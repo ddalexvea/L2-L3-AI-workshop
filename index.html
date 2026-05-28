@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>L2 AI Workshop — Ticket Annotator</title>
+  <title>Ticket Annotator</title>
   <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -17,12 +17,11 @@
       padding: 32px 24px;
     }
 
-    /* Layout */
-    .stack   { display: flex; flex-direction: column; }
-    .row     { display: flex; flex-direction: row; align-items: center; }
-    .spacer  { flex: 1; }
-    .wrap    { flex-wrap: wrap; }
-    hr.divider { border: none; border-top: 1px solid #d0d7de; margin: 4px 0; }
+    .app { max-width: 820px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+    .row { display: flex; flex-direction: row; align-items: center; }
+    .wrap { flex-wrap: wrap; }
+    .spacer { flex: 1; }
+    hr.divider { border: none; border-top: 1px solid #d0d7de; }
 
     /* Pills */
     .pill {
@@ -37,30 +36,36 @@
     .pill-danger  { background: #fee2e2; color: #b91c1c; }
     .pill-neutral { background: #f1f5f9; color: #475569; }
 
-    /* Draggable pill wrapper */
-    .pill-drag {
-      cursor: grab;
-      border-radius: 999px;
-      padding: 2px 3px;
-      transition: opacity 0.1s;
-    }
+    .pill-drag { cursor: grab; border-radius: 999px; transition: opacity 0.1s; }
     .pill-drag:active { cursor: grabbing; }
     .pill-drag.dragging { opacity: 0.3; }
 
-    /* Toggle button */
-    .toggle-btn {
-      cursor: pointer; opacity: 0.6; transition: opacity 0.15s;
-      background: none; border: 1px solid #d0d7de;
-      border-radius: 999px; padding: 3px 10px;
-      font-size: 12px; color: #475569;
+    /* Buttons */
+    .btn {
+      cursor: pointer; border-radius: 6px; padding: 6px 14px;
+      font-size: 13px; font-weight: 500; border: none;
+      transition: background 0.1s;
     }
-    .toggle-btn:hover { opacity: 1; }
+    .btn-primary { background: #1f2328; color: #fff; }
+    .btn-primary:hover { background: #32383f; }
+    .btn-ghost {
+      background: transparent; color: #475569;
+      border: 1px solid #d0d7de;
+    }
+    .btn-ghost:hover { background: #f1f5f9; }
+
+    /* Paste area */
+    .paste-area {
+      width: 100%; min-height: 140px; resize: vertical;
+      padding: 12px 14px; border-radius: 8px;
+      border: 1.5px solid #d0d7de; background: #fff;
+      font-family: inherit; font-size: 13px; line-height: 1.7;
+      color: #1f2328; outline: none;
+    }
+    .paste-area:focus { border-color: #2563eb; }
 
     /* Section label */
-    .section-label {
-      font-size: 13px; font-weight: 600; letter-spacing: 0.03em;
-      color: #1f2328;
-    }
+    .section-label { font-size: 13px; font-weight: 600; color: #1f2328; }
 
     /* Message line drop zones */
     .msg-line {
@@ -68,64 +73,54 @@
       border: 1.5px solid transparent;
       transition: background 0.12s, border-color 0.12s;
     }
-    .msg-line.drag-over {
-      border-color: #2563eb;
-      background: rgba(37, 99, 235, 0.05);
-    }
-    .msg-line.has-tag-info    { background: rgba(37,99,235,0.08); }
-    .msg-line.has-tag-success { background: rgba(21,128,61,0.10); }
-    .msg-line.has-tag-warning { background: rgba(133,77,14,0.08); }
-    .msg-line.has-tag-danger  { background: rgba(185,28,28,0.08); }
-    .msg-line.has-tag-neutral { background: #f1f5f9; }
+    .msg-line.drag-over    { border-color: #2563eb; background: rgba(37,99,235,0.05); }
+    .msg-line.has-info     { background: rgba(37,99,235,0.08); }
+    .msg-line.has-success  { background: rgba(21,128,61,0.10); }
+    .msg-line.has-warning  { background: rgba(133,77,14,0.08); }
+    .msg-line.has-danger   { background: rgba(185,28,28,0.08); }
+    .msg-line.has-neutral  { background: #f1f5f9; }
 
-    /* Text sizes */
-    .text-sm   { font-size: 13px; line-height: 1.7; }
-    .text-xs   { font-size: 11px; }
-    .text-muted { color: #6b7280; }
+    .text-sm { font-size: 13px; line-height: 1.7; }
 
-    /* Inline code */
     .inline-code {
       font-family: "SFMono-Regular", Consolas, monospace;
-      font-size: 11px;
-      background: #f1f5f9;
-      border: 1px solid #e2e8f0;
-      border-radius: 4px;
-      padding: 1px 5px;
-      color: #2563eb;
+      font-size: 11px; background: #f1f5f9;
+      border: 1px solid #e2e8f0; border-radius: 4px;
+      padding: 1px 5px; color: #2563eb;
     }
 
-    /* Config code block */
     .config-block {
-      margin: 8px 0 2px;
-      padding: 10px 14px;
-      border-radius: 6px;
-      background: #f0f2f5;
+      margin: 6px 0 2px; padding: 10px 14px;
+      border-radius: 6px; background: #f0f2f5;
       border: 1px solid #e2e8f0;
     }
     .config-row { font-family: "SFMono-Regular", Consolas, monospace; font-size: 12px; line-height: 1.8; }
     .config-key { color: #2563eb; font-weight: 600; }
     .config-val { color: #475569; }
 
-    /* Tag chips on lines */
     .tags-row { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
     .tag-chip { cursor: pointer; }
 
-    /* Count badge */
     .count-badge {
       font-size: 11px; color: #6b7280;
       background: #f1f5f9; border: 1px solid #e2e8f0;
       border-radius: 999px; padding: 2px 8px;
     }
 
-    /* Wrapper */
-    .app { max-width: 780px; margin: 0 auto; }
+    .toggle-btn {
+      cursor: pointer; background: none;
+      border: 1px solid #d0d7de; border-radius: 999px;
+      padding: 3px 10px; font-size: 12px; color: #475569;
+      opacity: 0.7;
+    }
+    .toggle-btn:hover { opacity: 1; }
   </style>
 </head>
 <body>
 <div id="root"></div>
 
 <script type="text/babel">
-const { useState } = React;
+const { useState, useCallback } = React;
 
 const ELEMENTS = [
   { id: "statement",  label: "Statement",    tone: "info" },
@@ -136,40 +131,52 @@ const ELEMENTS = [
   { id: "next_step",  label: "Next Step",    tone: "info" },
 ];
 
-const LINES = [
-  { id: "l1", text: "Our requirement is to exclude containers of all namespaces and include only `ig1` and `ncc-operators` namespace in a Kubernetes cluster." },
-  { id: "l2", text: "Additionally, from the `ig1` namespace, we want to exclude logs from the `istio-proxy` container from being sent to the Datadog UI." },
-  { id: "l3", isCode: true,
-    intro: "Hence, we have used the below configuration to meet our requirement.",
-    text: "containerExclude: kube_namespace:.*\ncontainerInclude: kube_namespace:ig1 kube_namespace:ncc-operators\ncontainerExcludeLogs: name:^istio-proxy$" },
-  { id: "l5", text: "But still we are seeing logs of container name `istio-proxy` in Datadog UI." },
-  { id: "l6", text: "Please help us with correct configuration to exclude logs of container `istio-proxy` which is under namespace." },
-];
+// Detect if a line looks like a config key: value pattern
+const CONFIG_RE = /^[\w]+\s*:/;
 
-let _uid = 0;
-const nextUid = () => ++_uid;
+// Parse raw pasted text into droppable line objects
+function parseText(raw) {
+  const paragraphs = raw.split(/\n{2,}/g).map(p => p.trim()).filter(Boolean);
+  const lines = [];
+  let id = 0;
 
-function renderInline(text) {
-  const parts = text.split(/(`[^`]+`)/g);
-  return parts.map((part, i) => {
-    if (part.startsWith("`") && part.endsWith("`")) {
-      return <code key={i} className="inline-code">{part.slice(1, -1)}</code>;
+  for (const para of paragraphs) {
+    const rows = para.split("\n").map(r => r.trim()).filter(Boolean);
+
+    // All rows look like config → one code block
+    if (rows.every(r => CONFIG_RE.test(r))) {
+      lines.push({ id: `l${++id}`, type: "code", rows });
     }
-    return <span key={i}>{part}</span>;
-  });
+    // Mixed: intro sentence + config rows
+    else if (rows.length > 1 && rows.slice(1).every(r => CONFIG_RE.test(r))) {
+      lines.push({ id: `l${++id}`, type: "intro-code", intro: rows[0], rows: rows.slice(1) });
+    }
+    // Plain text paragraph — one block
+    else {
+      lines.push({ id: `l${++id}`, type: "text", text: para.replace(/\n/g, " ") });
+    }
+  }
+  return lines;
 }
 
-function ConfigBlock({ text }) {
+// Render inline `backtick` code
+function renderInline(text) {
+  return text.split(/(`[^`]+`)/g).map((part, i) =>
+    part.startsWith("`") && part.endsWith("`")
+      ? <code key={i} className="inline-code">{part.slice(1, -1)}</code>
+      : <span key={i}>{part}</span>
+  );
+}
+
+function ConfigRows({ rows }) {
   return (
     <div className="config-block">
-      {text.split("\n").map((row, i) => {
-        const colonIdx = row.indexOf(":");
-        const key = row.slice(0, colonIdx);
-        const val = row.slice(colonIdx);
+      {rows.map((row, i) => {
+        const ci = row.indexOf(":");
         return (
           <div key={i} className="config-row">
-            <span className="config-key">{key}</span>
-            <span className="config-val">{val}</span>
+            <span className="config-key">{row.slice(0, ci)}</span>
+            <span className="config-val">{row.slice(ci)}</span>
           </div>
         );
       })}
@@ -177,11 +184,36 @@ function ConfigBlock({ text }) {
   );
 }
 
+let _uid = 0;
+const nextUid = () => ++_uid;
+
+const DEFAULT_TEXT = `Our requirement is to exclude containers of all namespaces and include only \`ig1\` and \`ncc-operators\` namespace in a Kubernetes cluster.
+
+Additionally, from the \`ig1\` namespace, we want to exclude logs from the \`istio-proxy\` container from being sent to the Datadog UI.
+
+Hence, we have used the below configuration to meet our requirement.
+containerExclude: kube_namespace:.*
+containerInclude: kube_namespace:ig1 kube_namespace:ncc-operators
+containerExcludeLogs: name:^istio-proxy$
+
+But still we are seeing logs of container name \`istio-proxy\` in Datadog UI.
+
+Please help us with correct configuration to exclude logs of container \`istio-proxy\` which is under namespace.`;
+
 function App() {
+  const [raw, setRaw]               = useState(DEFAULT_TEXT);
+  const [lines, setLines]           = useState(() => parseText(DEFAULT_TEXT));
+  const [editing, setEditing]       = useState(false);
   const [tags, setTags]             = useState({});
   const [dragging, setDragging]     = useState(null);
   const [over, setOver]             = useState(null);
   const [paletteOpen, setPaletteOpen] = useState(true);
+
+  function loadMessage() {
+    setLines(parseText(raw));
+    setTags({});
+    setEditing(false);
+  }
 
   function onDrop(lineId) {
     if (!dragging) return;
@@ -203,87 +235,107 @@ function App() {
   const totalTags = Object.values(tags).flat().length;
 
   return (
-    <div className="app stack" style={{ gap: 16 }}>
+    <div className="app">
 
-      {/* Palette */}
-      <div className="row wrap" style={{ gap: 8 }}>
-        {paletteOpen && ELEMENTS.map(el => (
-          <div
-            key={el.id}
-            className={`pill-drag${dragging === el.id ? " dragging" : ""}`}
-            draggable
-            onDragStart={() => setDragging(el.id)}
-            onDragEnd={() => { setDragging(null); setOver(null); }}
-          >
-            <span className={`pill pill-${el.tone}`}>{el.label}</span>
+      {/* Editing panel */}
+      {editing ? (
+        <>
+          <textarea
+            className="paste-area"
+            value={raw}
+            onChange={e => setRaw(e.target.value)}
+            placeholder="Paste the customer message here…"
+          />
+          <div className="row" style={{ gap: 8 }}>
+            <button className="btn btn-primary" onClick={loadMessage}>Load message</button>
+            <button className="btn btn-ghost" onClick={() => setEditing(false)}>Cancel</button>
           </div>
-        ))}
-        <div className="spacer" />
-        {totalTags > 0 && (
-          <span className="count-badge">{totalTags} label{totalTags !== 1 ? "s" : ""}</span>
-        )}
-        <button className="toggle-btn" onClick={() => setPaletteOpen(p => !p)}>
-          {paletteOpen ? "Hide labels" : "Show labels"}
-        </button>
-      </div>
+        </>
+      ) : (
+        <>
+          {/* Palette */}
+          <div className="row wrap" style={{ gap: 8 }}>
+            {paletteOpen && ELEMENTS.map(el => (
+              <div
+                key={el.id}
+                className={`pill-drag${dragging === el.id ? " dragging" : ""}`}
+                draggable
+                onDragStart={() => setDragging(el.id)}
+                onDragEnd={() => { setDragging(null); setOver(null); }}
+              >
+                <span className={`pill pill-${el.tone}`}>{el.label}</span>
+              </div>
+            ))}
+            <div className="spacer" />
+            {totalTags > 0 && (
+              <span className="count-badge">{totalTags} label{totalTags !== 1 ? "s" : ""}</span>
+            )}
+            <button className="toggle-btn" onClick={() => setPaletteOpen(p => !p)}>
+              {paletteOpen ? "Hide labels" : "Show labels"}
+            </button>
+            <button className="toggle-btn" onClick={() => setEditing(true)}>Change message</button>
+          </div>
 
-      <hr className="divider" />
+          <hr className="divider" />
+          <span className="section-label">Customer Message</span>
 
-      <span className="section-label">Customer Message</span>
+          {/* Drop zones */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            {lines.map(line => {
+              const lineTags = tags[line.id] ?? [];
+              const isOver   = over === line.id;
+              const topEl    = lineTags[0] ? ELEMENTS.find(e => e.id === lineTags[0].elementId) : null;
+              const toneClass = topEl && !isOver ? `has-${topEl.tone}` : "";
 
-      {/* Message drop zones */}
-      <div className="stack" style={{ gap: 4 }}>
-        {LINES.map(line => {
-          const lineTags = tags[line.id] ?? [];
-          const isOver   = over === line.id;
-          const topEl    = lineTags[0] ? ELEMENTS.find(e => e.id === lineTags[0].elementId) : null;
-          const toneClass = topEl && !isOver ? `has-tag-${topEl.tone}` : "";
+              return (
+                <div
+                  key={line.id}
+                  className={`msg-line${isOver ? " drag-over" : ""}${toneClass ? " " + toneClass : ""}`}
+                  onDragOver={e => { e.preventDefault(); setOver(line.id); }}
+                  onDragLeave={() => setOver(null)}
+                  onDrop={() => onDrop(line.id)}
+                >
+                  {line.type === "text" && (
+                    <p className="text-sm">{renderInline(line.text)}</p>
+                  )}
+                  {line.type === "code" && (
+                    <ConfigRows rows={line.rows} />
+                  )}
+                  {line.type === "intro-code" && (
+                    <>
+                      <p className="text-sm" style={{ marginBottom: 4 }}>{renderInline(line.intro)}</p>
+                      <ConfigRows rows={line.rows} />
+                    </>
+                  )}
 
-          return (
-            <div
-              key={line.id}
-              className={`msg-line${isOver ? " drag-over" : ""}${toneClass ? " " + toneClass : ""}`}
-              onDragOver={e => { e.preventDefault(); setOver(line.id); }}
-              onDragLeave={() => setOver(null)}
-              onDrop={() => onDrop(line.id)}
-            >
-              {line.intro && (
-                <p className="text-sm" style={{ marginBottom: 4 }}>{renderInline(line.intro)}</p>
-              )}
-
-              {line.isCode
-                ? <ConfigBlock text={line.text} />
-                : <p className="text-sm">{renderInline(line.text)}</p>
-              }
-
-              {lineTags.length > 0 && (
-                <div className="tags-row">
-                  {lineTags.map(tag => {
-                    const el = ELEMENTS.find(e => e.id === tag.elementId);
-                    return (
-                      <span
-                        key={tag.uid}
-                        className={`pill pill-${el.tone} tag-chip`}
-                        title="Click to remove"
-                        onClick={() => removeTag(line.id, tag.uid)}
-                      >
-                        {el.label} ×
-                      </span>
-                    );
-                  })}
+                  {lineTags.length > 0 && (
+                    <div className="tags-row">
+                      {lineTags.map(tag => {
+                        const el = ELEMENTS.find(e => e.id === tag.elementId);
+                        return (
+                          <span
+                            key={tag.uid}
+                            className={`pill pill-${el.tone} tag-chip`}
+                            title="Click to remove"
+                            onClick={() => removeTag(line.id, tag.uid)}
+                          >
+                            {el.label} ×
+                          </span>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
+              );
+            })}
+          </div>
+        </>
+      )}
     </div>
   );
 }
 
-const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(<App />);
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
 </script>
 </body>
 </html>
