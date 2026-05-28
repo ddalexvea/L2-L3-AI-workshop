@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>L2 AI Workshop — Ticket Annotator</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f6f8fa;
+      color: #1f2328;
+      min-height: 100vh;
+      padding: 32px 24px;
+    }
+
+    /* Layout */
+    .stack   { display: flex; flex-direction: column; }
+    .row     { display: flex; flex-direction: row; align-items: center; }
+    .spacer  { flex: 1; }
+    .wrap    { flex-wrap: wrap; }
+    hr.divider { border: none; border-top: 1px solid #d0d7de; margin: 4px 0; }
+
+    /* Pills */
+    .pill {
+      display: inline-flex; align-items: center;
+      padding: 3px 10px; border-radius: 999px;
+      font-size: 12px; font-weight: 500; line-height: 1;
+      white-space: nowrap; user-select: none;
+    }
+    .pill-info    { background: #dbeafe; color: #1d4ed8; }
+    .pill-success { background: #dcfce7; color: #15803d; }
+    .pill-warning { background: #fef9c3; color: #854d0e; }
+    .pill-danger  { background: #fee2e2; color: #b91c1c; }
+    .pill-neutral { background: #f1f5f9; color: #475569; }
+
+    /* Draggable pill wrapper */
+    .pill-drag {
+      cursor: grab;
+      border: 1.5px solid #d0d7de;
+      border-radius: 999px;
+      padding: 2px 3px;
+      transition: opacity 0.1s;
+    }
+    .pill-drag:active { cursor: grabbing; }
+    .pill-drag.dragging { opacity: 0.3; }
+
+    /* Toggle button */
+    .toggle-btn {
+      cursor: pointer; opacity: 0.6; transition: opacity 0.15s;
+      background: none; border: 1px solid #d0d7de;
+      border-radius: 999px; padding: 3px 10px;
+      font-size: 12px; color: #475569;
+    }
+    .toggle-btn:hover { opacity: 1; }
+
+    /* Section label */
+    .section-label {
+      font-size: 10px; font-weight: 600; letter-spacing: 0.06em;
+      text-transform: uppercase; color: #6b7280;
+    }
+
+    /* Message line drop zones */
+    .msg-line {
+      padding: 10px 14px; border-radius: 6px;
+      border: 1.5px solid transparent;
+      transition: background 0.12s, border-color 0.12s;
+    }
+    .msg-line.drag-over {
+      border-color: #2563eb;
+      background: rgba(37, 99, 235, 0.05);
+    }
+    .msg-line.has-tag-info    { background: rgba(37,99,235,0.08); }
+    .msg-line.has-tag-success { background: rgba(21,128,61,0.10); }
+    .msg-line.has-tag-warning { background: rgba(133,77,14,0.08); }
+    .msg-line.has-tag-danger  { background: rgba(185,28,28,0.08); }
+    .msg-line.has-tag-neutral { background: #f1f5f9; }
+
+    /* Text sizes */
+    .text-sm   { font-size: 13px; line-height: 1.7; }
+    .text-xs   { font-size: 11px; }
+    .text-muted { color: #6b7280; }
+
+    /* Inline code */
+    .inline-code {
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 11px;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      border-radius: 4px;
+      padding: 1px 5px;
+      color: #2563eb;
+    }
+
+    /* Config code block */
+    .config-block {
+      margin: 8px 0 2px;
+      padding: 10px 14px;
+      border-radius: 6px;
+      background: #f0f2f5;
+      border: 1px solid #e2e8f0;
+    }
+    .config-row { font-family: "SFMono-Regular", Consolas, monospace; font-size: 12px; line-height: 1.8; }
+    .config-key { color: #2563eb; font-weight: 600; }
+    .config-val { color: #475569; }
+
+    /* Tag chips on lines */
+    .tags-row { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+    .tag-chip { cursor: pointer; }
+
+    /* Count badge */
+    .count-badge {
+      font-size: 11px; color: #6b7280;
+      background: #f1f5f9; border: 1px solid #e2e8f0;
+      border-radius: 999px; padding: 2px 8px;
+    }
+
+    /* Wrapper */
+    .app { max-width: 780px; margin: 0 auto; }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState } = React;
+
+const ELEMENTS = [
+  { id: "statement",  label: "Statement",    tone: "info" },
+  { id: "evidence",   label: "Evidence",     tone: "success" },
+  { id: "hypothesis", label: "Hypothesis",   tone: "warning" },
+  { id: "missing",    label: "Missing Info", tone: "neutral" },
+  { id: "root_cause", label: "Root Cause",   tone: "danger" },
+  { id: "next_step",  label: "Next Step",    tone: "info" },
+];
+
+const LINES = [
+  { id: "l1", text: "Our requirement is to exclude containers of all namespaces and include only `ig1` and `ncc-operators` namespace in a Kubernetes cluster." },
+  { id: "l2", text: "Additionally, from the `ig1` namespace, we want to exclude logs from the `istio-proxy` container from being sent to the Datadog UI." },
+  { id: "l3", isCode: true,
+    intro: "Hence, we have used the below configuration to meet our requirement.",
+    text: "containerExclude: kube_namespace:.*\ncontainerInclude: kube_namespace:ig1 kube_namespace:ncc-operators\ncontainerExcludeLogs: name:^istio-proxy$" },
+  { id: "l5", text: "But still we are seeing logs of container name `istio-proxy` in Datadog UI." },
+  { id: "l6", text: "Please help us with correct configuration to exclude logs of container `istio-proxy` which is under namespace." },
+];
+
+let _uid = 0;
+const nextUid = () => ++_uid;
+
+function renderInline(text) {
+  const parts = text.split(/(`[^`]+`)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith("`") && part.endsWith("`")) {
+      return <code key={i} className="inline-code">{part.slice(1, -1)}</code>;
+    }
+    return <span key={i}>{part}</span>;
+  });
+}
+
+function ConfigBlock({ text }) {
+  return (
+    <div className="config-block">
+      {text.split("\n").map((row, i) => {
+        const colonIdx = row.indexOf(":");
+        const key = row.slice(0, colonIdx);
+        const val = row.slice(colonIdx);
+        return (
+          <div key={i} className="config-row">
+            <span className="config-key">{key}</span>
+            <span className="config-val">{val}</span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function App() {
+  const [tags, setTags]             = useState({});
+  const [dragging, setDragging]     = useState(null);
+  const [over, setOver]             = useState(null);
+  const [paletteOpen, setPaletteOpen] = useState(true);
+
+  function onDrop(lineId) {
+    if (!dragging) return;
+    setTags(prev => ({
+      ...prev,
+      [lineId]: [...(prev[lineId] ?? []), { uid: nextUid(), elementId: dragging }],
+    }));
+    setDragging(null);
+    setOver(null);
+  }
+
+  function removeTag(lineId, uid) {
+    setTags(prev => ({
+      ...prev,
+      [lineId]: (prev[lineId] ?? []).filter(t => t.uid !== uid),
+    }));
+  }
+
+  const totalTags = Object.values(tags).flat().length;
+
+  return (
+    <div className="app stack" style={{ gap: 16 }}>
+
+      {/* Palette */}
+      <div className="row wrap" style={{ gap: 8 }}>
+        {paletteOpen && ELEMENTS.map(el => (
+          <div
+            key={el.id}
+            className={`pill-drag${dragging === el.id ? " dragging" : ""}`}
+            draggable
+            onDragStart={() => setDragging(el.id)}
+            onDragEnd={() => { setDragging(null); setOver(null); }}
+          >
+            <span className={`pill pill-${el.tone}`}>{el.label}</span>
+          </div>
+        ))}
+        <div className="spacer" />
+        {totalTags > 0 && (
+          <span className="count-badge">{totalTags} label{totalTags !== 1 ? "s" : ""}</span>
+        )}
+        <button className="toggle-btn" onClick={() => setPaletteOpen(p => !p)}>
+          {paletteOpen ? "Hide labels" : "Show labels"}
+        </button>
+      </div>
+
+      <hr className="divider" />
+
+      <span className="section-label">Customer Message</span>
+
+      {/* Message drop zones */}
+      <div className="stack" style={{ gap: 4 }}>
+        {LINES.map(line => {
+          const lineTags = tags[line.id] ?? [];
+          const isOver   = over === line.id;
+          const topEl    = lineTags[0] ? ELEMENTS.find(e => e.id === lineTags[0].elementId) : null;
+          const toneClass = topEl && !isOver ? `has-tag-${topEl.tone}` : "";
+
+          return (
+            <div
+              key={line.id}
+              className={`msg-line${isOver ? " drag-over" : ""}${toneClass ? " " + toneClass : ""}`}
+              onDragOver={e => { e.preventDefault(); setOver(line.id); }}
+              onDragLeave={() => setOver(null)}
+              onDrop={() => onDrop(line.id)}
+            >
+              {line.intro && (
+                <p className="text-sm" style={{ marginBottom: 4 }}>{renderInline(line.intro)}</p>
+              )}
+
+              {line.isCode
+                ? <ConfigBlock text={line.text} />
+                : <p className="text-sm">{renderInline(line.text)}</p>
+              }
+
+              {lineTags.length > 0 && (
+                <div className="tags-row">
+                  {lineTags.map(tag => {
+                    const el = ELEMENTS.find(e => e.id === tag.elementId);
+                    return (
+                      <span
+                        key={tag.uid}
+                        className={`pill pill-${el.tone} tag-chip`}
+                        title="Click to remove"
+                        onClick={() => removeTag(line.id, tag.uid)}
+                      >
+                        {el.label} ×
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+    </div>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(<App />);
+</script>
+</body>
+</html>
