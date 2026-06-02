@@ -230,37 +230,18 @@
       background: var(--stage-color); opacity: 0.5;
     }
 
-    /* Alias chip (click to copy, no icon) */
-    .alias-block { display: flex; align-items: center; gap: 8px; }
-    .alias-label { font-size: 11px; color: #6b7280; font-weight: 500; white-space: nowrap; }
-    .alias-chip {
-      cursor: pointer; user-select: all;
-      display: inline-block;
-      padding: 3px 10px; border-radius: 6px;
-      font-family: "SFMono-Regular", Consolas, monospace;
-      font-size: 12px; font-weight: 600;
-      background: rgba(0,0,0,0.06); color: var(--stage-color);
-      border: 1px solid var(--stage-border);
-      transition: background 0.15s;
-    }
-    .alias-chip:hover { background: rgba(0,0,0,0.12); }
-    .alias-copied {
-      font-size: 11px; color: #15803d; font-weight: 500;
-      animation: fadeIn 0.15s ease;
-    }
-    @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
   </style>
 </head>
 <body>
 <div id="root"></div>
 
 <script type="text/babel">
-const { useState, useRef } = React;
+const { useState } = React;
 
 /* ── Stage definitions ─────────────────────────────────── */
 const STAGES = [
   {
-    id: "triage", label: "Triage", alias: ";ws-triage",
+    id: "triage", label: "Triage", alias: ";p_s_1",
     color: "#2563eb", bg: "#eff6ff", border: "#bfdbfe",
     desc: "First contact — quickly assess what the customer is reporting and what is missing before going deeper.",
     checks: [
@@ -272,7 +253,7 @@ const STAGES = [
     ],
   },
   {
-    id: "investigation", label: "Investigation", alias: ";ws-investigation",
+    id: "investigation", label: "Investigation", alias: ";p_s_2",
     color: "#15803d", bg: "#f0fdf4", border: "#bbf7d0",
     desc: "Dig into the evidence — annotate statements, spot hypotheses, and trace towards a root cause.",
     checks: [
@@ -284,7 +265,7 @@ const STAGES = [
     ],
   },
   {
-    id: "artefact", label: "Artefact Correlation", alias: ";ws-artefact",
+    id: "artefact", label: "Artefact Correlation", alias: ";p_s_3",
     color: "#6d28d9", bg: "#faf5ff", border: "#ddd6fe",
     desc: "Cross-reference logs, metrics, traces, and configs to build a correlated timeline of events.",
     checks: [
@@ -296,7 +277,7 @@ const STAGES = [
     ],
   },
   {
-    id: "reproduction", label: "Reproduction", alias: ";ws-reproduction",
+    id: "reproduction", label: "Reproduction", alias: ";p_s_4",
     color: "#c2410c", bg: "#fff7ed", border: "#fed7aa",
     desc: "Break down the customer's scenario into reproducible steps — what's needed, what to do, and what to expect.",
     checks: [
@@ -308,7 +289,7 @@ const STAGES = [
     ],
   },
   {
-    id: "escalation", label: "Escalation", alias: ";ws-escalation",
+    id: "escalation", label: "Escalation", alias: ";p_s_5",
     color: "#0f766e", bg: "#f0fdfa", border: "#99f6e4",
     desc: "Build the escalation — annotate customer impact, validated repro steps, and a clear ask for engineering.",
     checks: [
@@ -474,8 +455,6 @@ function App() {
   const [promptBlock, setPromptBlock] = useState(null);
   const [copied, setCopied]           = useState(false);
   const [activeStage, setActiveStage] = useState(getInitialStage);
-  const [copiedAlias, setCopiedAlias] = useState(null);
-  const aliasTimer = useRef(null);
 
   const ELEMENTS = ELEMENTS_BY_MODE[mode];
 
@@ -488,14 +467,6 @@ function App() {
 
   function toggleStage(id) {
     setActiveStage(prev => prev === id ? null : id);
-  }
-
-  function copyAlias(alias) {
-    navigator.clipboard.writeText(alias).then(() => {
-      setCopiedAlias(alias);
-      clearTimeout(aliasTimer.current);
-      aliasTimer.current = setTimeout(() => setCopiedAlias(null), 1800);
-    });
   }
 
   function handleGenerate() {
@@ -534,71 +505,6 @@ function App() {
 
   return (
     <div className="app">
-
-      {/* ── Stage buttons ── */}
-      <div className="stage-bar">
-        {STAGES.map((stage, i) => {
-          const cssVars = {
-            "--stage-color": stage.color,
-            "--stage-bg":    stage.bg,
-            "--stage-border":stage.border,
-          };
-          return (
-            <button
-              key={stage.id}
-              className={`stage-btn${activeStage === stage.id ? " active" : ""}`}
-              style={cssVars}
-              onClick={() => toggleStage(stage.id)}
-            >
-              <span className="stage-num">{i + 1}</span>
-              {stage.label}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* ── Stage panels (expand on click) ── */}
-      {STAGES.map(stage => {
-        const cssVars = {
-          "--stage-color": stage.color,
-          "--stage-bg":    stage.bg,
-          "--stage-border":stage.border,
-        };
-        const isOpen = activeStage === stage.id;
-        return (
-          <div key={stage.id} className={`stage-panel${isOpen ? " open" : ""}`} style={cssVars}>
-            <div className="stage-panel-inner">
-              <div className="stage-header-row">
-                <div className="stage-title">
-                  Stage {STAGES.indexOf(stage) + 1} — {stage.label}
-                </div>
-                <div className="alias-block">
-                  <span className="alias-label">espanso alias</span>
-                  <span
-                    className="alias-chip"
-                    title="Click to copy"
-                    onClick={() => copyAlias(stage.alias)}
-                  >
-                    {stage.alias}
-                  </span>
-                  {copiedAlias === stage.alias && (
-                    <span className="alias-copied">Copied!</span>
-                  )}
-                </div>
-              </div>
-              <p className="stage-desc">{stage.desc}</p>
-              <div className="stage-checklist">
-                {stage.checks.map((c, i) => (
-                  <div key={i} className="stage-check-item">
-                    <span className="stage-check-dot" />
-                    <span>{c}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        );
-      })}
 
       {/* ── Mode switcher ── */}
       <div className="row" style={{ gap: 10 }}>
@@ -704,6 +610,55 @@ function App() {
               );
             })}
           </div>
+
+          {/* ── Stage buttons + panels ── */}
+          <hr className="divider" />
+          <div className="stage-bar">
+            {STAGES.map((stage, i) => {
+              const cssVars = {
+                "--stage-color": stage.color,
+                "--stage-bg":    stage.bg,
+                "--stage-border":stage.border,
+              };
+              return (
+                <button
+                  key={stage.id}
+                  className={`stage-btn${activeStage === stage.id ? " active" : ""}`}
+                  style={cssVars}
+                  onClick={() => toggleStage(stage.id)}
+                >
+                  <span className="stage-num">{i + 1}</span>
+                  {stage.label}
+                </button>
+              );
+            })}
+          </div>
+
+          {STAGES.map(stage => {
+            const cssVars = {
+              "--stage-color": stage.color,
+              "--stage-bg":    stage.bg,
+              "--stage-border":stage.border,
+            };
+            return (
+              <div key={stage.id} className={`stage-panel${activeStage === stage.id ? " open" : ""}`} style={cssVars}>
+                <div className="stage-panel-inner">
+                  <div className="stage-title">
+                    Stage {STAGES.indexOf(stage) + 1} — {stage.label}
+                  </div>
+                  <p className="stage-desc">{stage.desc}</p>
+                  <div className="stage-checklist">
+                    {stage.checks.map((c, i) => (
+                      <div key={i} className="stage-check-item">
+                        <span className="stage-check-dot" />
+                        <span>{c}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
 
           {/* Prompt block output */}
           {promptBlock && (
