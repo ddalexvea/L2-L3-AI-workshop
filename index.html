@@ -178,9 +178,9 @@
     }
     .stage-btn:hover { border-color: #94a3b8; color: #1f2328; background: #f8fafc; }
     .stage-btn.active {
-      border-color: var(--stage-color);
-      background: var(--stage-bg);
-      color: var(--stage-color);
+      border-color: #1f2328;
+      background: #1f2328;
+      color: #fff;
     }
     .stage-num {
       width: 18px; height: 18px; border-radius: 999px;
@@ -189,9 +189,7 @@
       background: #e2e8f0; color: #64748b;
       transition: background 0.15s, color 0.15s;
     }
-    .stage-btn.active .stage-num {
-      background: var(--stage-color); color: #fff;
-    }
+    .stage-btn.active .stage-num { background: rgba(255,255,255,0.2); color: #fff; }
 
     /* Stage panel */
     .stage-panel {
@@ -204,30 +202,13 @@
 
     .stage-panel-inner {
       border-radius: 10px;
-      border: 1.5px solid var(--stage-border);
-      background: var(--stage-bg);
+      border: 1.5px solid #d0d7de;
+      background: #fff;
       padding: 14px 16px;
       display: flex; flex-direction: column; gap: 10px;
     }
-    .stage-header-row {
-      display: flex; align-items: flex-start;
-      justify-content: space-between; gap: 12px;
-    }
     .stage-title {
-      font-size: 14px; font-weight: 700;
-      color: var(--stage-color);
-      display: flex; align-items: center; gap: 8px;
-    }
-    .stage-desc { font-size: 13px; line-height: 1.65; color: #374151; }
-    .stage-checklist { display: flex; flex-direction: column; gap: 5px; }
-    .stage-check-item {
-      font-size: 12.5px; line-height: 1.5; color: #4b5563;
-      display: flex; align-items: flex-start; gap: 7px;
-    }
-    .stage-check-dot {
-      margin-top: 5px; flex-shrink: 0;
-      width: 6px; height: 6px; border-radius: 999px;
-      background: var(--stage-color); opacity: 0.5;
+      font-size: 14px; font-weight: 700; color: #1f2328;
     }
 
     /* Stage prompt block */
@@ -235,19 +216,19 @@
     .stage-prompt {
       font-family: "SFMono-Regular", Consolas, monospace;
       font-size: 11.5px; line-height: 1.7; white-space: pre-wrap;
-      background: rgba(255,255,255,0.7);
-      border: 1px solid var(--stage-border);
+      background: #f6f8fa;
+      border: 1px solid #d0d7de;
       border-radius: 6px; padding: 12px 14px;
       color: #1f2328; max-height: 260px; overflow-y: auto;
     }
     .stage-copy-btn {
       position: absolute; top: 8px; right: 8px;
-      cursor: pointer; background: rgba(255,255,255,0.9);
-      border: 1px solid var(--stage-border); border-radius: 6px;
+      cursor: pointer; background: #fff;
+      border: 1px solid #d0d7de; border-radius: 6px;
       padding: 3px 10px; font-size: 11px; font-weight: 600;
-      color: var(--stage-color); transition: background 0.15s;
+      color: #475569; transition: background 0.15s;
     }
-    .stage-copy-btn:hover { background: #fff; }
+    .stage-copy-btn:hover { background: #f1f5f9; }
 
     /* Pillar header colors */
     .pillar { font-weight: 700; }
@@ -754,34 +735,20 @@ function App() {
           {/* ── Stage buttons + panels ── */}
           <hr className="divider" />
           <div className="stage-bar">
-            {STAGES.map((stage, i) => {
-              const cssVars = {
-                "--stage-color": stage.color,
-                "--stage-bg":    stage.bg,
-                "--stage-border":stage.border,
-              };
-              return (
-                <button
-                  key={stage.id}
-                  className={`stage-btn${activeStage === stage.id ? " active" : ""}`}
-                  style={cssVars}
-                  onClick={() => toggleStage(stage.id)}
-                >
-                  <span className="stage-num">{i + 1}</span>
-                  {stage.label}
-                </button>
-              );
-            })}
+            {STAGES.map((stage, i) => (
+              <button
+                key={stage.id}
+                className={`stage-btn${activeStage === stage.id ? " active" : ""}`}
+                onClick={() => toggleStage(stage.id)}
+              >
+                <span className="stage-num">{i + 1}</span>
+                {stage.label}
+              </button>
+            ))}
           </div>
 
-          {STAGES.map(stage => {
-            const cssVars = {
-              "--stage-color": stage.color,
-              "--stage-bg":    stage.bg,
-              "--stage-border":stage.border,
-            };
-            return (
-              <div key={stage.id} className={`stage-panel${activeStage === stage.id ? " open" : ""}`} style={cssVars}>
+          {STAGES.map(stage => (
+              <div key={stage.id} className={`stage-panel${activeStage === stage.id ? " open" : ""}`}>
                 <div className="stage-panel-inner">
                   <div className="stage-title">
                     Stage {STAGES.indexOf(stage) + 1} — {stage.label}
@@ -797,8 +764,7 @@ function App() {
                   </div>
                 </div>
               </div>
-            );
-          })}
+          ))}
 
           {/* Prompt block output */}
           {promptBlock && (
