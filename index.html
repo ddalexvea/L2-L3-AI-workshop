@@ -233,10 +233,10 @@
     /* Pillar header colors */
     .pillar { font-weight: 700; }
     .pillar-CONTEXT     { color: #2563eb; }
-    .pillar-INSTRUCTION { color: #15803d; }
+    .pillar-INSTRUCTIONS { color: #15803d; }
     .pillar-REASONING   { color: #c2410c; }
-    .pillar-EXAMPLE     { color: #6d28d9; }
-    .pillar-OUTPUT      { color: #0f766e; }
+    .pillar-EXAMPLES     { color: #6d28d9; }
+    .pillar-OUTPUT_FORMAT { color: #0f766e; }
 
   </style>
 </head>
@@ -254,7 +254,7 @@ const STAGES = [
     prompt: `## CONTEXT
 I'm a Datadog TSE2 starting a ticket investigation leveraging AI. I'm working in 5 stages: Kickoff, Investigation, Log/Configuration Codebase Correlation, Reproduction, and Escalation.
 
-## INSTRUCTION
+## INSTRUCTIONS
 Using the customer message below, complete in order:
 1. Restate the problem in one sentence
 2. List all investigation elements: Statement, Evidence, Hypothesis
@@ -267,7 +267,7 @@ For each trust level, quote the exact customer wording that justified it, or wri
 Do not include Root Cause or Workaround rows — those are determined in later stages.
 Minimum artifact rule: infer artifact candidates from the product area, environment, and symptoms — do not use a fixed list. For each candidate, decide needed or not needed and justify why in one sentence.
 
-## EXAMPLE
+## EXAMPLES
 | Element | Content | Trust | Justification |
 |---------|---------|-------|---------------|
 | Statement | [restate the symptom] | Customer Claim | "[exact customer quote]" |
@@ -278,7 +278,7 @@ Artifact decision table:
 |----------|--------|-----|
 | [artifact type] | YES/NO | [one sentence reason] |
 
-## OUTPUT
+## OUTPUT FORMAT
 1-sentence problem restatement + elements table + hypotheses with confidence % + artifact decision table.
 
 [PASTE CUSTOMER MESSAGE HERE]`,
@@ -289,7 +289,7 @@ Artifact decision table:
     prompt: `## CONTEXT
 Stage 2 — Investigation. Stage 1 identified initial hypotheses. Artifacts are now available.
 
-## INSTRUCTION
+## INSTRUCTIONS
 Using the artifacts identified in Stage 1, complete in order:
 1. Examine the configuration artifact: confirm the customer's claimed settings are present
 2. Examine the runtime artifact: confirm the Agent loaded those settings at runtime
@@ -301,12 +301,12 @@ Using the artifacts identified in Stage 1, complete in order:
 ## REASONING
 For each trust level change, quote the exact line from the artifact. Do not change trust without a direct quote.
 
-## EXAMPLE
+## EXAMPLES
 | Finding | Artifact | Quote | Impact on H1 |
 |---------|----------|-------|-------------|
 | [what was found] | [artifact name] | "[exact line]" | Supports/Refutes H1 |
 
-## OUTPUT
+## OUTPUT FORMAT
 Updated elements table + evidence table + updated hypothesis confidence % + one key finding sentence.
 
 [ATTACH HELM VALUES AND AGENT FLARE]`,
@@ -317,7 +317,7 @@ Updated elements table + evidence table + updated hypothesis confidence % + one 
     prompt: `## CONTEXT
 Stage 3 — Log/Configuration Codebase Correlation. Stage 2 confirmed the configuration. Now correlate findings with the Datadog Agent codebase.
 
-## INSTRUCTION
+## INSTRUCTIONS
 Complete in order:
 1. Search the datadog-agent GitHub repository for files that implement the relevant filter logic
 2. Find the function or component that defines filter group precedence
@@ -327,12 +327,12 @@ Complete in order:
 ## REASONING
 For each finding, quote the exact file path + line number + code or comment. Do not paraphrase — direct quote only.
 
-## EXAMPLE
+## EXAMPLES
 | File | Line | Quote | Verdict |
 |------|------|-------|---------|
 | [file path] | [line] | "[exact code or comment]" | Confirms/Refutes H1 |
 
-## OUTPUT
+## OUTPUT FORMAT
 Code evidence table + updated hypothesis confidence % (expected 70-95%) + one-line root cause statement.
 
 [PASTE STAGE 2 FINDINGS HERE]`,
@@ -343,7 +343,7 @@ Code evidence table + updated hypothesis confidence % (expected 70-95%) + one-li
     prompt: `## CONTEXT
 Stage 4 — Reproduction. The hypothesis is confirmed by codebase evidence. Reproduce the issue in minikube.
 
-## INSTRUCTION
+## INSTRUCTIONS
 Before anything else:
 1. Clean minikube — remove all pods and deployments. Do not delete secrets or the cluster itself. Retrieve existing API keys from kubectl secrets and reuse them.
 2. Present the full deployment plan (namespaces, pods, Agent config, debug flags) and wait for approval before executing.
@@ -359,10 +359,10 @@ Then complete in order:
 ## REASONING
 Before each step, verify the configuration matches the customer Helm values exactly. If anything differs, stop and realign before continuing.
 
-## EXAMPLE
+## EXAMPLES
 "[relevant log line]" → [what it confirms about the hypothesis]
 
-## OUTPUT
+## OUTPUT FORMAT
 Deployment plan (presented first, before execution) + step-by-step reproduction log + debug log snippet confirming the behavior + pass/fail verdict.
 
 [PASTE CUSTOMER HELM VALUES HERE]`,
@@ -373,7 +373,7 @@ Deployment plan (presented first, before execution) + step-by-step reproduction 
     prompt: `## CONTEXT
 Stage 5 — Escalation. Reproduction confirmed the bug. Prepare the escalation package.
 
-## INSTRUCTION
+## INSTRUCTIONS
 Complete in order:
 1. State the root cause in one technical sentence
 2. List all evidence with artifact references (file + line, flare file, or screenshot)
@@ -384,13 +384,13 @@ Complete in order:
 ## REASONING
 For each claim in the escalation, cite a specific artifact. No claim without direct evidence.
 
-## EXAMPLE
+## EXAMPLES
 - Root cause: [technical one-sentence description]
 - Evidence: [file:line or artifact reference]
 - Affected: [version X confirmed broken · version Y confirmed fixed]
 - Workaround: [actionable step the customer can take today]
 
-## OUTPUT
+## OUTPUT FORMAT
 Root cause / evidence table / affected versions / workaround / Jira draft.
 
 [CUSTOMER ISSUE DESCRIPTION — paste original customer message]
@@ -533,14 +533,15 @@ We are a P1 enterprise customer and this level of service is not acceptable. We 
 
 const DEFAULT_TEXTS = { L2: L2_DEFAULT_TEXT, L3: L3_DEFAULT_TEXT };
 
-const PILLARS = ["CONTEXT", "INSTRUCTION", "REASONING", "EXAMPLE", "OUTPUT"];
+const PILLARS = ["CONTEXT", "INSTRUCTIONS", "REASONING", "EXAMPLES", "OUTPUT FORMAT"];
 
 function renderPrompt(text) {
   return text.split("\n").map((line, i, arr) => {
     const m = line.match(/^## ([A-Z]+)$/);
     if (m && PILLARS.includes(m[1])) {
+      const cls = m[1].replace(/\s+/g, "_");
       return (
-        <span key={i} className={`pillar pillar-${m[1]}`}>{line}{i < arr.length - 1 ? "\n" : ""}</span>
+        <span key={i} className={`pillar pillar-${cls}`}>{line}{i < arr.length - 1 ? "\n" : ""}</span>
       );
     }
     return <span key={i}>{line}{i < arr.length - 1 ? "\n" : ""}</span>;
