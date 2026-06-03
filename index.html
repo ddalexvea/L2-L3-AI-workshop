@@ -229,6 +229,11 @@
       color: #475569; transition: background 0.15s;
     }
     .stage-copy-btn:hover { background: #f1f5f9; }
+    .prompt-version-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; color: #94a3b8;
+      margin: 10px 0 4px 0;
+    }
 
     /* Pillar header colors */
     .pillar { font-weight: 700; }
@@ -405,6 +410,8 @@ const L3_STAGES = [
   {
     id: "evaluate", label: "Evaluate", alias: ";p_s_l3_1",
     color: "#2563eb", bg: "#eff6ff", border: "#bfdbfe",
+    promptLight: `Read the customer message above.
+What is the dominant signal? What is the risk level: Low / Medium / High?`,
     prompt: `CONTEXT:
 You are a Datadog TSE2 evaluating a customer message before writing a response.
 The annotated message above is your input.
@@ -435,6 +442,8 @@ OUTPUT FORMAT:
   {
     id: "draft", label: "Draft", alias: ";p_s_l3_2",
     color: "#6d28d9", bg: "#faf5ff", border: "#ddd6fe",
+    promptLight: `Write a response to the customer message above.
+Be professional, empathetic, and direct. Address each concern in priority order. No filler phrases.`,
     prompt: `CONTEXT:
 You are a Datadog TSE2 writing a customer-facing response on behalf of the support team.
 The customer is reaching out via an async support ticket. Your team operates async-first;
@@ -464,6 +473,8 @@ OUTPUT:
   {
     id: "criticize", label: "Criticize", alias: ";p_s_l3_3",
     color: "#c2410c", bg: "#fff7ed", border: "#fed7aa",
+    promptLight: `Review the response draft above.
+What signal is missing? Any filler phrases? What is the single best edit?`,
     prompt: `CONTEXT:
 You are a Datadog TSE2 reviewing a response draft before sending.
 The draft above and the annotated customer message are your inputs.
@@ -849,6 +860,21 @@ function App() {
                   <div className="stage-title">
                     Stage {STAGES.indexOf(stage) + 1} — {stage.label}
                   </div>
+                  {stage.promptLight && (
+                    <>
+                      <div className="prompt-version-label">Light</div>
+                      <div className="stage-prompt-wrap">
+                        <pre className="stage-prompt">{stage.promptLight}</pre>
+                        <button
+                          className="stage-copy-btn"
+                          onClick={() => { navigator.clipboard.writeText(stage.promptLight); setCopiedStage(stage.id + "_light"); setTimeout(() => setCopiedStage(null), 2000); }}
+                        >
+                          {copiedStage === stage.id + "_light" ? "Copied!" : "Copy"}
+                        </button>
+                      </div>
+                      <div className="prompt-version-label">Complete</div>
+                    </>
+                  )}
                   <div className="stage-prompt-wrap">
                     <pre className="stage-prompt">{renderPrompt(stage.prompt)}</pre>
                     <button
