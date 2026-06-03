@@ -691,9 +691,13 @@ function getInitialStage() {
 
 /* ── App ───────────────────────────────────────────────── */
 function App() {
-  const [mode, setMode]               = useState("L2");
-  const [raw, setRaw]                 = useState(L2_DEFAULT_TEXT);
-  const [lines, setLines]             = useState(() => parseText(L2_DEFAULT_TEXT));
+  const urlMode = new URLSearchParams(window.location.search).get("mode");
+  const lockedMode = (urlMode === "L2" || urlMode === "L3") ? urlMode : null;
+  const initialMode = lockedMode ?? "L2";
+
+  const [mode, setMode]               = useState(initialMode);
+  const [raw, setRaw]                 = useState(DEFAULT_TEXTS[initialMode]);
+  const [lines, setLines]             = useState(() => parseText(DEFAULT_TEXTS[initialMode]));
   const [editing, setEditing]         = useState(false);
   const [tags, setTags]               = useState({});
   const [dragging, setDragging]       = useState(null);
@@ -762,12 +766,14 @@ function App() {
   return (
     <div className="app">
 
-      {/* ── Mode switcher ── */}
+      {/* ── Mode switcher (hidden when ?mode= param locks the mode) ── */}
       <div className="row" style={{ gap: 10 }}>
-        <div className="mode-bar">
-          <button className={`mode-btn${mode === "L2" ? " active" : ""}`} onClick={() => switchMode("L2")}>L2</button>
-          <button className={`mode-btn${mode === "L3" ? " active" : ""}`} onClick={() => switchMode("L3")}>L3</button>
-        </div>
+        {!lockedMode && (
+          <div className="mode-bar">
+            <button className={`mode-btn${mode === "L2" ? " active" : ""}`} onClick={() => switchMode("L2")}>L2</button>
+            <button className={`mode-btn${mode === "L3" ? " active" : ""}`} onClick={() => switchMode("L3")}>L3</button>
+          </div>
+        )}
         <span className="mode-label">{mode === "L2" ? "Technical Ticket Annotation" : "Customer-Facing Response"}</span>
       </div>
 
