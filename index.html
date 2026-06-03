@@ -435,7 +435,7 @@ const L2_STAGES = [
   {
     id: "triage", label: "Kickoff", alias: ";p_s_1",
     color: "#2563eb", bg: "#eff6ff", border: "#bfdbfe",
-    steps: ["Restate the problem in one sentence", "List elements — Statement, Evidence, Hypothesis — with a trust level for each", "Propose 1–3 hypotheses with confidence % (max 30%)", "For each element and hypothesis — what artifact would confirm or refute it?"],
+    steps: ["What is the customer actually reporting vs. what could be their assumption?", "How confident should I be right now — with zero artifacts in hand?", "What would I need to see to believe or disprove each hypothesis?", "Can I restate the whole problem in one sentence the customer would agree with?"],
     canvasVisual: "heatmap — rows=hypotheses, cols=artifacts needed, filled dot=confirmed, empty=needed. All dots start empty.",
     htmlVisual: "heatmap grid table — rows=hypotheses, cols=artifacts. Green cell ●=confirmed, gray cell ○=needed.",
     promptLight: `INSTRUCTIONS:
@@ -488,7 +488,7 @@ OUTPUT FORMAT:
   {
     id: "investigation", label: "Investigation", alias: ";p_s_2",
     color: "#15803d", bg: "#f0fdf4", border: "#bbf7d0",
-    steps: ["Confirm settings are present in the config artifact", "Confirm the Agent loaded those settings at runtime", "Note any gap between config written and config loaded", "Check official docs for the interaction between the relevant settings", "Update trust levels and hypothesis confidence % with direct quotes"],
+    steps: ["Is what the customer configured actually what the Agent loaded at runtime?", "Where could a gap exist between config written and config running?", "Does the official documentation say anything about how these settings interact?", "Can I raise my confidence — and if so, what exact line justifies it?"],
     canvasVisual: "evidence tracker — rows=findings, columns=[Artifact, Quote, Trust before, Trust after, H impact]. rowTone: success=upgraded, danger=refuted, neutral=unchanged.",
     htmlVisual: "evidence table — green row=trust upgraded, red row=refuted, gray=unchanged. Columns: Artifact | Quote | Trust Before | Trust After | H Impact.",
     promptLight: `INSTRUCTIONS:
@@ -534,7 +534,7 @@ Updated elements table + evidence table + updated hypothesis confidence % + one 
   {
     id: "artefact", label: "Artefact Correlation", alias: ";p_s_3",
     color: "#6d28d9", bg: "#faf5ff", border: "#ddd6fe",
-    steps: ["Cross-reference findings across logs, config, and code", "Find the component or parameter responsible", "Trace when/where behavior diverges from expectation", "Check release notes or changelogs for the relevant version", "Update hypothesis with direct evidence — source + line required"],
+    steps: ["Where in the codebase does the Agent decide what to filter?", "Which function or rule takes priority when two filters conflict?", "When did this behavior change — and what commit introduced it?", "Can I now name the exact root cause with a file and line to back it up?"],
     canvasVisual: "diff view — DiffView of buggy vs fixed lines with file path in CardHeader and DiffStats in trailing slot, one card per file.",
     htmlVisual: "two-column diff — left=buggy config (red highlight on changed lines), right=fixed (green highlight). File path as section header.",
     promptLight: `INSTRUCTIONS:
@@ -577,7 +577,7 @@ Code evidence table + updated hypothesis confidence % (expected 70-95%) + one-li
   {
     id: "reproduction", label: "Reproduction", alias: ";p_s_4",
     color: "#c2410c", bg: "#fff7ed", border: "#fed7aa",
-    steps: ["Clean environment (remove pods, keep secrets)", "Present deployment plan and wait for approval", "Deploy sandbox matching customer environment", "Confirm reproduction and capture supporting evidence", "Document every command and output"],
+    steps: ["What exact environment do I need to reproduce this — namespaces, pods, Agent config?", "What would a successful reproduction look like vs. a failed one?", "What debug flag or log line would confirm the issue is happening inside the Agent?", "Am I using the customer's exact config — or have I changed anything?"],
     canvasVisual: "timeline — one dot per repro step (rowTone success=pass, danger=fail, neutral=skipped), final row=VERDICT in bold.",
     htmlVisual: "numbered step list — ✓ green=pass, ✗ red=fail per step. VERDICT in large bold at bottom inside green or red bordered box.",
     promptLight: `INSTRUCTIONS:
@@ -625,7 +625,7 @@ Deployment plan (presented first, before execution) + step-by-step reproduction 
   {
     id: "escalation", label: "Escalation", alias: ";p_s_5",
     color: "#0f766e", bg: "#f0fdfa", border: "#99f6e4",
-    steps: ["Check for an existing Jira card — bug or feature request", "Identify gaps and unknowns before escalating", "Summarize observed behavior, scope, expected vs actual", "Attach all evidence with source references", "Share detailed reproduction steps — environment, commands, output"],
+    steps: ["Can I state the root cause in one sentence an engineer could act on?", "Does every claim I'm making have an artifact to back it up?", "What versions are confirmed broken — and is there a known fixed version?", "What can the customer do today while waiting for a fix?"],
     canvasVisual: "summary — Root Cause (danger Callout) + Affected versions (Stat cards) + Workaround (success Callout) side by side, evidence table with file:line citations below.",
     htmlVisual: "three side-by-side boxes: Root Cause (red border), Versions (gray border), Workaround (green border). Evidence table with file:line citations below.",
     promptLight: `INSTRUCTIONS:
