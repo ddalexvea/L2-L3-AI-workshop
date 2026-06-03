@@ -413,26 +413,19 @@ The annotated message above is your input.
 1. Identify the dominant signal in the message (Sentiment / Urgency / Business Impact / Unmet Expectation / Escalation Signal).
 2. Before rating risk, state which signals led you to your assessment.
 3. Rate the overall risk level: Low / Medium / High.
+4. If risk is Medium or High: state whether stakeholder involvement is needed and the single reason that tipped the decision.
 
 Example of expected output:
 Dominant signal: Escalation Signal
 Reasoning: Customer explicitly mentions involving their AE and references 2 weeks of no progress.
 Risk level: High
+Stakeholder involvement: Yes — customer has stated intent to escalate to their AE.
 
-Output: dominant signal + one-sentence reasoning + risk level.`,
+Output: dominant signal + one-sentence reasoning + risk level + stakeholder decision (if risk Medium/High).`,
   },
   {
-    id: "stakeholder", label: "Stakeholder Check", alias: ";p_s_l3_2",
-    color: "#c2410c", bg: "#fff7ed", border: "#fed7aa",
-    prompt: `Based on the message you just evaluated:
-
-1. Think through: escalation signals present, business impact stated, SLA exposure.
-2. State your assumption about the customer's next action if no escalation happens.
-3. Output: Yes or No for stakeholder involvement, and the single reason that tipped the decision.`,
-  },
-  {
-    id: "draft", label: "Draft Response", alias: ";p_s_l3_3",
-    color: "#15803d", bg: "#f0fdf4", border: "#bbf7d0",
+    id: "draft", label: "Draft", alias: ";p_s_l3_2",
+    color: "#6d28d9", bg: "#faf5ff", border: "#ddd6fe",
     prompt: `CONTEXT:
 You are a Datadog TSE2 writing a customer-facing response on behalf of the support team.
 The customer is reaching out via an async support ticket. Your team operates async-first;
@@ -460,8 +453,8 @@ OUTPUT:
 - Response draft (one paragraph per point, professional and empathetic)`,
   },
   {
-    id: "iterate", label: "Iterate", alias: ";p_s_l3_4",
-    color: "#0f766e", bg: "#f0fdfa", border: "#99f6e4",
+    id: "criticize", label: "Criticize", alias: ";p_s_l3_3",
+    color: "#c2410c", bg: "#fff7ed", border: "#fed7aa",
     prompt: `Review the response draft above.
 
 1. Check that every signal identified in the annotation is addressed — flag any gap.
@@ -470,6 +463,20 @@ OUTPUT:
 4. Propose the single most impactful edit to the draft.
 
 Output: signal coverage (addressed / missing per signal) + filler phrases found + opening sentence verdict + one concrete edit.`,
+  },
+  {
+    id: "iterate", label: "Iterate", alias: ";p_s_l3_4",
+    color: "#0f766e", bg: "#f0fdfa", border: "#99f6e4",
+    prompt: `Apply the edits from the critique above to the response draft.
+
+1. Address each flagged signal gap.
+2. Remove all identified filler phrases — replace with direct, accountable language.
+3. Fix the opening sentence if flagged.
+4. Apply the single most impactful edit.
+
+Output: revised response draft only — no commentary, no before/after comparison.
+
+If the revised draft still has gaps, run Criticize again.`,
   },
 ];
 
