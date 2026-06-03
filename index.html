@@ -124,6 +124,32 @@
       width: 5px; height: 5px; border-radius: 999px;
       background: #cbd5e1; flex-shrink: 0; margin-top: 6px;
     }
+    .checklist-hint-wrap { margin-left: 13px; margin-top: 2px; }
+    .checklist-hint-summary {
+      font-size: 11px; font-weight: 600;
+      color: #6366f1; background: #eef2ff;
+      border: 1px solid #c7d2fe; border-radius: 4px;
+      cursor: pointer; user-select: none; list-style: none;
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 1px 7px; letter-spacing: 0.02em;
+    }
+    .checklist-hint-summary::-webkit-details-marker { display: none; }
+    .checklist-hint-summary:hover { background: #e0e7ff; color: #4338ca; }
+    .checklist-hint-text {
+      font-size: 11px; color: #374151;
+      margin-top: 5px; line-height: 1.65;
+      padding: 7px 10px; background: #f8fafc;
+      border-left: 3px solid #a5b4fc; border-radius: 0 4px 4px 0;
+      font-family: 'Menlo', 'Consolas', monospace;
+      white-space: pre; overflow-x: auto;
+    }
+    .step-visual {
+      font-size: 11px; color: #374151; line-height: 1.65;
+      padding: 8px 12px; background: #f8fafc;
+      border: 1px solid #e2e8f0; border-radius: 6px;
+      font-family: 'Menlo', 'Consolas', monospace;
+      white-space: pre; overflow-x: auto; margin-top: 10px;
+    }
 
     /* Attachments */
     .attach-section { display: flex; flex-direction: column; gap: 6px; }
@@ -436,6 +462,12 @@ const L2_STAGES = [
     id: "triage", label: "Kickoff", alias: ";p_s_1",
     color: "#2563eb", bg: "#eff6ff", border: "#bfdbfe",
     steps: ["What is the customer actually reporting vs. what could be their assumption?", "How confident should I be right now — with zero artifacts in hand?", "What would I need to see to believe or disprove each hypothesis?", "Can I restate the whole problem in one sentence the customer would agree with?"],
+    hints: [
+      `Statement  [HIGH]  "Customer says X is happening"\nEvidence   [MED]   "Seen in ticket: <quote>"\nHypothesis [LOW]   "Could be caused by Y"`,
+      `▓░░░░░░░░░  ~15%\nno artifacts yet → confidence stays low`,
+      `H1 → needs: agent.log     (grep "excluded")\nH2 → needs: datadog.yaml  (exclude_containers)`,
+      `✗  "Logs not working"\n✓  "Logs from my-app excluded despite include_containers: [my-app]"`,
+    ],
     canvasVisual: "heatmap — rows=hypotheses, cols=artifacts needed, filled dot=confirmed, empty=needed. All dots start empty.",
     htmlVisual: "heatmap grid table — rows=hypotheses, cols=artifacts. Green cell ●=confirmed, gray cell ○=needed.",
     promptLight: `INSTRUCTIONS:
@@ -489,6 +521,12 @@ OUTPUT FORMAT:
     id: "investigation", label: "Investigation", alias: ";p_s_2",
     color: "#15803d", bg: "#f0fdf4", border: "#bbf7d0",
     steps: ["Is what the customer configured actually what the Agent loaded at runtime?", "Where could a gap exist between config written and config running?", "Does the official documentation say anything about how these settings interact?", "Can I raise my confidence — and if so, what exact line justifies it?"],
+    hints: [
+      `📄 datadog.yaml   → exclude: [pattern-A]\n🖥  runtime dump   → exclude: [pattern-A, pattern-B?]\n                           ↑ gap here?`,
+      `Written:  logs_collection.enabled: true\nLoaded:   logs_collection.enabled: false\n                        ↑ env var override?`,
+      `docs.datadoghq.com/agent/logs/\n→ "exclude_containers takes precedence over include"`,
+      `H1 [LOW → HIGH]  "agent.log:42: container excluded by rule"\nconfidence: 15% → 65%`,
+    ],
     canvasVisual: "evidence tracker — rows=findings, columns=[Artifact, Quote, Trust before, Trust after, H impact]. rowTone: success=upgraded, danger=refuted, neutral=unchanged.",
     htmlVisual: "evidence table — green row=trust upgraded, red row=refuted, gray=unchanged. Columns: Artifact | Quote | Trust Before | Trust After | H Impact.",
     promptLight: `INSTRUCTIONS:
@@ -535,6 +573,12 @@ Updated elements table + evidence table + updated hypothesis confidence % + one 
     id: "artefact", label: "Artefact Correlation", alias: ";p_s_3",
     color: "#6d28d9", bg: "#faf5ff", border: "#ddd6fe",
     steps: ["Where in the codebase does the Agent decide what to filter?", "Which function or rule takes priority when two filters conflict?", "When did this behavior change — and what commit introduced it?", "Can I now name the exact root cause with a file and line to back it up?"],
+    hints: [
+      `github: datadog/datadog-agent\n→ pkg/logs/launchers/container/\n  → launcher.go → shouldCollect()`,
+      `include_containers []  → allow-list\nexclude_containers []  → deny-list\nRule: exclude wins over include`,
+      `git blame pkg/logs/launchers/container/launcher.go\n→ line 87  abc1234  2024-03-15\n  "exclude takes precedence"`,
+      `H1 [CONFIRMED]\npkg/logs/launchers/container/launcher.go:87\n  "if shouldExclude(...) { return false }"`,
+    ],
     canvasVisual: "diff view — DiffView of buggy vs fixed lines with file path in CardHeader and DiffStats in trailing slot, one card per file.",
     htmlVisual: "two-column diff — left=buggy config (red highlight on changed lines), right=fixed (green highlight). File path as section header.",
     promptLight: `INSTRUCTIONS:
@@ -578,6 +622,12 @@ Code evidence table + updated hypothesis confidence % (expected 70-95%) + one-li
     id: "reproduction", label: "Reproduction", alias: ";p_s_4",
     color: "#c2410c", bg: "#fff7ed", border: "#fed7aa",
     steps: ["What exact environment do I need to reproduce this — namespaces, pods, Agent config?", "What would a successful reproduction look like vs. a failed one?", "What debug flag or log line would confirm the issue is happening inside the Agent?", "Am I using the customer's exact config — or have I changed anything?"],
+    hints: [
+      `ns: monitoring\npod: dd-agent (DaemonSet)\nconfig: exact customer values.yaml\nflags: DD_LOG_LEVEL=debug`,
+      `✓ reproduced   → logs absent in Datadog despite rule\n✗ not repro'd  → logs appear normally`,
+      `DD_LOG_LEVEL=debug\n→ agent.log: "Skipping container my-app: excluded by rule"`,
+      `exclude_containers: ["my-app"]   ← from customer\ninclude_containers: ["my-app"]   ← from customer\n(do not change either value)`,
+    ],
     canvasVisual: "timeline — one dot per repro step (rowTone success=pass, danger=fail, neutral=skipped), final row=VERDICT in bold.",
     htmlVisual: "numbered step list — ✓ green=pass, ✗ red=fail per step. VERDICT in large bold at bottom inside green or red bordered box.",
     promptLight: `INSTRUCTIONS:
@@ -626,6 +676,12 @@ Deployment plan (presented first, before execution) + step-by-step reproduction 
     id: "escalation", label: "Escalation", alias: ";p_s_5",
     color: "#0f766e", bg: "#f0fdfa", border: "#99f6e4",
     steps: ["Can I state the root cause in one sentence an engineer could act on?", "Does every claim I'm making have an artifact to back it up?", "What versions are confirmed broken — and is there a known fixed version?", "What can the customer do today while waiting for a fix?"],
+    hints: [
+      `✗  "The logs aren't being collected"\n✓  "exclude_containers wins over include (launcher.go:87),\n    silently dropping logs from my-app"`,
+      `[1] agent.log:42    "container excluded by rule"\n[2] launcher.go:87  "if shouldExclude(...)"\n[3] repro: logs absent with exact customer config`,
+      `Broken:  Agent 7.43.0 – 7.45.1\nFixed:   Agent 7.46.0  (PR #18234)`,
+      `Option A: remove my-app from exclude_containers\nOption B: pin Agent ≤ 7.42.x until fix ships`,
+    ],
     canvasVisual: "summary — Root Cause (danger Callout) + Affected versions (Stat cards) + Workaround (success Callout) side by side, evidence table with file:line citations below.",
     htmlVisual: "three side-by-side boxes: Root Cause (red border), Versions (gray border), Workaround (green border). Evidence table with file:line citations below.",
     promptLight: `INSTRUCTIONS:
@@ -1017,6 +1073,9 @@ function App() {
                 </div>
               </div>
 
+              {/* Preparation visual */}
+              <pre className="step-visual">{`How it works\n\n  ① Paste the routing block below  →  sets the AI session context\n  ② Go to Stage 1–5 in the sidebar →  copy the stage prompt\n  ③ Paste the stage prompt          →  AI runs the investigation step\n\n  Routing block  ──────────────┐\n                               ↓\n  Stage prompt   ──────────────→  AI output\n\n  (routing is pasted once;  stage prompts are pasted per stage)`}</pre>
+
               <div className="prep-block">
                 <div className="prep-block-label">{tool === "cursor" ? "Cursor Canvas — session routing" : "Claude Code — session routing"}</div>
                 <div className="prep-routing">{tool === "cursor" ? CANVAS_SESSION_ROUTING : HTML_SESSION_ROUTING}</div>
@@ -1046,6 +1105,9 @@ function App() {
               <p className="prep-hint" style={{ color: "#15803d" }}>
                 Fill in a metaphor, paste this into the AI session (after the Preparation routing), then use the stage prompts as usual. The AI will run the full investigation in the metaphor world — no Datadog knowledge needed.
               </p>
+              {/* Game visual */}
+              <pre className="step-visual" style={{ borderColor: "#bbf7d0", background: "#f0fdf4", color: "#166534" }}>{`How it works\n\n  ① Paste Preparation routing    →  sets the AI session\n  ② Paste this game prompt        →  tells AI to think in metaphor\n  ③ Use stage prompts as usual    →  AI investigates in your world\n\nExample  (metaphor = "pizza delivery")\n\n  Datadog Agent   →  delivery driver\n  Log pipeline    →  order queue\n  Integration     →  restaurant partner\n  Flare           →  customer complaint form\n  Kubernetes      →  chain of restaurants\n\n  Stage 1 output becomes:\n  "The driver (agent) is ignoring orders (logs) from\n   the blacklisted restaurant (excluded container)."`}</pre>
+
               <div className="prep-block">
                 <div className="prep-block-label" style={{ color: "#15803d" }}>Choose a metaphor</div>
                 <input
@@ -1190,9 +1252,19 @@ function App() {
                       <div className="checklist">
                         <div className="checklist-label">Checklist</div>
                         {stage.steps.map((step, i) => (
-                          <div key={i} className="checklist-item">
-                            <span className="checklist-dot" />
-                            <span>{step}</span>
+                          <div key={i} className="checklist-item" style={{flexDirection:'column', alignItems:'flex-start', gap:'2px'}}>
+                            <div style={{display:'flex', alignItems:'flex-start', gap:'8px', width:'100%'}}>
+                              <span className="checklist-dot" style={{marginTop:'6px'}} />
+                              <span>{step}</span>
+                            </div>
+                            {stage.hints && stage.hints[i] && (
+                              <div className="checklist-hint-wrap">
+                                <details>
+                                  <summary className="checklist-hint-summary">💡 show hint</summary>
+                                  <pre className="checklist-hint-text">{stage.hints[i]}</pre>
+                                </details>
+                              </div>
+                            )}
                           </div>
                         ))}
                       </div>
