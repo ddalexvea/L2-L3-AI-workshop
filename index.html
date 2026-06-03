@@ -789,11 +789,14 @@ Canvas hard rules — must follow exactly:
 - Pill tone valid values only: "neutral" | "added" | "deleted" | "renamed" | "success" | "warning" | "info"
 - No box-shadow, no gradients, no emoji as decoration, no hardcoded font sizes above 24px.`;
 
-const GAME_ROUTING = `Metaphor: [                    ]
+function buildGamePrompt(metaphor) {
+  const filled = metaphor.trim() || "[                    ]";
+  return `Metaphor: ${filled}
 
 For this entire session, do not use any Datadog, Kubernetes, or technical product names. Translate every concept into the metaphor above.
 
 When I send you an investigation prompt, run it entirely in the metaphor world — same logic, same framework, different vocabulary.`;
+}
 
 const HTML_SESSION_ROUTING = `WORKSHOP MODE — HTML file only, no chat output.
 Rules for this session:
@@ -830,6 +833,7 @@ function App() {
   const [copiedStage, setCopiedStage]     = useState(null);
   const [tool, setTool]                   = useState("cursor"); // "cursor" | "claude" | "game"
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
+  const [metaphor, setMetaphor]               = useState("");
 
   function toggleStage(id) {
     setActiveStage(prev => prev === id ? null : id);
@@ -970,13 +974,30 @@ function App() {
                 Fill in a metaphor, paste this into the AI session (after the Preparation routing), then use the stage prompts as usual. The AI will run the full investigation in the metaphor world — no Datadog knowledge needed.
               </p>
               <div className="prep-block">
-                <div className="prep-block-label" style={{ color: "#15803d" }}>Game master prompt</div>
-                <div className="prep-routing" style={{ borderColor: "#bbf7d0" }}>{GAME_ROUTING}</div>
+                <div className="prep-block-label" style={{ color: "#15803d" }}>Choose a metaphor</div>
+                <input
+                  type="text"
+                  value={metaphor}
+                  onChange={e => setMetaphor(e.target.value)}
+                  placeholder="e.g. toll gates, pizza delivery, beehive…"
+                  style={{
+                    width: "100%", padding: "7px 10px", borderRadius: 6,
+                    border: "1.5px solid #bbf7d0", fontSize: 13,
+                    fontFamily: "inherit", outline: "none", background: "#fff",
+                    color: "#1f2328",
+                  }}
+                  onFocus={e => e.target.style.borderColor = "#16a34a"}
+                  onBlur={e => e.target.style.borderColor = "#bbf7d0"}
+                />
+              </div>
+              <div className="prep-block">
+                <div className="prep-block-label" style={{ color: "#15803d" }}>Prompt preview</div>
+                <div className="prep-routing" style={{ borderColor: "#bbf7d0" }}>{buildGamePrompt(metaphor)}</div>
                 <button
                   className="prep-copy-btn"
                   style={{ background: "#16a34a" }}
                   onClick={() => {
-                    navigator.clipboard.writeText(GAME_ROUTING).then(() => {
+                    navigator.clipboard.writeText(buildGamePrompt(metaphor)).then(() => {
                       setCopiedStage("game");
                       setTimeout(() => setCopiedStage(null), 2000);
                     });
