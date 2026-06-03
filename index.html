@@ -145,6 +145,22 @@
       letter-spacing: 0.04em; text-transform: uppercase;
     }
 
+    /* Tool selector */
+    .tool-bar {
+      display: flex; align-items: center; gap: 4px;
+      background: #f1f5f9; border-radius: 999px;
+      padding: 3px; width: fit-content;
+    }
+    .tool-btn {
+      cursor: pointer; border: none; border-radius: 999px;
+      padding: 3px 12px; font-size: 11px; font-weight: 600;
+      transition: background 0.15s, color 0.15s;
+      background: transparent; color: #64748b;
+    }
+    .tool-btn.active { background: #1f2328; color: #fff; }
+    .tool-btn:not(.active):hover { background: #e2e8f0; }
+    .tool-hint { font-size: 10px; color: #94a3b8; font-style: italic; }
+
     /* Prompt output panel */
     .prompt-panel {
       border: 1.5px solid #2563eb; border-radius: 8px;
@@ -273,6 +289,8 @@ const L2_STAGES = [
   {
     id: "triage", label: "Kickoff", alias: ";p_s_1",
     color: "#2563eb", bg: "#eff6ff", border: "#bfdbfe",
+    canvasVisual: "heatmap — rows=hypotheses, cols=artifacts needed, filled dot=confirmed, empty=needed. All dots start empty.",
+    htmlVisual: "heatmap grid table — rows=hypotheses, cols=artifacts. Green cell ●=confirmed, gray cell ○=needed.",
     promptLight: `Restate the customer problem in one sentence.
 List 3 hypotheses with a confidence % (max 30% each at this stage).
 What artifacts or information do I still need to verify each one?`,
@@ -311,6 +329,8 @@ OUTPUT FORMAT:
   {
     id: "investigation", label: "Investigation", alias: ";p_s_2",
     color: "#15803d", bg: "#f0fdf4", border: "#bbf7d0",
+    canvasVisual: "evidence tracker — rows=findings, columns=[Artifact, Quote, Trust before, Trust after, H impact]. rowTone: success=upgraded, danger=refuted, neutral=unchanged.",
+    htmlVisual: "evidence table — green row=trust upgraded, red row=refuted, gray=unchanged. Columns: Artifact | Quote | Trust Before | Trust After | H Impact.",
     promptLight: `Review the attached artifacts.
 What confirms or refutes each hypothesis from Stage 1? Update confidence %.`,
     prompt: `CONTEXT:
@@ -341,6 +361,8 @@ Updated elements table + evidence table + updated hypothesis confidence % + one 
   {
     id: "artefact", label: "Artefact Correlation", alias: ";p_s_3",
     color: "#6d28d9", bg: "#faf5ff", border: "#ddd6fe",
+    canvasVisual: "diff view — DiffView of buggy vs fixed lines with file path in CardHeader and DiffStats in trailing slot, one card per file.",
+    htmlVisual: "two-column diff — left=buggy config (red highlight on changed lines), right=fixed (green highlight). File path as section header.",
     promptLight: `Search the datadog-agent GitHub repo for the code that implements the relevant behavior.
 What does it tell us? Quote the exact file path, line number, and code.`,
     prompt: `CONTEXT:
@@ -369,6 +391,8 @@ Code evidence table + updated hypothesis confidence % (expected 70-95%) + one-li
   {
     id: "reproduction", label: "Reproduction", alias: ";p_s_4",
     color: "#c2410c", bg: "#fff7ed", border: "#fed7aa",
+    canvasVisual: "timeline — one dot per repro step (rowTone success=pass, danger=fail, neutral=skipped), final row=VERDICT in bold.",
+    htmlVisual: "numbered step list — ✓ green=pass, ✗ red=fail per step. VERDICT in large bold at bottom inside green or red bordered box.",
     promptLight: `Reproduce this issue in minikube using the customer's exact configuration.
 Show the commands and their output. Confirm pass or fail.`,
     prompt: `CONTEXT:
@@ -401,6 +425,8 @@ Deployment plan (presented first, before execution) + step-by-step reproduction 
   {
     id: "escalation", label: "Escalation", alias: ";p_s_5",
     color: "#0f766e", bg: "#f0fdfa", border: "#99f6e4",
+    canvasVisual: "summary — Root Cause (danger Callout) + Affected versions (Stat cards) + Workaround (success Callout) side by side, evidence table with file:line citations below.",
+    htmlVisual: "three side-by-side boxes: Root Cause (red border), Versions (gray border), Workaround (green border). Evidence table with file:line citations below.",
     promptLight: `State the root cause in one sentence.
 List the evidence. Draft a Jira escalation ticket with reproduction steps and a workaround.`,
     prompt: `CONTEXT:
@@ -689,6 +715,48 @@ function getInitialStage() {
   return null;
 }
 
+/* ── Workshop routing blocks ──────────────────────────── */
+function canvasRoutingBlock(stageNum, visual) {
+  return `WORKSHOP MODE — canvas only, no chat output.
+Rules for this session:
+- Do NOT output the analysis in chat. All content goes in the canvas file only.
+- In chat, respond only with: "Canvas ready — open stage-${stageNum}.canvas.tsx"
+- Canvas target: fits on a single screen, max 3 bullet points per section, max 4 table rows, one bold takeaway line at the bottom.
+
+Canvas: create a Cursor canvas at ~/.cursor/projects/Users-alexandre-vea-Projects-TSE/canvases/stage-${stageNum}.canvas.tsx
+Visual: ${visual}
+
+Canvas hard rules — must follow exactly:
+- No hardcoded hex colors. Only useHostTheme() tokens (call it inside every component that needs it).
+- Valid token paths: theme.accent.primary · theme.fill.primary/secondary/tertiary/quaternary  theme.stroke.primary/secondary/tertiary · theme.text.primary/secondary/tertiary/onAccent  theme.bg.editor/chrome/elevated · theme.diff.stripAdded (green) · theme.diff.stripRemoved (red)
+- Table rowTone valid values only: "success" | "danger" | "warning" | "info" | "neutral" — never "pass" or "fail"
+- Pill tone valid values only: "neutral" | "added" | "deleted" | "renamed" | "success" | "warning" | "info"
+- No box-shadow, no gradients, no emoji as decoration, no hardcoded font sizes above 24px.
+
+---
+`;
+}
+
+function htmlRoutingBlock(stageNum, visual) {
+  return `WORKSHOP MODE — HTML file only, no chat output.
+Rules:
+- Write a single self-contained HTML file to ~/Desktop/workshop/stage-${stageNum}.html
+- After writing, run: open ~/Desktop/workshop/stage-${stageNum}.html
+- In chat respond only with: "Stage ${stageNum} ready — check Chrome"
+- Single screen layout, max 3 bullets per section, max 4 table rows, one bold takeaway at bottom
+
+Visual: ${visual}
+
+HTML hard rules:
+- Self-contained: inline CSS only, no external dependencies
+- Colors: white background, dark text, green=#22c55e red=#ef4444 amber=#f59e0b gray=#94a3b8
+- Tables: alternating row shading (#f8fafc), colored row left-border for status
+- Font: system-ui, 13px body, bold section headers
+
+---
+`;
+}
+
 /* ── App ───────────────────────────────────────────────── */
 function App() {
   const urlMode = new URLSearchParams(window.location.search).get("mode");
@@ -707,6 +775,7 @@ function App() {
   const [copied, setCopied]           = useState(false);
   const [activeStage, setActiveStage]   = useState(getInitialStage);
   const [copiedStage, setCopiedStage]   = useState(null);
+  const [tool, setTool]                 = useState("cursor"); // "cursor" | "claude"
 
   const ELEMENTS = ELEMENTS_BY_MODE[mode];
   const STAGES   = STAGES_BY_MODE[mode];
@@ -723,7 +792,15 @@ function App() {
   }
 
   function copyPrompt(stage) {
-    navigator.clipboard.writeText(stage.prompt).then(() => {
+    const stageIndex = STAGES.indexOf(stage);
+    let text = stage.prompt;
+    if (mode === "L2" && stage.canvasVisual) {
+      const routing = tool === "cursor"
+        ? canvasRoutingBlock(stageIndex + 1, stage.canvasVisual)
+        : htmlRoutingBlock(stageIndex + 1, stage.htmlVisual);
+      text = routing + text;
+    }
+    navigator.clipboard.writeText(text).then(() => {
       setCopiedStage(stage.id);
       setTimeout(() => setCopiedStage(null), 2000);
     });
@@ -875,6 +952,15 @@ function App() {
 
           {/* ── Stage buttons + panels ── */}
           <hr className="divider" />
+          {mode === "L2" && (
+            <div className="row" style={{ gap: 10, marginBottom: 6 }}>
+              <div className="tool-bar">
+                <button className={`tool-btn${tool === "cursor" ? " active" : ""}`} onClick={() => setTool("cursor")}>⬡ Cursor Canvas</button>
+                <button className={`tool-btn${tool === "claude" ? " active" : ""}`} onClick={() => setTool("claude")}>◈ Claude HTML</button>
+              </div>
+              <span className="tool-hint">Complete prompts include {tool === "cursor" ? "Cursor canvas routing" : "Claude HTML routing"}</span>
+            </div>
+          )}
           <div className="stage-bar">
             {STAGES.map((stage, i) => (
               <button
@@ -908,7 +994,11 @@ function App() {
                       </div>
                     </details>
                   )}
-                  {stage.promptLight && <div className="prompt-version-label">Complete version</div>}
+                  {stage.promptLight && (
+                    <div className="prompt-version-label">
+                      Complete version{mode === "L2" && stage.canvasVisual ? ` — ${tool === "cursor" ? "Cursor Canvas" : "Claude HTML"}` : ""}
+                    </div>
+                  )}
                   <div className="stage-prompt-wrap">
                     <pre className="stage-prompt">{renderPrompt(stage.prompt)}</pre>
                     <button
