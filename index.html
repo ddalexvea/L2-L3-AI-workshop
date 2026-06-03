@@ -461,67 +461,72 @@ function AbstractionGameVisual({ metaphor }) {
   const m = (metaphor||'').trim() || 'lighthouse';
   const mCap = m.charAt(0).toUpperCase() + m.slice(1);
 
-  const FileChip = ({ name, content }) => (
-    <div style={{background:'#fff',border:'1px solid #e2e8f0',borderRadius:5,padding:'5px 8px',marginBottom:5}}>
-      <div style={{fontSize:9,fontWeight:700,color:'#64748b',marginBottom:3,fontFamily:'monospace'}}>{name}</div>
-      <div style={{fontSize:9,color:'#94a3b8',fontFamily:'monospace',lineHeight:1.5}}>{content}</div>
+  const Chip = ({ icon, name, lines, accent }) => (
+    <div style={{background:'#fff',border:`1px solid ${accent||'#e2e8f0'}`,borderRadius:5,padding:'4px 7px',marginBottom:4,borderLeft:`3px solid ${accent||'#cbd5e1'}`}}>
+      <div style={{fontSize:8,fontWeight:700,color:'#64748b',fontFamily:'monospace',marginBottom:2}}>{icon} {name}</div>
+      {lines.map((l,i) => <div key={i} style={{fontSize:8,color:'#94a3b8',fontFamily:'monospace',lineHeight:1.5,paddingLeft:4}}>{l}</div>)}
     </div>
   );
 
-  const BoardRow = ({ trust, tc, label, text }) => (
-    <div style={{background:'rgba(255,255,255,0.75)',borderRadius:6,padding:'6px 8px',marginBottom:5}}>
-      <div style={{display:'flex',alignItems:'center',gap:5,marginBottom:2}}>
-        <span style={{fontSize:8,fontWeight:700,background:tc,color:'#fff',padding:'1px 5px',borderRadius:3}}>{trust}</span>
-        <span style={{fontSize:10,fontWeight:600,color:'#374151'}}>{label}</span>
+  const BoardRow = ({ n, trust, tc, label, text }) => (
+    <div style={{display:'flex',gap:6,alignItems:'flex-start',marginBottom:6}}>
+      <span style={{fontSize:9,fontWeight:700,color:'#d1d5db',marginTop:1,flexShrink:0,width:12}}>{n}</span>
+      <div style={{flex:1,background:'rgba(255,255,255,0.8)',borderRadius:6,padding:'5px 8px',borderLeft:`3px solid ${tc}`}}>
+        <div style={{display:'flex',alignItems:'center',gap:5,marginBottom:2}}>
+          <span style={{fontSize:8,fontWeight:700,background:tc,color:'#fff',padding:'1px 5px',borderRadius:3,letterSpacing:'0.04em'}}>{trust}</span>
+          <span style={{fontSize:10,fontWeight:700,color:'#374151'}}>{label}</span>
+        </div>
+        <div style={{fontSize:9,color:'#6b7280',fontStyle:'italic',lineHeight:1.4}}>{text}</div>
       </div>
-      <div style={{fontSize:10,color:'#4b5563',fontStyle:'italic',lineHeight:1.4}}>{text}</div>
     </div>
   );
 
   return (
     <div style={{margin:'14px 0'}}>
-      <div style={{display:'flex',gap:8,alignItems:'stretch'}}>
+      <div style={{display:'flex',gap:10,alignItems:'stretch'}}>
 
-        {/* Left — Datadog complexity */}
-        <div style={{flex:1,minWidth:140,background:'#f8fafc',border:'2px solid #e2e8f0',borderRadius:10,padding:'11px 12px'}}>
-          <div style={{fontSize:11,fontWeight:700,color:'#475569',marginBottom:8,display:'flex',alignItems:'center',gap:5}}>
-            🔧 Datadog World
-          </div>
-          <FileChip name="/etc/datadog-agent/datadog.yaml" content={"exclude_containers:\n  - my-app\ninclude_containers:\n  - my-app"} />
-          <FileChip name="/var/log/datadog/agent.log" content={"[INFO] Skipping container\nmy-app: excluded by rule\n10:42:01.334"} />
-          <FileChip name="helm/values.yaml" content={"datadog.logs.enabled: true\ncontainerCollectAll: true\n..."} />
-          <div style={{fontSize:9,color:'#94a3b8',marginTop:4,fontStyle:'italic'}}>+ Kubernetes · CRI-O · runtime layers…</div>
+        {/* Left — raw complexity */}
+        <div style={{flex:1,minWidth:145,background:'#f8fafc',border:'2px solid #e2e8f0',borderRadius:10,padding:'11px 12px'}}>
+          <div style={{fontSize:10,fontWeight:700,color:'#64748b',marginBottom:7,letterSpacing:'0.05em'}}>⚠ REAL TICKET COMPLEXITY</div>
+          <Chip icon="📄" name="datadog.yaml" accent="#fca5a5" lines={['exclude_containers: [my-app]','include_containers: [my-app]','logs_config.enabled: true']} />
+          <Chip icon="📋" name="agent.log" accent="#fbbf24" lines={['10:42:01 [WARN] Skipping my-app','10:42:01 [INFO] rule=exclude wins','10:42:02 [DEBUG] container id: …']} />
+          <Chip icon="⚙" name="helm/values.yaml" accent="#93c5fd" lines={['containerCollectAll: true','containerExclude: "name:my-app"','…14 more overrides']} />
+          <Chip icon="☸" name="k8s events" accent="#c4b5fd" lines={['CrashLoopBackOff my-app','ImagePullBackOff sidecar','OOMKilled collector-pod']} />
+          <div style={{fontSize:8,color:'#94a3b8',marginTop:5,fontStyle:'italic',textAlign:'center'}}>+ runtime layers · CRI-O · network policies…</div>
         </div>
 
         {/* Arrow */}
-        <div style={{display:'flex',flexDirection:'column',justifyContent:'center',alignItems:'center',gap:3,flexShrink:0}}>
-          <div style={{fontSize:20,color:'#7c3aed',lineHeight:1}}>→</div>
-          <div style={{fontSize:8,color:'#a78bfa',fontWeight:700,letterSpacing:'0.04em',textAlign:'center'}}>ABSTRACT</div>
+        <div style={{display:'flex',flexDirection:'column',justifyContent:'center',alignItems:'center',gap:2,flexShrink:0,padding:'0 2px'}}>
+          <div style={{width:1,flex:1,background:'#e2e8f0'}}/>
+          <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:2,padding:'6px 0'}}>
+            <div style={{fontSize:16,color:'#7c3aed'}}>→</div>
+            <div style={{fontSize:7,color:'#a78bfa',fontWeight:800,letterSpacing:'0.08em',writingMode:'horizontal-tb',textAlign:'center',lineHeight:1.3}}>ABSTRACTION<br/>GAME</div>
+          </div>
+          <div style={{width:1,flex:1,background:'#e2e8f0'}}/>
         </div>
 
-        {/* Right — Investigation framework */}
-        <div style={{flex:1,minWidth:140,background:'#f0fdf4',border:'2px solid #86efac',borderRadius:10,padding:'11px 12px'}}>
-          <div style={{fontSize:11,fontWeight:700,color:'#15803d',marginBottom:8,display:'flex',alignItems:'center',gap:5}}>
-            🎮 {mCap} World
-          </div>
-          <BoardRow trust="HIGH" tc="#22c55e" label="Statement" text={`"${mCap} blocks signals despite entry rule"`} />
-          <BoardRow trust="MED"  tc="#f59e0b" label="Evidence"  text='"Report: signals lost since rule change"' />
-          <BoardRow trust="LOW"  tc="#ef4444" label="Hypothesis" text='"Block rule overrides entry permission"' />
-          <div style={{borderTop:'1px solid #bbf7d0',paddingTop:6,marginTop:2}}>
+        {/* Right — investigation methodology */}
+        <div style={{flex:1,minWidth:145,background:'#f0fdf4',border:'2px solid #86efac',borderRadius:10,padding:'11px 12px'}}>
+          <div style={{fontSize:10,fontWeight:700,color:'#15803d',marginBottom:7,letterSpacing:'0.05em'}}>✦ INVESTIGATION METHODOLOGY</div>
+          <BoardRow n="1" trust="HIGH" tc="#22c55e" label="Statement"  text={`"${mCap} blocks signals despite entry rule"`} />
+          <BoardRow n="2" trust="MED"  tc="#f59e0b" label="Evidence"   text='"Signals lost since last rule change"' />
+          <BoardRow n="3" trust="LOW"  tc="#ef4444" label="Hypothesis" text='"Block rule takes precedence over entry"' />
+          <div style={{borderTop:'1px solid #bbf7d0',paddingTop:6,marginTop:1}}>
+            <div style={{fontSize:8,color:'#15803d',fontWeight:600,marginBottom:3}}>CONFIDENCE</div>
             <div style={{display:'flex',alignItems:'center',gap:6}}>
-              <div style={{flex:1,background:'#dcfce7',borderRadius:4,height:8,overflow:'hidden'}}>
+              <div style={{flex:1,background:'#dcfce7',borderRadius:4,height:9,overflow:'hidden'}}>
                 <div style={{width:'20%',background:'#16a34a',height:'100%',borderRadius:4}}/>
               </div>
               <span style={{fontSize:10,fontWeight:700,color:'#15803d'}}>20%</span>
             </div>
-            <div style={{fontSize:9,color:'#86efac',marginTop:2}}>confidence — no artifacts yet</div>
+            <div style={{fontSize:8,color:'#86efac',marginTop:2}}>grows only when evidence is cited</div>
           </div>
         </div>
 
       </div>
-      <div style={{marginTop:9,padding:'7px 12px',background:'#faf5ff',border:'1px solid #ddd6fe',borderRadius:7,textAlign:'center'}}>
-        <div style={{fontSize:11,color:'#6d28d9',fontWeight:700}}>Datadog knowledge hidden · Investigation reasoning exposed</div>
-        <div style={{fontSize:10,color:'#7c3aed',marginTop:2}}>Can you build the board without knowing the product?</div>
+      <div style={{marginTop:9,padding:'8px 14px',background:'#faf5ff',border:'1px solid #ddd6fe',borderRadius:7}}>
+        <div style={{fontSize:11,color:'#6d28d9',fontWeight:700,textAlign:'center'}}>The domain changes · The methodology never does</div>
+        <div style={{fontSize:10,color:'#7c3aed',marginTop:3,textAlign:'center'}}>Statement · Evidence · Hypothesis · Confidence — same framework, any product, any metaphor</div>
       </div>
     </div>
   );
