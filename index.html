@@ -431,27 +431,49 @@
 const { useState, useEffect, useRef } = React;
 
 function WorkshopModeVisual() {
-  const rows = [['H1','●','○','●','○'],['H2','○','●','○','○'],['H3','●','○','●','●']];
-  const widths = [90,80,100,70,85,20];
+  const stages = [
+    {n:1, label:'Kickoff',      icon:'⬡', color:'#2563eb', bg:'#eff6ff', border:'#bfdbfe', visual:'Heatmap',         desc:'H1 ● ○ ● ○\nH2 ○ ● ○ ○'},
+    {n:2, label:'Investigation',icon:'⬡', color:'#0891b2', bg:'#ecfeff', border:'#a5f3fc', visual:'Evidence table',  desc:'artifact | trust ↑\nquote   | H impact'},
+    {n:3, label:'Correlation',  icon:'⬡', color:'#6d28d9', bg:'#faf5ff', border:'#ddd6fe', visual:'Diff view',       desc:'- old line (red)\n+ new line (green)'},
+    {n:4, label:'Reproduction', icon:'⬡', color:'#c2410c', bg:'#fff7ed', border:'#fed7aa', visual:'Timeline',        desc:'✓ step 1 — pass\n✓ step 2 — pass\n✗ step 3 — FAIL'},
+    {n:5, label:'Escalation',   icon:'⬡', color:'#15803d', bg:'#f0fdf4', border:'#86efac', visual:'Summary card',    desc:'Root cause\nVersions · Workaround'},
+  ];
+  const widths = [92,75,100,68,84,55,40];
+
   return (
-    <div style={{display:'flex',gap:12,alignItems:'center',margin:'14px 0',flexWrap:'wrap'}}>
-      <div style={{flex:1,minWidth:130,background:'#f8fafc',border:'1.5px solid #e2e8f0',borderRadius:8,padding:'10px 12px'}}>
-        <div style={{fontSize:10,fontWeight:700,color:'#94a3b8',marginBottom:8,letterSpacing:'0.06em'}}>WITHOUT ROUTING</div>
-        {widths.map((w,i) => <div key={i} style={{height:7,background:i===5?'transparent':'#e2e8f0',borderRadius:3,marginBottom:5,width:w+'%'}}/>)}
-        <div style={{fontSize:9,color:'#cbd5e1',marginTop:6,fontStyle:'italic'}}>plain markdown in chat</div>
-      </div>
-      <div style={{fontSize:22,color:'#7c3aed',flexShrink:0,fontWeight:300}}>→</div>
-      <div style={{flex:1,minWidth:130,background:'#faf5ff',border:'1.5px solid #c4b5fd',borderRadius:8,padding:'10px 12px'}}>
-        <div style={{fontSize:10,fontWeight:700,color:'#7c3aed',marginBottom:8,letterSpacing:'0.06em'}}>WITH ROUTING</div>
-        <div style={{display:'grid',gridTemplateColumns:'auto repeat(4,1fr)',gap:3,marginBottom:6}}>
-          {rows.map((row,i) => row.map((cell,j) => (
-            <div key={j} style={{textAlign:'center',padding:'2px 3px',borderRadius:3,
-              background:j===0?'transparent':cell==='●'?'#22c55e':'#f1f5f9',
-              color:j===0?'#7c3aed':cell==='●'?'#fff':'#94a3b8',
-              fontWeight:j===0?700:400,fontSize:j===0?9:11}}>{cell}</div>
-          )))}
+    <div style={{margin:'14px 0'}}>
+      <div style={{display:'flex',gap:10,alignItems:'flex-start'}}>
+
+        {/* Left — without */}
+        <div style={{minWidth:120,background:'#f8fafc',border:'1.5px solid #e2e8f0',borderRadius:9,padding:'10px 12px'}}>
+          <div style={{fontSize:9,fontWeight:700,color:'#94a3b8',marginBottom:8,letterSpacing:'0.06em'}}>WITHOUT ROUTING</div>
+          {widths.map((w,i) => <div key={i} style={{height:6,background:'#e2e8f0',borderRadius:3,marginBottom:5,width:w+'%'}}/>)}
+          <div style={{height:6,background:'#e2e8f0',borderRadius:3,marginBottom:5,width:'90%'}}/>
+          <div style={{height:6,background:'#e2e8f0',borderRadius:3,marginBottom:5,width:'60%'}}/>
+          <div style={{height:6,background:'#e2e8f0',borderRadius:3,marginBottom:5,width:'80%'}}/>
+          <div style={{fontSize:8,color:'#cbd5e1',marginTop:6,fontStyle:'italic',textAlign:'center'}}>wall of markdown in chat</div>
         </div>
-        <div style={{fontSize:9,color:'#7c3aed',fontStyle:'italic'}}>stage-1.canvas.tsx · Desktop</div>
+
+        {/* Arrow */}
+        <div style={{display:'flex',flexDirection:'column',justifyContent:'center',alignItems:'center',paddingTop:40,flexShrink:0}}>
+          <div style={{fontSize:18,color:'#7c3aed'}}>→</div>
+          <div style={{fontSize:7,color:'#a78bfa',fontWeight:800,letterSpacing:'0.06em',textAlign:'center',lineHeight:1.4}}>WORKSHOP<br/>MODE</div>
+        </div>
+
+        {/* Right — 5 stage output cards */}
+        <div style={{flex:1,display:'flex',flexDirection:'column',gap:4}}>
+          <div style={{fontSize:9,fontWeight:700,color:'#7c3aed',marginBottom:2,letterSpacing:'0.06em'}}>WITH ROUTING — one visual file per stage</div>
+          {stages.map(s => (
+            <div key={s.n} style={{display:'flex',alignItems:'center',gap:6,background:s.bg,border:`1.5px solid ${s.border}`,borderRadius:6,padding:'5px 8px'}}>
+              <span style={{fontSize:9,fontWeight:700,color:s.color,flexShrink:0,width:14}}>{s.n}</span>
+              <span style={{fontSize:9,fontWeight:600,color:s.color,width:74,flexShrink:0}}>{s.label}</span>
+              <span style={{fontSize:8,fontWeight:700,color:'#fff',background:s.color,padding:'1px 5px',borderRadius:3,flexShrink:0}}>{s.visual}</span>
+              <span style={{fontSize:8,color:'#6b7280',fontFamily:'monospace',whiteSpace:'pre',overflow:'hidden',textOverflow:'ellipsis'}}>{s.desc.split('\n')[0]}</span>
+            </div>
+          ))}
+          <div style={{fontSize:8,color:'#a78bfa',fontStyle:'italic',marginTop:2,textAlign:'right'}}>saved to ~/Desktop/workshop/ · no chat output</div>
+        </div>
+
       </div>
     </div>
   );
@@ -506,20 +528,29 @@ function AbstractionGameVisual({ metaphor }) {
         </div>
 
         {/* Right — investigation methodology */}
-        <div style={{flex:1,minWidth:145,background:'#f0fdf4',border:'2px solid #86efac',borderRadius:10,padding:'11px 12px'}}>
-          <div style={{fontSize:10,fontWeight:700,color:'#15803d',marginBottom:7,letterSpacing:'0.05em'}}>✦ INVESTIGATION METHODOLOGY</div>
+        <div style={{flex:1,minWidth:145,background:'#f0fdf4',border:'2px solid #86efac',borderRadius:10,padding:'11px 12px',display:'flex',flexDirection:'column',gap:5}}>
+          <div style={{fontSize:10,fontWeight:700,color:'#15803d',marginBottom:2,letterSpacing:'0.05em'}}>✦ INVESTIGATION METHODOLOGY</div>
           <BoardRow n="1" trust="HIGH" tc="#22c55e" label="Statement"  text={`"${mCap} blocks signals despite entry rule"`} />
           <BoardRow n="2" trust="MED"  tc="#f59e0b" label="Evidence"   text='"Signals lost since last rule change"' />
           <BoardRow n="3" trust="LOW"  tc="#ef4444" label="Hypothesis" text='"Block rule takes precedence over entry"' />
+          {/* Artifact needed */}
+          <div style={{background:'rgba(255,255,255,0.8)',borderRadius:6,padding:'5px 8px',borderLeft:'3px solid #a78bfa'}}>
+            <div style={{fontSize:8,fontWeight:700,color:'#7c3aed',marginBottom:2}}>ARTIFACT NEEDED</div>
+            <div style={{fontSize:9,color:'#6b7280',fontStyle:'italic'}}>rule evaluation log — confirms H1</div>
+          </div>
+          {/* Confidence evolution */}
           <div style={{borderTop:'1px solid #bbf7d0',paddingTop:6,marginTop:1}}>
-            <div style={{fontSize:8,color:'#15803d',fontWeight:600,marginBottom:3}}>CONFIDENCE</div>
-            <div style={{display:'flex',alignItems:'center',gap:6}}>
-              <div style={{flex:1,background:'#dcfce7',borderRadius:4,height:9,overflow:'hidden'}}>
-                <div style={{width:'20%',background:'#16a34a',height:'100%',borderRadius:4}}/>
+            <div style={{fontSize:8,color:'#15803d',fontWeight:700,marginBottom:4,letterSpacing:'0.04em'}}>CONFIDENCE EVOLUTION</div>
+            {[['Stage 1','20%','20%','no artifacts yet'],['Stage 2','60%','60%','log confirms rule'],['Stage 3','85%','85%','code traced']].map(([label,pct,w,note],i) => (
+              <div key={i} style={{display:'flex',alignItems:'center',gap:5,marginBottom:4}}>
+                <span style={{fontSize:8,color:'#374151',width:42,flexShrink:0}}>{label}</span>
+                <div style={{flex:1,background:'#dcfce7',borderRadius:3,height:7,overflow:'hidden'}}>
+                  <div style={{width:w,background:'#16a34a',height:'100%',borderRadius:3}}/>
+                </div>
+                <span style={{fontSize:8,fontWeight:700,color:'#15803d',width:26,textAlign:'right'}}>{pct}</span>
               </div>
-              <span style={{fontSize:10,fontWeight:700,color:'#15803d'}}>20%</span>
-            </div>
-            <div style={{fontSize:8,color:'#86efac',marginTop:2}}>grows only when evidence is cited</div>
+            ))}
+            <div style={{fontSize:8,color:'#86efac',marginTop:1}}>only moves when evidence is cited</div>
           </div>
         </div>
 
