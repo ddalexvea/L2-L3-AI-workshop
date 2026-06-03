@@ -514,7 +514,7 @@ function WorkshopModeVisual() {
       <div style={{display:'flex',gap:10,alignItems:'flex-start'}}>
 
         {/* Left — without routing: realistic markdown wall */}
-        <div style={{minWidth:128,background:'#f8fafc',border:'1.5px solid #e2e8f0',borderRadius:9,padding:'10px 12px',fontFamily:'system-ui'}}>
+        <div style={{flex:1,minWidth:0,background:'#f8fafc',border:'1.5px solid #e2e8f0',borderRadius:9,padding:'10px 12px',fontFamily:'system-ui'}}>
           <div style={{fontSize:9,fontWeight:700,color:'#94a3b8',marginBottom:8,letterSpacing:'0.05em'}}>WITHOUT ROUTING</div>
           {/* ## Heading */}
           <div style={{height:8,background:'#334155',borderRadius:2,marginBottom:5,width:'70%'}}/>
@@ -550,7 +550,7 @@ function WorkshopModeVisual() {
         </div>
 
         {/* Right — 5 stage previews */}
-        <div style={{flex:1,display:'flex',flexDirection:'column',gap:5}}>
+        <div style={{flex:1,minWidth:0,display:'flex',flexDirection:'column',gap:5}}>
           <div style={{fontSize:9,fontWeight:700,color:'#7c3aed',marginBottom:1,letterSpacing:'0.05em'}}>WITH ROUTING — one visual file per stage</div>
           {stages.map(s => (
             <div key={s.n} style={{background:s.bg,border:`1.5px solid ${s.border}`,borderRadius:7,padding:'7px 9px'}}>
