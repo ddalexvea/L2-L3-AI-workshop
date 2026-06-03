@@ -1788,225 +1788,223 @@ function App() {
             </div>
           </>
         ) : (
-          (() => {
-            /* ── Shared stage panel renderer (used by both Stage 1 col and Stages 2-5 stack) ── */
-            const renderPanel = () => {
-              if (!activeStageObj) return null;
+          <>
+            {activeStage === 'triage' ? (
+              <>
+                {/* Palette — triage only */}
+                <div className="row wrap" style={{ gap: 8 }}>
+                  {paletteOpen && ELEMENTS.map(el => (
+                    <div
+                      key={el.id}
+                      className={`pill-drag${dragging === el.id ? " dragging" : ""}`}
+                      draggable
+                      onDragStart={() => setDragging(el.id)}
+                      onDragEnd={() => { setDragging(null); setOver(null); }}
+                    >
+                      <span className={`pill pill-${el.tone}`}>{el.label}</span>
+                    </div>
+                  ))}
+                  <div className="spacer" />
+                  {totalTags > 0 && (
+                    <span className="count-badge">{totalTags} label{totalTags !== 1 ? "s" : ""}</span>
+                  )}
+                  <button className="toggle-btn" onClick={() => setPaletteOpen(p => !p)}>
+                    {paletteOpen ? "Hide labels" : "Show labels"}
+                  </button>
+                  <button className="toggle-btn" onClick={() => setEditing(true)}>Change message</button>
+                  {totalTags > 0 && (
+                    <button className="btn btn-primary" style={{ fontSize: 12, padding: "4px 12px" }} onClick={handleGenerate}>
+                      Generate prompt block
+                    </button>
+                  )}
+                </div>
+                <hr className="divider" />
+                <span className="section-label">Customer Message</span>
+                {/* Drop zones */}
+                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                  {lines.map(line => {
+                    const lineTags = tags[line.id] ?? [];
+                    const isOver   = over === line.id;
+                    const topEl    = lineTags[0] ? ELEMENTS.find(e => e.id === lineTags[0].elementId) : null;
+                    const toneClass = topEl && !isOver ? `has-${topEl.tone}` : "";
+                    return (
+                      <div
+                        key={line.id}
+                        className={`msg-line${isOver ? " drag-over" : ""}${toneClass ? " " + toneClass : ""}`}
+                        onDragOver={e => { e.preventDefault(); setOver(line.id); }}
+                        onDragLeave={() => setOver(null)}
+                        onDrop={() => onDrop(line.id)}
+                      >
+                        {line.type === "text" && <p className="text-sm">{renderInline(line.text)}</p>}
+                        {line.type === "code" && <ConfigRows rows={line.rows} />}
+                        {line.type === "intro-code" && (
+                          <>
+                            <p className="text-sm" style={{ marginBottom: 4 }}>{renderInline(line.intro)}</p>
+                            <ConfigRows rows={line.rows} />
+                          </>
+                        )}
+                        {lineTags.length > 0 && (
+                          <div className="tags-row">
+                            {lineTags.map(tag => {
+                              const el = ELEMENTS.find(e => e.id === tag.elementId);
+                              if (!el) return null;
+                              return (
+                                <span key={tag.uid} className={`pill pill-${el.tone} tag-chip`} title="Click to remove" onClick={() => removeTag(line.id, tag.uid)}>
+                                  {el.label} ×
+                                </span>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            ) : (
+              /* Stages 2–5: collapsed message pill */
+              <div style={{display:'flex',alignItems:'center',gap:8,padding:'6px 10px',background:'#f8fafc',border:'1px solid #e2e8f0',borderRadius:8,marginBottom:4}}>
+                <Ic n="MessageSquare" size={13} color="#94a3b8"/>
+                <span style={{fontSize:11,color:'#94a3b8',flex:1}}>
+                  {lines.length > 0 ? 'Customer message loaded' : 'No message loaded'}
+                </span>
+                {totalTags > 0 && <span className="count-badge" style={{flexShrink:0}}>{totalTags} tag{totalTags!==1?'s':''}</span>}
+                <button className="toggle-btn" style={{flexShrink:0,fontSize:10}} onClick={() => setActiveStage('triage')}>View →</button>
+              </div>
+            )}
+
+            {/* ── Active stage content ── */}
+            {activeStageObj && (() => {
               const stage = activeStageObj;
               const stageIndex = STAGES.indexOf(stage);
               const atts = STAGE_ATTACHMENTS[stage.id];
               return (
-                <div className="stage-panel-inner">
-                  <div className="stage-title">Stage {stageIndex + 1} — {stage.label}</div>
-
-                  {/* Stage visual */}
-                  {STAGE_VISUALS[stage.id] && (() => {
-                    const sv = STAGE_VISUALS[stage.id];
-                    return (
-                      <div style={{marginBottom:14,border:`1px solid ${sv.color}28`,borderRadius:10,overflow:'hidden'}}>
-                        <div style={{background:`${sv.color}10`,borderBottom:`1px solid ${sv.color}28`,padding:'8px 12px',display:'flex',alignItems:'center',gap:8}}>
-                          <div style={{width:26,height:26,borderRadius:6,background:sv.color,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
-                            <Ic n={sv.icon} size={13} color="#fff"/>
-                          </div>
-                          <span style={{fontSize:12,fontWeight:600,color:'#1e293b',lineHeight:1.3}}>{sv.concept}</span>
-                        </div>
-                        <div style={{padding:'12px 14px',background:`${sv.color}04`}}>
-                          {sv.graphic && sv.graphic()}
-                        </div>
-                      </div>
-                    );
-                  })()}
-
-                  {/* Checklist */}
-                  {stage.steps && (
-                    <div className="checklist" key={stage.id}>
-                      <div className="checklist-label">Checklist</div>
-                      {stage.steps.map((step, i) => {
-                        const hintFn = STAGE_VISUAL_HINTS[stage.id] && STAGE_VISUAL_HINTS[stage.id][i];
-                        return (
-                          <div key={i} style={{marginBottom:4}}>
-                            {hintFn ? (
-                              <details className="hint-toggle">
-                                <summary>
-                                  <span className="checklist-dot"/>
-                                  <span style={{flex:1}}>{step}</span>
-                                  <span className="hint-icon"><Ic n="Lightbulb" size={11}/></span>
-                                </summary>
-                                <div className="hint-visual">{hintFn()}</div>
-                              </details>
-                            ) : (
-                              <div className="checklist-item">
-                                <span className="checklist-dot"/>
-                                <span>{step}</span>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
+                <>
+                  <hr className="divider" />
+                  <div className="stage-panel-inner">
+                    <div className="stage-title">
+                      Stage {stageIndex + 1} — {stage.label}
                     </div>
-                  )}
 
-                  {/* Attachments */}
-                  {atts && (
-                    <div className="attach-section">
-                      <div className="attach-section-label">Attachments</div>
-                      <div className="attach-row">
-                        {atts.map(att => (
-                          <div key={att.id} className="attach-item">
-                            <div className="attach-header">
-                              <span className="attach-filename">{att.filename}</span>
-                              <div style={{display:"flex",alignItems:"center",gap:6}}>
-                                <span className={`attach-tag ${att.tagClass}`}>{att.tag}</span>
-                                <a className="attach-dl-btn" href={att.href} download={att.filename}>↓ Download</a>
-                              </div>
+                    {/* Stage visual — concept + what you give AI vs what AI does */}
+                    {STAGE_VISUALS[stage.id] && (() => {
+                      const sv = STAGE_VISUALS[stage.id];
+                      return (
+                        <div style={{marginBottom:14,border:`1px solid ${sv.color}28`,borderRadius:10,overflow:'hidden'}}>
+                          {/* Concept header */}
+                          <div style={{background:`${sv.color}10`,borderBottom:`1px solid ${sv.color}28`,padding:'8px 12px',display:'flex',alignItems:'center',gap:8}}>
+                            <div style={{width:26,height:26,borderRadius:6,background:sv.color,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
+                              <Ic n={sv.icon} size={13} color="#fff"/>
                             </div>
-                            <div className="attach-desc">{att.desc}</div>
+                            <span style={{fontSize:12,fontWeight:600,color:'#1e293b',lineHeight:1.3}}>{sv.concept}</span>
                           </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                          {/* Full-width graphic */}
+                          <div style={{padding:'12px 14px',background:`${sv.color}04`}}>
+                            {sv.graphic && sv.graphic()}
+                          </div>
+                        </div>
+                      );
+                    })()}
 
-                  {/* Prompts */}
-                  <details className="light-details">
-                    <summary className="light-summary">Show prompts <span className="light-hint">(reveal after attempt)</span></summary>
-                    <div style={{display:"flex",flexDirection:"column",gap:10,marginTop:10}}>
-                      {stage.promptLight && (
-                        <>
-                          <div className="prompt-version-label">Light version</div>
-                          <div className="stage-prompt-wrap">
-                            <pre className="stage-prompt">{stage.promptLight}</pre>
-                            <button className="stage-copy-btn" onClick={() => { navigator.clipboard.writeText(stage.promptLight); setCopiedStage(stage.id + "_light"); setTimeout(() => setCopiedStage(null), 2000); }}>
-                              {copiedStage === stage.id + "_light" ? <><Ic n="Check" size={11}/> Copied!</> : <><Ic n="Copy" size={11}/> Copy</>}
-                            </button>
-                          </div>
-                        </>
-                      )}
-                      <div className="prompt-version-label">Complete version</div>
-                      <div className="stage-prompt-wrap">
-                        <pre className="stage-prompt">{renderPrompt(stage.prompt)}</pre>
-                        <button className="stage-copy-btn" onClick={() => copyPrompt(stage)}>
-                          {copiedStage === stage.id ? <><Ic n="Check" size={11}/> Copied!</> : <><Ic n="Copy" size={11}/> Copy</>}
-                        </button>
+                    {/* Checklist */}
+                    {stage.steps && (
+                      <div className="checklist" key={stage.id}>
+                        <div className="checklist-label">Checklist</div>
+                        {stage.steps.map((step, i) => {
+                          const hintFn = STAGE_VISUAL_HINTS[stage.id] && STAGE_VISUAL_HINTS[stage.id][i];
+                          return (
+                            <div key={i} style={{marginBottom:4}}>
+                              {hintFn ? (
+                                <details className="hint-toggle">
+                                  <summary>
+                                    <span className="checklist-dot"/>
+                                    <span style={{flex:1}}>{step}</span>
+                                    <span className="hint-icon"><Ic n="Lightbulb" size={11}/></span>
+                                  </summary>
+                                  <div className="hint-visual">{hintFn()}</div>
+                                </details>
+                              ) : (
+                                <div className="checklist-item">
+                                  <span className="checklist-dot"/>
+                                  <span>{step}</span>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
-                    </div>
-                  </details>
-                </div>
+                    )}
+
+                    {/* Attachments */}
+                    {atts && (
+                      <div className="attach-section">
+                        <div className="attach-section-label">Attachments</div>
+                        <div className="attach-row">
+                          {atts.map(att => (
+                            <div key={att.id} className="attach-item">
+                              <div className="attach-header">
+                                <span className="attach-filename">{att.filename}</span>
+                                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                                  <span className={`attach-tag ${att.tagClass}`}>{att.tag}</span>
+                                  <a className="attach-dl-btn" href={att.href} download={att.filename}>
+                                    ↓ Download
+                                  </a>
+                                </div>
+                              </div>
+                              <div className="attach-desc">{att.desc}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Prompts — hidden by default (reveal after participants attempt) */}
+                    <details className="light-details">
+                      <summary className="light-summary">Show prompts <span className="light-hint">(reveal after attempt)</span></summary>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 10 }}>
+                        {stage.promptLight && (
+                          <>
+                            <div className="prompt-version-label">Light version</div>
+                            <div className="stage-prompt-wrap">
+                              <pre className="stage-prompt">{stage.promptLight}</pre>
+                              <button className="stage-copy-btn" onClick={() => { navigator.clipboard.writeText(stage.promptLight); setCopiedStage(stage.id + "_light"); setTimeout(() => setCopiedStage(null), 2000); }}>
+                                {copiedStage === stage.id + "_light" ? <><Ic n="Check" size={11}/> Copied!</> : <><Ic n="Copy" size={11}/> Copy</>}
+                              </button>
+                            </div>
+                          </>
+                        )}
+                        <div className="prompt-version-label">Complete version</div>
+                        <div className="stage-prompt-wrap">
+                          <pre className="stage-prompt">{renderPrompt(stage.prompt)}</pre>
+                          <button className="stage-copy-btn" onClick={() => copyPrompt(stage)}>
+                            {copiedStage === stage.id ? <><Ic n="Check" size={11}/> Copied!</> : <><Ic n="Copy" size={11}/> Copy</>}
+                          </button>
+                        </div>
+                      </div>
+                    </details>
+                  </div>
+                </>
               );
-            };
+            })()}
 
-            /* ── Prompt block output (shared) ── */
-            const promptBlockEl = promptBlock && (
+            {/* Prompt block output */}
+            {promptBlock && (
               <>
                 <hr className="divider" />
                 <div className="prompt-panel">
                   <div className="prompt-panel-header">
                     <span className="prompt-panel-title">Annotated prompt block</span>
                     <div className="spacer" />
-                    <button className="btn btn-ghost" style={{fontSize:12,padding:"4px 12px",marginLeft:8}} onClick={() => handleCopyPrompt(promptBlock)}>
+                    <button className="btn btn-ghost" style={{ fontSize: 12, padding: "4px 12px", marginLeft: 8 }} onClick={() => handleCopyPrompt(promptBlock)}>
                       {copied ? "Copied!" : "Copy"}
                     </button>
-                    <button className="toggle-btn" style={{marginLeft:4}} onClick={() => setPromptBlock(null)}>✕</button>
+                    <button className="toggle-btn" style={{ marginLeft: 4 }} onClick={() => setPromptBlock(null)}>✕</button>
                   </div>
                   <pre className="prompt-output">{promptBlock}</pre>
                 </div>
               </>
-            );
-
-            /* ── Stage 1 — 2-column layout: annotate left, visual+checklist right ── */
-            if (activeStage === 'triage') return (
-              <div style={{display:'flex', gap:16, alignItems:'flex-start'}}>
-                {/* Left column — palette + annotatable message + prompt block output */}
-                <div style={{flex:1.1, minWidth:0}}>
-                  <div className="row wrap" style={{gap:8}}>
-                    {paletteOpen && ELEMENTS.map(el => (
-                      <div key={el.id} className={`pill-drag${dragging === el.id ? " dragging" : ""}`}
-                        draggable
-                        onDragStart={() => setDragging(el.id)}
-                        onDragEnd={() => { setDragging(null); setOver(null); }}>
-                        <span className={`pill pill-${el.tone}`}>{el.label}</span>
-                      </div>
-                    ))}
-                    <div className="spacer" />
-                    {totalTags > 0 && (
-                      <span className="count-badge">{totalTags} label{totalTags !== 1 ? "s" : ""}</span>
-                    )}
-                    <button className="toggle-btn" onClick={() => setPaletteOpen(p => !p)}>
-                      {paletteOpen ? "Hide labels" : "Show labels"}
-                    </button>
-                    <button className="toggle-btn" onClick={() => setEditing(true)}>Change message</button>
-                    {totalTags > 0 && (
-                      <button className="btn btn-primary" style={{fontSize:12,padding:"4px 12px"}} onClick={handleGenerate}>
-                        Generate prompt block
-                      </button>
-                    )}
-                  </div>
-                  <hr className="divider" />
-                  <span className="section-label">Customer Message</span>
-                  <div style={{display:"flex",flexDirection:"column",gap:4}}>
-                    {lines.map(line => {
-                      const lineTags = tags[line.id] ?? [];
-                      const isOver   = over === line.id;
-                      const topEl    = lineTags[0] ? ELEMENTS.find(e => e.id === lineTags[0].elementId) : null;
-                      const toneClass = topEl && !isOver ? `has-${topEl.tone}` : "";
-                      return (
-                        <div key={line.id}
-                          className={`msg-line${isOver ? " drag-over" : ""}${toneClass ? " " + toneClass : ""}`}
-                          onDragOver={e => { e.preventDefault(); setOver(line.id); }}
-                          onDragLeave={() => setOver(null)}
-                          onDrop={() => onDrop(line.id)}>
-                          {line.type === "text" && <p className="text-sm">{renderInline(line.text)}</p>}
-                          {line.type === "code" && <ConfigRows rows={line.rows} />}
-                          {line.type === "intro-code" && (
-                            <>
-                              <p className="text-sm" style={{marginBottom:4}}>{renderInline(line.intro)}</p>
-                              <ConfigRows rows={line.rows} />
-                            </>
-                          )}
-                          {lineTags.length > 0 && (
-                            <div className="tags-row">
-                              {lineTags.map(tag => {
-                                const el = ELEMENTS.find(e => e.id === tag.elementId);
-                                if (!el) return null;
-                                return (
-                                  <span key={tag.uid} className={`pill pill-${el.tone} tag-chip`} title="Click to remove"
-                                    onClick={() => removeTag(line.id, tag.uid)}>
-                                    {el.label} ×
-                                  </span>
-                                );
-                              })}
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                  {promptBlockEl}
-                </div>
-
-                {/* Right column — stage visual + checklist + prompts */}
-                <div style={{flex:1, minWidth:0}}>
-                  {activeStageObj && (<><hr className="divider"/>{renderPanel()}</>)}
-                </div>
-              </div>
-            );
-
-            /* ── Stages 2–5 — stacked layout ── */
-            return (
-              <>
-                <div style={{display:'flex',alignItems:'center',gap:8,padding:'6px 10px',background:'#f8fafc',border:'1px solid #e2e8f0',borderRadius:8,marginBottom:4}}>
-                  <Ic n="MessageSquare" size={13} color="#94a3b8"/>
-                  <span style={{fontSize:11,color:'#94a3b8',flex:1}}>
-                    {lines.length > 0 ? 'Customer message loaded' : 'No message loaded'}
-                  </span>
-                  {totalTags > 0 && <span className="count-badge" style={{flexShrink:0}}>{totalTags} tag{totalTags!==1?'s':''}</span>}
-                  <button className="toggle-btn" style={{flexShrink:0,fontSize:10}} onClick={() => setActiveStage('triage')}>View →</button>
-                </div>
-                {activeStageObj && (<><hr className="divider"/>{renderPanel()}</>)}
-                {promptBlockEl}
-              </>
-            );
-          })()
+            )}
+          </>
         ))}
       </div>
     </div>
