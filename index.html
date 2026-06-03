@@ -760,54 +760,6 @@ const STAGE_ATTACHMENTS = {
   ],
 };
 
-/* ── Workshop routing blocks ──────────────────────────── */
-function canvasRoutingBlock(stageNum) {
-  return `WORKSHOP MODE — canvas only, no chat output.
-Rules for this session:
-- Do NOT output the analysis in chat. All content goes in the canvas file only.
-- In chat, respond only with: "Canvas ready — open stage-${stageNum}.canvas.tsx"
-- Canvas target: fits on a single screen, max 3 bullet points per section, max 4 table rows, one bold takeaway line at the bottom.
-
-Canvas: after producing the text output, create a Cursor canvas at
-~/.cursor/projects/Users-alexandre-vea-Projects-TSE/canvases/stage-${stageNum}.canvas.tsx
-using this visual per stage:
-- Stage 1: heatmap — rows=hypotheses, cols=artifacts needed, filled dot=confirmed, empty=needed. All dots start empty.
-- Stage 2: evidence tracker — rows=findings, columns=[Artifact, Quote, Trust before, Trust after, H impact], row tone green=upgraded red=refuted neutral=unchanged
-- Stage 3: diff view — DiffView of buggy vs fixed lines with file path in CardHeader and DiffStats in trailing slot, one card per file
-- Stage 4: timeline — one dot per repro step (green=pass, red=fail, gray=skipped), final row=VERDICT in bold
-- Stage 5: summary — Root Cause (danger Callout) + Affected versions (Stat cards) + Workaround (success Callout) side by side, evidence table with file:line citations below
-Canvas hard rules — must follow exactly:
-- No hardcoded hex colors. Only useHostTheme() tokens (call it inside every component that needs it).
-- Valid token paths: theme.accent.primary · theme.fill.primary/secondary/tertiary/quaternary
-  theme.stroke.primary/secondary/tertiary · theme.text.primary/secondary/tertiary/onAccent
-  theme.bg.editor/chrome/elevated · theme.diff.stripAdded (green) · theme.diff.stripRemoved (red)
-- Table rowTone valid values only: "success" | "danger" | "warning" | "info" | "neutral" — never "pass" or "fail"
-- Pill tone valid values only: "neutral" | "added" | "deleted" | "renamed" | "success" | "warning" | "info"
-- No box-shadow, no gradients, no emoji as decoration, no hardcoded font sizes above 24px.
-
----
-`;
-}
-
-function htmlRoutingBlock(stageNum, visual) {
-  return `WORKSHOP MODE — HTML file only, no chat output.
-Rules:
-- Write a single self-contained HTML file to ~/Desktop/workshop/stage-${stageNum}.html
-- After writing, run: open ~/Desktop/workshop/stage-${stageNum}.html
-- In chat respond only with: "Stage ${stageNum} ready — check Chrome"
-- Single screen layout, max 3 bullets per section, max 4 table rows, one bold takeaway at bottom
-
-Visual: ${visual}
-
-HTML hard rules:
-- Self-contained: inline CSS only, no external dependencies
-- Colors: white background, dark text, green=#22c55e red=#ef4444 amber=#f59e0b gray=#94a3b8
-- Tables: alternating row shading (#f8fafc), colored row left-border for status
-- Font: system-ui, 13px body, bold section headers
-
----
-`;
-}
 
 /* ── Session-level routing (paste once at start) ──────── */
 const CANVAS_SESSION_ROUTING = `WORKSHOP MODE — canvas only, no chat output.
@@ -874,16 +826,8 @@ function App() {
     setActiveStage(prev => prev === id ? null : id);
   }
 
-  function buildPrompt(stage) {
-    const stageIndex = STAGES.indexOf(stage);
-    const routing = tool === "cursor"
-      ? canvasRoutingBlock(stageIndex + 1)
-      : htmlRoutingBlock(stageIndex + 1, stage.htmlVisual);
-    return routing + stage.prompt;
-  }
-
   function copyPrompt(stage) {
-    navigator.clipboard.writeText(buildPrompt(stage)).then(() => {
+    navigator.clipboard.writeText(stage.prompt).then(() => {
       setCopiedStage(stage.id);
       setTimeout(() => setCopiedStage(null), 2000);
     });
@@ -1151,12 +1095,7 @@ function App() {
                             </div>
                           </>
                         )}
-                        <div className="prompt-version-label" style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                          <span>Complete — {tool === "cursor" ? "⬡ Cursor Canvas" : "◈ Claude HTML"}</span>
-                          <span className="tool-hint" style={{ fontStyle: "normal" }}>
-                            · <button style={{ background: "none", border: "none", padding: 0, cursor: "pointer", fontSize: 10, color: "#2563eb", fontWeight: 600 }} onClick={() => setActiveStage("prep")}>change tool</button>
-                          </span>
-                        </div>
+                        <div className="prompt-version-label">Complete version</div>
                         <div className="stage-prompt-wrap">
                           <pre className="stage-prompt">{renderPrompt(stage.prompt)}</pre>
                           <button className="stage-copy-btn" onClick={() => copyPrompt(stage)}>
