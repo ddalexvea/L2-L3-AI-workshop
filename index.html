@@ -789,27 +789,27 @@ Canvas hard rules — must follow exactly:
 - Pill tone valid values only: "neutral" | "added" | "deleted" | "renamed" | "success" | "warning" | "info"
 - No box-shadow, no gradients, no emoji as decoration, no hardcoded font sizes above 24px.`;
 
-const GAME_ROUTING = `ABSTRACTION GAME — Investigation in disguise 🎮
-
-We are going to play a collaborative investigation game. No technical knowledge needed.
+const GAME_ROUTING = `Let's play a mystery investigation game 🎮
 
 Metaphor: [                    ]
 
-Rules:
-- You are the Game Master. The audience are the investigators.
-- We investigate a mystery together using the metaphor above — the same logical structure as a real 5-stage support investigation, but in a different world.
-- The investigation runs in 5 rounds: Kickoff · Clue Gathering · Pattern Recognition · Reproduction · Verdict.
-- In each round: the investigators describe what they observe → you update the shared hypothesis board → you ask one guiding question to move forward.
+We will investigate a mystery together using the metaphor above. No technical knowledge needed — just curiosity.
 
-The mystery (always the same logic):
-"Something that was supposed to be filtered out keeps getting through. There is a rule that should block it — but another rule silently overrides it. The culprit is a priority conflict hidden in the configuration."
+How it works:
+- I am the investigator. You are my investigation partner.
+- The mystery unfolds in 5 rounds: Kickoff · Clue Gathering · Pattern Recognition · Reproduction · Verdict.
+- Each round: I give you what I observe → you help me update our hypothesis board → you ask me one question to dig deeper.
+- After round 5, we name the root cause together.
 
-Translate the mystery into the chosen metaphor world:
-- The "filter rule" becomes a gate, valve, bouncer, channel, etc.
-- The "configuration" becomes the rulebook, settings panel, schedule, map, etc.
+The mystery (same logic every time, translated into our metaphor):
+Something that should be blocked keeps getting through. There is a rule that should stop it — but another rule silently overrides it. The culprit is a conflict hidden in the configuration.
+
+Translate everything into the metaphor world:
+- The "rule" becomes whatever makes sense there (a gate, a filter, a bouncer, a valve…)
+- The "configuration" becomes the settings, schedule, rulebook, map…
 - The "override" becomes whatever silently undoes the intended rule in that world.
 
-Start Round 1 immediately. Keep it fun, fast, and visual.`;
+Start Round 1 now. Keep it fun and concise.`;
 
 const HTML_SESSION_ROUTING = `WORKSHOP MODE — HTML file only, no chat output.
 Rules for this session:
@@ -983,7 +983,7 @@ function App() {
             <div className="prep-panel" style={{ borderColor: "#16a34a", background: "#f0fdf4" }}>
               <div className="prep-panel-title" style={{ color: "#15803d" }}>🎮 Abstraction Game</div>
               <p className="prep-hint" style={{ color: "#15803d" }}>
-                Paste into any AI before the investigation stages. The audience picks a metaphor and the AI runs the full 5-round investigation in that world — no Datadog knowledge needed.
+                Each participant pastes this into their own AI session, fills in a metaphor, and plays the 5-round investigation 1-on-1 with the AI — no Datadog knowledge needed. Use a fresh chat session, without the workshop routing.
               </p>
               <div className="prep-block">
                 <div className="prep-block-label" style={{ color: "#15803d" }}>Game master prompt</div>
