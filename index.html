@@ -1675,17 +1675,17 @@ function App() {
               <div className="prep-panel-title">Workshop Preparation</div>
               <p className="prep-hint">Paste this prompt <strong>once</strong> at the start of your Cursor or Claude session. The AI will remember the routing rules for all 5 stages.</p>
 
-              {/* Tool toggle inside prep */}
-              <div className="row" style={{ gap: 10 }}>
+              {/* Preparation visual */}
+              <div style={{ fontSize: 12, color: '#6d28d9', fontWeight: 600, marginTop: 14, marginBottom: 2 }}>What workshop mode does</div>
+              <WorkshopModeVisual />
+
+              {/* Tool toggle — after visual */}
+              <div className="row" style={{ gap: 10, marginTop: 12 }}>
                 <div className="tool-bar">
                   <button className={`tool-btn${tool === "cursor" ? " active" : ""}`} onClick={() => setTool("cursor")}><Ic n="LayoutDashboard" size={11}/> Cursor Canvas</button>
                   <button className={`tool-btn${tool === "claude" ? " active" : ""}`} onClick={() => setTool("claude")}><Ic n="Code2" size={11}/> Claude HTML</button>
                 </div>
               </div>
-
-              {/* Preparation visual */}
-              <div style={{ fontSize: 12, color: '#6d28d9', fontWeight: 600, marginTop: 14, marginBottom: 2 }}>What workshop mode does</div>
-              <WorkshopModeVisual />
 
               <div className="prep-block">
                 <div className="prep-block-label">{tool === "cursor" ? "Cursor Canvas — session routing" : "Claude Code — session routing"}</div>
