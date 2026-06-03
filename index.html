@@ -819,16 +819,16 @@ const STAGE_VISUALS = {
       const C = '#15803d';
       const rows = [
         {ic:'FileCode', label:'Config',    trust:'HIGH', gap:false, tc:'#22c55e'},
-        {ic:'FileCode', label:'Runtime',   trust:'GAP',  gap:true,  tc:'#f59e0b'},
+        {ic:'FileCode', label:'Runtime',   trust:'GAP',  gap:true,  tc:'#b45309'},
         {ic:'BookOpen', label:'Reference', trust:'HIGH', gap:false, tc:'#22c55e'},
       ];
       return (
         <div style={{display:'flex',alignItems:'stretch',gap:0,height:120}}>
           {/* Zone 1 — inputs */}
-          <div style={{width:62,display:'flex',flexDirection:'column',gap:4,paddingTop:6}}>
-            <span style={{fontSize:7,color:'#94a3b8',fontWeight:600,letterSpacing:'0.03em',marginBottom:1}}>ARTIFACTS</span>
+          <div style={{width:72,display:'flex',flexDirection:'column',justifyContent:'space-between',paddingTop:6,paddingBottom:4}}>
+            <span style={{fontSize:7,color:'#94a3b8',fontWeight:600,letterSpacing:'0.03em',marginBottom:4}}>ARTIFACTS</span>
             {rows.map((r,i)=>(
-              <div key={i} style={{display:'flex',alignItems:'center',gap:5,background:'#f8fafc',border:'1px solid #e2e8f0',borderRadius:5,padding:'5px 7px'}}>
+              <div key={i} style={{flex:1,display:'flex',alignItems:'center',gap:5,background:'#f8fafc',border:'1px solid #e2e8f0',borderRadius:5,padding:'0 7px',margin:'2px 0'}}>
                 <Ic n={r.ic} size={10} color="#64748b"/>
                 <span style={{fontSize:9,color:'#334155',fontWeight:500}}>{r.label}</span>
               </div>
@@ -837,25 +837,25 @@ const STAGE_VISUALS = {
           {/* Zone 2 — brain */}
           <div style={{width:48,position:'relative',display:'flex',alignItems:'center',justifyContent:'center'}}>
             <svg width="48" height="120" viewBox="0 0 48 120" style={{position:'absolute',inset:0}}>
-              <line x1="0" y1="36" x2="48" y2="60" stroke={C} strokeWidth="1.5" strokeOpacity="0.4"/>
+              <line x1="0" y1="40" x2="48" y2="60" stroke={C} strokeWidth="1.5" strokeOpacity="0.4"/>
               <line x1="0" y1="60" x2="48" y2="60" stroke={C} strokeWidth="1.5" strokeOpacity="0.4"/>
-              <line x1="0" y1="84" x2="48" y2="60" stroke={C} strokeWidth="1.5" strokeOpacity="0.4"/>
+              <line x1="0" y1="80" x2="48" y2="60" stroke={C} strokeWidth="1.5" strokeOpacity="0.4"/>
             </svg>
             <div style={{position:'relative',zIndex:1,background:'#f0fdf4',border:`2px solid ${C}60`,borderRadius:'50%',width:30,height:30,display:'flex',alignItems:'center',justifyContent:'center'}}>
               <Ic n="BrainCircuit" size={14} color={C}/>
             </div>
           </div>
-          {/* Zone 3 — evidence table */}
-          <div style={{flex:1,display:'flex',flexDirection:'column',gap:0,paddingTop:6}}>
-            <span style={{fontSize:7,color:C,fontWeight:700,letterSpacing:'0.04em',marginBottom:5}}>EVIDENCE TABLE</span>
+          {/* Zone 3 — evidence table — same row height as left chips */}
+          <div style={{flex:1,display:'flex',flexDirection:'column',justifyContent:'space-between',paddingTop:6,paddingBottom:4}}>
+            <span style={{fontSize:7,color:C,fontWeight:700,letterSpacing:'0.04em',marginBottom:4}}>EVIDENCE TABLE</span>
             {rows.map((r,i)=>(
-              <div key={i} style={{display:'flex',alignItems:'center',gap:5,borderRadius:4,padding:'5px 7px',marginBottom:4,background:r.gap?'#fef3c7':'#f8fafc',border:`1px solid ${r.gap?'#f59e0b':'#e2e8f0'}`}}>
-                <span style={{fontSize:8,color:'#64748b',width:38,flexShrink:0}}>{r.label}</span>
+              <div key={i} style={{flex:1,display:'flex',alignItems:'center',gap:5,borderRadius:5,padding:'0 7px',margin:'2px 0',background:r.gap?'#fef9c3':'#f8fafc',border:`1px solid ${r.gap?'#fde047':'#e2e8f0'}`}}>
+                <span style={{fontSize:8,color:r.gap?'#92400e':'#64748b',width:44,flexShrink:0,fontWeight:r.gap?600:400}}>{r.label}</span>
                 <div style={{flex:1,height:4,borderRadius:2,background:r.gap?'#fde68a':'#e2e8f0'}}/>
                 <span style={{fontSize:7,fontWeight:700,color:r.tc,flexShrink:0}}>{r.trust}</span>
               </div>
             ))}
-            <div style={{display:'flex',alignItems:'center',gap:4,background:'#f0fdf4',borderRadius:4,padding:'3px 6px',marginTop:2}}>
+            <div style={{display:'flex',alignItems:'center',gap:4,background:'#f0fdf4',borderRadius:5,padding:'0 7px',height:24,marginTop:2}}>
               <Ic n="TrendingUp" size={9} color={C}/>
               <div style={{flex:1,background:'#bbf7d0',borderRadius:2,height:4,overflow:'hidden'}}><div style={{width:'60%',background:C,height:'100%'}}/></div>
               <span style={{fontSize:8,fontWeight:700,color:C}}>~60%</span>
@@ -870,58 +870,54 @@ const STAGE_VISUALS = {
     concept: 'Pinpoint the exact code location and commit where the behavior lives.',
     graphic: () => {
       const C = '#6d28d9';
+      const rightRows = [
+        {ic:'Timer',    label:'Timestamp match', sub:'cross-log alignment', bg:'#faf5ff', bc:'#ddd6fe', dot:true},
+        {ic:'FileCode', label:'Source location',  sub:'file + line number',  bg:'#f8fafc', bc:'#e2e8f0', badge:'blame'},
+        {ic:'GitCommitHorizontal', label:'Diff found', sub:'old behavior → new', bg:'#f8fafc', bc:'#e2e8f0', diff:true},
+      ];
       return (
         <div style={{display:'flex',alignItems:'stretch',gap:0,height:120}}>
           {/* Zone 1 — inputs */}
-          <div style={{width:62,display:'flex',flexDirection:'column',gap:4,paddingTop:6}}>
-            <span style={{fontSize:7,color:'#94a3b8',fontWeight:600,letterSpacing:'0.03em',marginBottom:1}}>SOURCES</span>
+          <div style={{width:72,display:'flex',flexDirection:'column',justifyContent:'space-between',paddingTop:6,paddingBottom:4}}>
+            <span style={{fontSize:7,color:'#94a3b8',fontWeight:600,letterSpacing:'0.03em',marginBottom:4}}>SOURCES</span>
             {[['ScrollText','Log A'],['ScrollText','Log B'],['Github','Codebase']].map(([ic,lbl],i)=>(
-              <div key={i} style={{display:'flex',alignItems:'center',gap:5,background:'#faf5ff',border:'1px solid #ddd6fe',borderRadius:5,padding:'5px 7px'}}>
+              <div key={i} style={{flex:1,display:'flex',alignItems:'center',gap:5,background:'#faf5ff',border:'1px solid #ddd6fe',borderRadius:5,padding:'0 7px',margin:'2px 0'}}>
                 <Ic n={ic} size={10} color={C}/>
                 <span style={{fontSize:9,color:'#4c1d95',fontWeight:500}}>{lbl}</span>
               </div>
             ))}
           </div>
-          {/* Zone 2 — brain with merge lines */}
+          {/* Zone 2 — brain */}
           <div style={{width:48,position:'relative',display:'flex',alignItems:'center',justifyContent:'center'}}>
             <svg width="48" height="120" viewBox="0 0 48 120" style={{position:'absolute',inset:0}}>
-              <line x1="0" y1="29" x2="48" y2="60" stroke={C} strokeWidth="1.5" strokeOpacity="0.4"/>
-              <line x1="0" y1="52" x2="48" y2="60" stroke={C} strokeWidth="1.5" strokeOpacity="0.4"/>
-              <line x1="0" y1="75" x2="48" y2="60" stroke={C} strokeWidth="1.5" strokeOpacity="0.4"/>
+              <line x1="0" y1="40" x2="48" y2="60" stroke={C} strokeWidth="1.5" strokeOpacity="0.4"/>
+              <line x1="0" y1="60" x2="48" y2="60" stroke={C} strokeWidth="1.5" strokeOpacity="0.4"/>
+              <line x1="0" y1="80" x2="48" y2="60" stroke={C} strokeWidth="1.5" strokeOpacity="0.4"/>
             </svg>
             <div style={{position:'relative',zIndex:1,background:'#faf5ff',border:`2px solid ${C}60`,borderRadius:'50%',width:30,height:30,display:'flex',alignItems:'center',justifyContent:'center'}}>
               <Ic n="BrainCircuit" size={14} color={C}/>
             </div>
           </div>
-          {/* Zone 3 — code location + diff */}
-          <div style={{flex:1,display:'flex',flexDirection:'column',gap:5,paddingTop:6}}>
-            <span style={{fontSize:7,color:C,fontWeight:700,letterSpacing:'0.04em'}}>ROOT CAUSE</span>
-            {/* Timestamp match indicator */}
-            <div style={{display:'flex',alignItems:'center',gap:5,background:'#faf5ff',border:'1px solid #ddd6fe',borderRadius:5,padding:'5px 7px'}}>
-              <Ic n="Timer" size={10} color={C}/>
-              <span style={{fontSize:8,color:'#4c1d95'}}>Timestamp match</span>
-              <div style={{marginLeft:'auto',width:8,height:8,borderRadius:'50%',background:C}}/>
-            </div>
-            {/* Code pin */}
-            <div style={{background:'#1e293b',borderRadius:5,padding:'5px 8px',display:'flex',alignItems:'center',gap:5}}>
-              <Ic n="FileCode" size={10} color="#94a3b8"/>
-              <div style={{flex:1,height:4,borderRadius:2,background:'#334155'}}/>
-              <span style={{fontSize:8,fontFamily:'monospace',color:'#86efac',fontWeight:700}}>:N</span>
-              <div style={{background:C,borderRadius:3,padding:'1px 5px',fontSize:7,color:'#fff',fontWeight:700}}>blame</div>
-            </div>
-            {/* Diff */}
-            <div style={{background:'#1e293b',borderRadius:5,padding:'5px 8px',display:'flex',flexDirection:'column',gap:3}}>
-              <div style={{display:'flex',alignItems:'center',gap:4}}>
-                <span style={{fontSize:8,fontFamily:'monospace',color:'#fca5a5',width:8,flexShrink:0}}>-</span>
-                <div style={{flex:1,height:4,borderRadius:2,background:'#fca5a525'}}/>
-                <span style={{fontSize:7,color:'#fca5a5'}}>old</span>
+          {/* Zone 3 — right rows matching left height */}
+          <div style={{flex:1,display:'flex',flexDirection:'column',justifyContent:'space-between',paddingTop:6,paddingBottom:4}}>
+            <span style={{fontSize:7,color:C,fontWeight:700,letterSpacing:'0.04em',marginBottom:4}}>ROOT CAUSE</span>
+            {rightRows.map((r,i)=>(
+              <div key={i} style={{flex:1,display:'flex',alignItems:'center',gap:6,borderRadius:5,padding:'0 8px',margin:'2px 0',background:r.bg,border:`1px solid ${r.bc}`}}>
+                <Ic n={r.ic} size={10} color={C}/>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontSize:9,color:'#334155',fontWeight:500,lineHeight:1}}>{r.label}</div>
+                  {r.diff
+                    ? <div style={{display:'flex',gap:4,marginTop:2}}>
+                        <span style={{fontSize:7,color:'#f87171',fontFamily:'monospace'}}>- old</span>
+                        <span style={{fontSize:7,color:'#4ade80',fontFamily:'monospace'}}>+ new</span>
+                      </div>
+                    : <div style={{fontSize:7,color:'#94a3b8',marginTop:1}}>{r.sub}</div>
+                  }
+                </div>
+                {r.dot && <div style={{width:8,height:8,borderRadius:'50%',background:C,flexShrink:0}}/>}
+                {r.badge && <div style={{background:C,borderRadius:3,padding:'1px 5px',fontSize:7,color:'#fff',fontWeight:700,flexShrink:0}}>{r.badge}</div>}
               </div>
-              <div style={{display:'flex',alignItems:'center',gap:4}}>
-                <span style={{fontSize:8,fontFamily:'monospace',color:'#86efac',width:8,flexShrink:0}}>+</span>
-                <div style={{flex:1,height:4,borderRadius:2,background:'#86efac25'}}/>
-                <span style={{fontSize:7,color:'#86efac'}}>new</span>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       );
