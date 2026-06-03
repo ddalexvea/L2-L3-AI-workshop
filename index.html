@@ -789,26 +789,11 @@ Canvas hard rules — must follow exactly:
 - Pill tone valid values only: "neutral" | "added" | "deleted" | "renamed" | "success" | "warning" | "info"
 - No box-shadow, no gradients, no emoji as decoration, no hardcoded font sizes above 24px.`;
 
-const GAME_ROUTING = `Let's play a mystery investigation game 🎮
+const GAME_ROUTING = `Metaphor: [                    ]
 
-Metaphor: [                    ]
+For this entire session, do not use any Datadog, Kubernetes, or technical product names. Translate every concept into the metaphor above.
 
-We will investigate a mystery together using the metaphor above. No technical knowledge needed — just curiosity.
-
-How it works:
-- I am the investigator. You are my investigation partner.
-- Each round: I give you what I observe → you help me update our hypothesis board → you ask me one question to dig deeper.
-- After round 5, we name the root cause together.
-
-The mystery (same logic every time, translated into our metaphor):
-Something that should be blocked keeps getting through. There is a rule that should stop it — but another rule silently overrides it. The culprit is a conflict hidden in the configuration.
-
-Translate everything into the metaphor world:
-- The "rule" becomes whatever makes sense there (a gate, a filter, a bouncer, a valve…)
-- The "configuration" becomes the settings, schedule, rulebook, map…
-- The "override" becomes whatever silently undoes the intended rule in that world.
-
-Start Round 1 now. Keep it fun and concise.`;
+When I send you an investigation prompt, run it entirely in the metaphor world — same logic, same framework, different vocabulary.`;
 
 const HTML_SESSION_ROUTING = `WORKSHOP MODE — HTML file only, no chat output.
 Rules for this session:
@@ -982,7 +967,7 @@ function App() {
             <div className="prep-panel" style={{ borderColor: "#16a34a", background: "#f0fdf4" }}>
               <div className="prep-panel-title" style={{ color: "#15803d" }}>🎮 Abstraction Game</div>
               <p className="prep-hint" style={{ color: "#15803d" }}>
-                Each participant pastes this into their own AI session, fills in a metaphor, and plays the 5-round investigation 1-on-1 with the AI — no Datadog knowledge needed. Use a fresh chat session, without the workshop routing.
+                Fill in a metaphor, paste this into the AI session (after the Preparation routing), then use the stage prompts as usual. The AI will run the full investigation in the metaphor world — no Datadog knowledge needed.
               </p>
               <div className="prep-block">
                 <div className="prep-block-label" style={{ color: "#15803d" }}>Game master prompt</div>
