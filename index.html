@@ -462,20 +462,6 @@ OUTPUT:
 
 Output: signal coverage (addressed / missing per signal) + filler phrases found + opening sentence verdict + one concrete edit.`,
   },
-  {
-    id: "iterate", label: "Iterate", alias: ";p_s_l3_4",
-    color: "#0f766e", bg: "#f0fdfa", border: "#99f6e4",
-    prompt: `Apply the edits from the critique above to the response draft.
-
-1. Address each flagged signal gap.
-2. Remove all identified filler phrases — replace with direct, accountable language.
-3. Fix the opening sentence if flagged.
-4. Apply the single most impactful edit.
-
-Output: revised response draft only — no commentary, no before/after comparison.
-
-If the revised draft still has gaps, run Criticize again.`,
-  },
 ];
 
 const STAGES_BY_MODE = { L2: L2_STAGES, L3: L3_STAGES };
