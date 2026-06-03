@@ -124,6 +124,20 @@
       width: 5px; height: 5px; border-radius: 999px;
       background: #cbd5e1; flex-shrink: 0; margin-top: 6px;
     }
+    .hint-toggle { margin-left: 13px; margin-top: 3px; }
+    .hint-toggle summary {
+      font-size: 10px; font-weight: 700; color: #6366f1;
+      background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 4px;
+      cursor: pointer; list-style: none; display: inline-flex;
+      align-items: center; gap: 4px; padding: 2px 8px; user-select: none;
+    }
+    .hint-toggle summary::-webkit-details-marker { display: none; }
+    .hint-toggle summary:hover { background: #e0e7ff; }
+    .hint-visual {
+      margin-top: 5px; padding: 8px 10px;
+      background: #f8fafc; border: 1px solid #e2e8f0;
+      border-left: 3px solid #a5b4fc; border-radius: 0 6px 6px 0;
+    }
 
     /* Attachments */
     .attach-section { display: flex; flex-direction: column; gap: 6px; }
@@ -616,6 +630,112 @@ function AbstractionGameVisual({ metaphor }) {
     </div>
   );
 }
+
+/* ── Visual hint mini-components ───────────────────────── */
+const HV = {
+  // ✗ / ✓ contrast
+  Contrast: ({bad, good}) => (
+    <div style={{display:'flex',flexDirection:'column',gap:3,fontFamily:'monospace',fontSize:10}}>
+      <div style={{color:'#dc2626'}}><span style={{fontWeight:700}}>✗ </span>{bad}</div>
+      <div style={{color:'#16a34a'}}><span style={{fontWeight:700}}>✓ </span>{good}</div>
+    </div>
+  ),
+  // mini investigation board rows
+  Board: ({rows}) => (
+    <div style={{display:'flex',flexDirection:'column',gap:3}}>
+      {rows.map(([trust,tc,label,text],i) => (
+        <div key={i} style={{display:'flex',alignItems:'flex-start',gap:5,background:'#f8fafc',borderRadius:5,padding:'4px 7px',borderLeft:`3px solid ${tc}`}}>
+          <span style={{fontSize:8,fontWeight:700,background:tc,color:'#fff',padding:'1px 4px',borderRadius:2,flexShrink:0,marginTop:1}}>{trust}</span>
+          <span style={{fontSize:9,fontWeight:600,color:'#374151',flexShrink:0,width:68}}>{label}</span>
+          <span style={{fontSize:9,color:'#6b7280',fontStyle:'italic'}}>{text}</span>
+        </div>
+      ))}
+    </div>
+  ),
+  // confidence bars
+  ConfBars: ({bars}) => (
+    <div style={{display:'flex',flexDirection:'column',gap:4}}>
+      {bars.map(([label,pct,note],i) => (
+        <div key={i} style={{display:'flex',alignItems:'center',gap:6}}>
+          <span style={{fontSize:9,color:'#374151',width:50,flexShrink:0}}>{label}</span>
+          <div style={{flex:1,background:'#e2e8f0',borderRadius:3,height:8,overflow:'hidden'}}>
+            <div style={{width:pct+'%',background:'#2563eb',height:'100%',borderRadius:3}}/>
+          </div>
+          <span style={{fontSize:8,fontWeight:700,color:'#2563eb',width:26,textAlign:'right'}}>{pct}%</span>
+          {note && <span style={{fontSize:8,color:'#94a3b8'}}>{note}</span>}
+        </div>
+      ))}
+    </div>
+  ),
+  // artifact map
+  ArtMap: ({rows}) => (
+    <div style={{display:'flex',flexDirection:'column',gap:3}}>
+      {rows.map(([h,art,why],i) => (
+        <div key={i} style={{display:'flex',alignItems:'flex-start',gap:5,fontSize:9}}>
+          <span style={{fontWeight:700,color:'#6d28d9',width:20,flexShrink:0}}>{h}</span>
+          <span style={{color:'#0891b2',fontFamily:'monospace',flexShrink:0,width:80}}>{art}</span>
+          <span style={{color:'#94a3b8',fontStyle:'italic'}}>{why}</span>
+        </div>
+      ))}
+    </div>
+  ),
+  // diff lines
+  Diff: ({lines}) => (
+    <div style={{display:'flex',flexDirection:'column',gap:2,fontFamily:'monospace',fontSize:9}}>
+      {lines.map(([sign,text],i) => (
+        <div key={i} style={{background:sign==='-'?'#fef2f2':'#f0fdf4',color:sign==='-'?'#dc2626':'#16a34a',padding:'2px 6px',borderRadius:3}}>
+          {sign} {text}
+        </div>
+      ))}
+    </div>
+  ),
+  // mini table
+  Table: ({rows, cols}) => (
+    <div style={{fontSize:9,fontFamily:'monospace'}}>
+      {cols && <div style={{display:'flex',gap:0,borderBottom:'1px solid #e2e8f0',paddingBottom:2,marginBottom:3}}>
+        {cols.map((c,i) => <span key={i} style={{flex:1,color:'#94a3b8',fontWeight:700,fontSize:8}}>{c}</span>)}
+      </div>}
+      {rows.map((row,i) => (
+        <div key={i} style={{display:'flex',gap:0,padding:'2px 0',borderBottom:'1px solid #f1f5f9'}}>
+          {row.map((cell,j) => <span key={j} style={{flex:1,color:j===0?'#374151':'#6b7280'}}>{cell}</span>)}
+        </div>
+      ))}
+    </div>
+  ),
+};
+
+const STAGE_VISUAL_HINTS = {
+  triage: [
+    () => <HV.Board rows={[['HIGH','#22c55e','Statement','"Customer says X is happening"'],['MED','#f59e0b','Evidence','"From ticket: <quote>"'],['LOW','#ef4444','Hypothesis','"Could be caused by Y"']]} />,
+    () => <HV.ConfBars bars={[['Stage 1',15,'no artifacts']]} />,
+    () => <HV.ArtMap rows={[['H1→','agent.log','grep "excluded"'],['H2→','config file','check exclude key']]} />,
+    () => <HV.Contrast bad='"Logs not working"' good='"Container X excluded despite include_containers: [X]"' />,
+  ],
+  investigation: [
+    () => <HV.Diff lines={[[' ','📄 config:  exclude: [A]'],[' ','🖥  runtime: exclude: [A, B?]'],['+',' ↑ gap here?']]} />,
+    () => <HV.Diff lines={[['-','written:  enabled: true'],['+','loaded:   enabled: false'],['+',' ↑ env override?']]} />,
+    () => <HV.Table rows={[['docs/logs/','exclude takes precedence over include']]} cols={['Source','Finding']} />,
+    () => <HV.Board rows={[['LOW→HIGH','#22c55e','H1','agent.log:42: "container excluded by rule"']]} />,
+  ],
+  artefact: [
+    () => <HV.Table cols={['Time','Source','Event']} rows={[['10:42:01','comp-A.log','"filter eval start"'],['10:42:01','comp-B.log','"rule: exclude wins"']]} />,
+    () => <HV.Table cols={['Repo path','Component']} rows={[['pkg/logs/launchers/','launcher.go → shouldCollect()']]} />,
+    () => <HV.Diff lines={[['+',' include_containers → allow-list'],['-',' exclude_containers → deny-list (wins)']]} />,
+    () => <HV.Contrast bad='"The logs are not collected"' good='"launcher.go:87 — exclude wins over include (commit abc1234)"' />,
+  ],
+  reproduction: [
+    () => <HV.Table cols={['Item','Value']} rows={[['component','app-pod (target ns)'],['config','exact customer values'],['flag','LOG_LEVEL=debug']]} />,
+    () => <HV.Contrast bad='✗  logs appear normally' good='✓  symptom present under customer config' />,
+    () => <HV.Diff lines={[['+','LOG_LEVEL=debug'],['+','"Skipping X: excluded by rule" → confirms H1']]} />,
+    () => <HV.Diff lines={[['+','exclude: ["X"]   ← customer'],['+',' include: ["X"]   ← customer'],['−',' (do not change either)']]} />,
+  ],
+  escalation: [
+    () => <HV.Contrast bad='"Logs are not being collected"' good='"exclude_containers wins over include (launcher.go:87)"' />,
+    () => <HV.Table cols={['#','Source','Links']} rows={[['1','agent.log:42','H1 ✓'],['2','launcher.go:87','H1 ✓'],['3','repro','confirmed']]} />,
+    () => <HV.Contrast bad='Unknown' good='Broken: v7.43–7.45 · Fixed: v7.46 (PR #18234)' />,
+    () => <HV.Table cols={['Option','Action']} rows={[['A','Remove X from exclude_containers'],['B','Pin to ≤ v7.42 until fix ships']]} />,
+  ],
+};
 
 /* ── Stage definitions ─────────────────────────────────── */
 const L2_STAGES = [
@@ -1393,12 +1513,23 @@ function App() {
                     {stage.steps && (
                       <div className="checklist">
                         <div className="checklist-label">Checklist</div>
-                        {stage.steps.map((step, i) => (
-                          <div key={i} className="checklist-item">
-                            <span className="checklist-dot" />
-                            <span>{step}</span>
-                          </div>
-                        ))}
+                        {stage.steps.map((step, i) => {
+                          const hintFn = STAGE_VISUAL_HINTS[stage.id] && STAGE_VISUAL_HINTS[stage.id][i];
+                          return (
+                            <div key={i} style={{display:'flex',flexDirection:'column',gap:0,marginBottom:2}}>
+                              <div className="checklist-item" style={{marginBottom:0}}>
+                                <span className="checklist-dot" />
+                                <span>{step}</span>
+                              </div>
+                              {hintFn && (
+                                <details className="hint-toggle">
+                                  <summary>💡 show hint</summary>
+                                  <div className="hint-visual">{hintFn()}</div>
+                                </details>
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
                     )}
 
