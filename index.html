@@ -126,15 +126,22 @@
       width: 5px; height: 5px; border-radius: 999px;
       background: #cbd5e1; flex-shrink: 0; margin-top: 6px;
     }
-    .hint-toggle { margin-left: 13px; margin-top: 3px; }
+    .hint-toggle { margin-top: 0; }
     .hint-toggle summary {
-      font-size: 10px; font-weight: 700; color: #6366f1;
-      background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 4px;
-      cursor: pointer; list-style: none; display: inline-flex;
-      align-items: center; gap: 4px; padding: 2px 8px; user-select: none;
+      display: flex; align-items: flex-start; gap: 8px;
+      font-size: 12px; color: #475569; line-height: 1.5;
+      list-style: none; cursor: pointer; user-select: none;
+      padding: 2px 0; border-radius: 5px;
     }
     .hint-toggle summary::-webkit-details-marker { display: none; }
-    .hint-toggle summary:hover { background: #e0e7ff; }
+    .hint-toggle summary:hover .hint-icon { opacity: 1; }
+    .hint-icon {
+      flex-shrink: 0; margin-left: auto; opacity: 0.35;
+      transition: opacity 0.15s; padding: 2px 4px;
+      border-radius: 4px; margin-top: 2px;
+    }
+    .hint-toggle[open] summary .hint-icon { opacity: 1; color: #6366f1; }
+    .hint-toggle[open] summary .hint-icon svg { stroke: #6366f1; }
     .hint-visual {
       margin-top: 5px; padding: 8px 10px;
       background: #f8fafc; border: 1px solid #e2e8f0;
@@ -1891,16 +1898,21 @@ function App() {
                         {stage.steps.map((step, i) => {
                           const hintFn = STAGE_VISUAL_HINTS[stage.id] && STAGE_VISUAL_HINTS[stage.id][i];
                           return (
-                            <div key={i} style={{display:'flex',flexDirection:'column',gap:0,marginBottom:2}}>
-                              <div className="checklist-item" style={{marginBottom:0}}>
-                                <span className="checklist-dot" />
-                                <span>{step}</span>
-                              </div>
-                              {hintFn && (
+                            <div key={i} style={{marginBottom:4}}>
+                              {hintFn ? (
                                 <details className="hint-toggle">
-                                  <summary><Ic n="Lightbulb" size={11}/> show hint</summary>
+                                  <summary>
+                                    <span className="checklist-dot"/>
+                                    <span style={{flex:1}}>{step}</span>
+                                    <span className="hint-icon"><Ic n="Lightbulb" size={11}/></span>
+                                  </summary>
                                   <div className="hint-visual">{hintFn()}</div>
                                 </details>
+                              ) : (
+                                <div className="checklist-item">
+                                  <span className="checklist-dot"/>
+                                  <span>{step}</span>
+                                </div>
                               )}
                             </div>
                           );
