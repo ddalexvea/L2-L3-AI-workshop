@@ -719,50 +719,50 @@ Log correlation timeline + code evidence table + updated hypothesis confidence %
   {
     id: "reproduction", label: "Reproduction", alias: ";p_s_4",
     color: "#c2410c", bg: "#fff7ed", border: "#fed7aa",
-    steps: ["What exact environment do I need to reproduce this — namespaces, pods, Agent config?", "What would a successful reproduction look like vs. a failed one?", "What debug flag or log line would confirm the issue is happening inside the Agent?", "Am I using the customer's exact config — or have I changed anything?"],
+    steps: ["What exact environment do I need to reproduce this — components, config, runtime?", "What would a successful reproduction look like vs. a failed one?", "What debug flag or log line would confirm the issue is happening inside the product?", "Am I using the customer's exact config — or have I changed anything?"],
     canvasVisual: "timeline — one dot per repro step (rowTone success=pass, danger=fail, neutral=skipped), final row=VERDICT in bold.",
     htmlVisual: "numbered step list — ✓ green=pass, ✗ red=fail per step. VERDICT in large bold at bottom inside green or red bordered box.",
     promptLight: `INSTRUCTIONS:
-Stage 4 — reproduce the issue in minikube:
-1. Present the full deployment plan (namespaces, pods, Agent config, debug flags) and wait for approval
-2. Create namespaces and deploy simulation pods
-3. Deploy the Agent using the exact customer Helm values — do not change any filter setting
+Stage 4 — reproduce the issue in a sandbox environment:
+1. Present the full environment plan (components, config, debug flags) and wait for approval
+2. Set up the environment matching the customer setup
+3. Apply the exact customer config — do not change any setting
 4. Confirm the issue is reproduced
-5. Enable Agent debug logging and capture the filter evaluation output
+5. Enable debug logging and capture the relevant output
 6. Document each step with the exact command and output
 
 REASONING:
-Verify configuration matches customer Helm values exactly before each step. Stop and realign if anything differs.
+Verify configuration matches customer values exactly before each step. Stop and realign if anything differs.
 
 OUTPUT FORMAT:
-Deployment plan + step-by-step reproduction log + debug snippet + pass/fail verdict
+Environment plan + step-by-step reproduction log + debug snippet + pass/fail verdict
 
-[PASTE CUSTOMER HELM VALUES HERE]`,
+[PASTE CUSTOMER CONFIG HERE]`,
     prompt: `CONTEXT:
-Stage 4 — Reproduction. The hypothesis is confirmed by codebase evidence. Reproduce the issue in minikube.
+Stage 4 — Reproduction. The hypothesis is confirmed by codebase evidence. Reproduce the issue in a sandbox environment.
 
 INSTRUCTIONS:
 Before anything else:
-1. Present the full deployment plan (namespaces, pods, Agent config, debug flags) and wait for approval before executing.
+1. Present the full environment plan (components, config, debug flags) and wait for approval before executing.
 
 Then complete in order:
-2. Create namespaces matching the customer environment
-3. Deploy simulation pods that produce logs in the target namespace
-4. Deploy the Datadog Agent using the exact customer Helm values — do not change any filter setting
-5. Confirm the issue is reproduced (logs reaching Datadog despite the exclusion rule)
-6. Enable Agent debug logging and capture the filter evaluation output
+2. Set up the environment matching the customer setup
+3. Deploy the components needed to simulate the customer workload
+4. Apply the exact customer config — do not change any setting
+5. Confirm the issue is reproduced (symptom present under customer config)
+6. Enable debug logging and capture the relevant component output
 7. Document each step with the exact command and output
 
 REASONING:
-Before each step, verify the configuration matches the customer Helm values exactly. If anything differs, stop and realign before continuing.
+Before each step, verify the configuration matches the customer values exactly. If anything differs, stop and realign before continuing.
 
 EXAMPLES:
 "[relevant log line]" → [what it confirms about the hypothesis]
 
 OUTPUT FORMAT:
-Deployment plan (presented first, before execution) + step-by-step reproduction log + debug log snippet confirming the behavior + pass/fail verdict.
+Environment plan (presented first, before execution) + step-by-step reproduction log + debug log snippet confirming the behavior + pass/fail verdict.
 
-[PASTE CUSTOMER HELM VALUES HERE]`,
+[PASTE CUSTOMER CONFIG HERE]`,
   },
   {
     id: "escalation", label: "Escalation", alias: ";p_s_5",
