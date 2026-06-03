@@ -789,6 +789,32 @@ Canvas hard rules — must follow exactly:
 - Pill tone valid values only: "neutral" | "added" | "deleted" | "renamed" | "success" | "warning" | "info"
 - No box-shadow, no gradients, no emoji as decoration, no hardcoded font sizes above 24px.`;
 
+const GAME_ROUTING = `ABSTRACTION GAME — Investigation in disguise 🎮
+
+We are going to play a collaborative investigation game. No technical knowledge needed.
+
+Rules:
+- You are the Game Master. The audience are the investigators.
+- We investigate a mystery together using a metaphor — the same logical structure as a real 5-stage support investigation, but in a different world.
+- The investigation runs in 5 rounds: Kickoff · Clue Gathering · Pattern Recognition · Reproduction · Verdict.
+- In each round: the investigators describe what they observe → you update the shared hypothesis board → you ask one guiding question to move forward.
+
+The mystery (always the same logic):
+"Something that was supposed to be filtered out keeps getting through. There is a rule that should block it — but another rule silently overrides it. The culprit is a priority conflict hidden in the configuration."
+
+Metaphor menu — the audience picks one (or invents their own):
+🚗 Cars and toll gates        🚲 Bicycle repair shop       🚀 Space mission control
+🏠 House plumbing             🍕 Pizza delivery routing    🎸 Recording studio mixing board
+🌊 Harbour and cargo ships    🐝 Beehive and worker bees   🏥 Hospital triage queue
+🎭 Theatre stage directions   🌱 Garden irrigation zones   🚂 Train switching network
+
+Once the audience picks a metaphor, translate the mystery into that world:
+- The "filter rule" becomes a gate, valve, bouncer, channel, etc.
+- The "configuration" becomes the rulebook, settings panel, schedule, map, etc.
+- The "override" becomes whatever silently undoes the intended rule in that world.
+
+Start Round 1 immediately after the metaphor is chosen. Keep it fun, fast, and visual.`;
+
 const HTML_SESSION_ROUTING = `WORKSHOP MODE — HTML file only, no chat output.
 Rules for this session:
 - Write a single self-contained HTML file to ~/Desktop/workshop/stage-N.html (replace N with stage number)
@@ -822,7 +848,7 @@ function App() {
   const [copied, setCopied]               = useState(false);
   const [activeStage, setActiveStage]     = useState(getInitialStage);
   const [copiedStage, setCopiedStage]     = useState(null);
-  const [tool, setTool]                   = useState("cursor"); // "cursor" | "claude"
+  const [tool, setTool]                   = useState("cursor"); // "cursor" | "claude" | "game"
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
 
   function toggleStage(id) {
@@ -922,25 +948,48 @@ function App() {
                 <div className="tool-bar">
                   <button className={`tool-btn${tool === "cursor" ? " active" : ""}`} onClick={() => setTool("cursor")}>⬡ Cursor Canvas</button>
                   <button className={`tool-btn${tool === "claude" ? " active" : ""}`} onClick={() => setTool("claude")}>◈ Claude HTML</button>
+                  <button className={`tool-btn${tool === "game" ? " active" : ""}`} onClick={() => setTool("game")}>🎮 Abstraction Game</button>
                 </div>
               </div>
 
-              <div className="prep-block">
-                <div className="prep-block-label">{tool === "cursor" ? "Cursor Canvas — session routing" : "Claude Code — session routing"}</div>
-                <div className="prep-routing">{tool === "cursor" ? CANVAS_SESSION_ROUTING : HTML_SESSION_ROUTING}</div>
-                <button
-                  className="prep-copy-btn"
-                  onClick={() => {
-                    const text = tool === "cursor" ? CANVAS_SESSION_ROUTING : HTML_SESSION_ROUTING;
-                    navigator.clipboard.writeText(text).then(() => {
-                      setCopiedStage("prep");
-                      setTimeout(() => setCopiedStage(null), 2000);
-                    });
-                  }}
-                >
-                  {copiedStage === "prep" ? "Copied!" : (tool === "cursor" ? "Copy for Cursor" : "Copy for Claude")}
-                </button>
-              </div>
+              {tool === "game" ? (
+                <div className="prep-block">
+                  <div className="prep-block-label">Abstraction Game — metaphor investigation prompt</div>
+                  <p className="prep-hint" style={{ marginTop: 0 }}>
+                    Paste into any AI. The audience picks a metaphor (cars, rockets, pizza…) and the AI runs the 5-stage investigation in that world — no Datadog knowledge needed.
+                  </p>
+                  <div className="prep-routing">{GAME_ROUTING}</div>
+                  <button
+                    className="prep-copy-btn"
+                    style={{ background: "#16a34a" }}
+                    onClick={() => {
+                      navigator.clipboard.writeText(GAME_ROUTING).then(() => {
+                        setCopiedStage("prep");
+                        setTimeout(() => setCopiedStage(null), 2000);
+                      });
+                    }}
+                  >
+                    {copiedStage === "prep" ? "Copied!" : "Copy game prompt"}
+                  </button>
+                </div>
+              ) : (
+                <div className="prep-block">
+                  <div className="prep-block-label">{tool === "cursor" ? "Cursor Canvas — session routing" : "Claude Code — session routing"}</div>
+                  <div className="prep-routing">{tool === "cursor" ? CANVAS_SESSION_ROUTING : HTML_SESSION_ROUTING}</div>
+                  <button
+                    className="prep-copy-btn"
+                    onClick={() => {
+                      const text = tool === "cursor" ? CANVAS_SESSION_ROUTING : HTML_SESSION_ROUTING;
+                      navigator.clipboard.writeText(text).then(() => {
+                        setCopiedStage("prep");
+                        setTimeout(() => setCopiedStage(null), 2000);
+                      });
+                    }}
+                  >
+                    {copiedStage === "prep" ? "Copied!" : (tool === "cursor" ? "Copy for Cursor" : "Copy for Claude")}
+                  </button>
+                </div>
+              )}
             </div>
             <hr className="divider" />
           </>
