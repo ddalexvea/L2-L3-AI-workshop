@@ -760,34 +760,34 @@ const HV = {
 
 const STAGE_VISUAL_HINTS = {
   triage: [
-    () => <HV.Board rows={[['HIGH','#22c55e','Statement','"Customer says X is happening"'],['MED','#f59e0b','Evidence','"From ticket: <quote>"'],['LOW','#ef4444','Hypothesis','"Could be caused by Y"']]} />,
-    () => <HV.ConfBars bars={[['Stage 1',15,'no artifacts']]} />,
-    () => <HV.ArtMap rows={[['H1→','agent.log','grep "excluded"'],['H2→','config file','check exclude key']]} />,
-    () => <HV.Contrast bad='"Logs not working"' good='"Container X excluded despite include_containers: [X]"' />,
+    () => <HV.Board rows={[['HIGH','#22c55e','Statement','"Customer reports X is happening"'],['MED','#f59e0b','Evidence','"From ticket: <direct quote>"'],['LOW','#ef4444','Hypothesis','"Could be caused by Y"']]} />,
+    () => <HV.ConfBars bars={[['Stage 1',15,'no artifacts yet']]} />,
+    () => <HV.ArtMap rows={[['H1→','app.log','confirms/refutes H1'],['H2→','config file','check rule setting']]} />,
+    () => <HV.Contrast bad='"Feature X not working"' good='"Rule Y excludes item Z despite include setting"' />,
   ],
   investigation: [
-    () => <HV.Diff lines={[[' ','📄 config:  exclude: [A]'],[' ','🖥  runtime: exclude: [A, B?]'],['+',' ↑ gap here?']]} />,
-    () => <HV.Diff lines={[['-','written:  enabled: true'],['+','loaded:   enabled: false'],['+',' ↑ env override?']]} />,
-    () => <HV.Table rows={[['docs/logs/','exclude takes precedence over include']]} cols={['Source','Finding']} />,
-    () => <HV.Board rows={[['LOW→HIGH','#22c55e','H1','agent.log:42: "container excluded by rule"']]} />,
+    () => <HV.Diff lines={[[' ','📄 config:   rule: [A]'],[' ','🖥  runtime:  rule: [A, B?]'],['+',' ↑ gap here?']]} />,
+    () => <HV.Diff lines={[['-','written:  setting: true'],['+','loaded:   setting: false'],['+',' ↑ env override?']]} />,
+    () => <HV.Table rows={[['official docs','"rule B takes precedence over rule A"']]} cols={['Source','Finding']} />,
+    () => <HV.Board rows={[['LOW→HIGH','#22c55e','H1','app.log:42: "item excluded by rule" (direct quote)']]} />,
   ],
   artefact: [
-    () => <HV.Table cols={['Time','Source','Event']} rows={[['10:42:01','comp-A.log','"filter eval start"'],['10:42:01','comp-B.log','"rule: exclude wins"']]} />,
-    () => <HV.Table cols={['Repo path','Component']} rows={[['pkg/logs/launchers/','launcher.go → shouldCollect()']]} />,
-    () => <HV.Diff lines={[['+',' include_containers → allow-list'],['-',' exclude_containers → deny-list (wins)']]} />,
-    () => <HV.Contrast bad='"The logs are not collected"' good='"launcher.go:87 — exclude wins over include (commit abc1234)"' />,
+    () => <HV.Table cols={['Time','Source','Event']} rows={[['10:42:01','component-A.log','"filter eval start"'],['10:42:01','component-B.log','"rule: B wins over A"']]} />,
+    () => <HV.Table cols={['Repo path','Component']} rows={[['pkg/pipeline/filter/','filter.go → shouldProcess()']]} />,
+    () => <HV.Diff lines={[['+',' rule A → allow-list'],['-',' rule B → deny-list (wins)']]} />,
+    () => <HV.Contrast bad='"The feature is not working"' good='"filter.go:87 — rule B wins over A (commit abc1234)"' />,
   ],
   reproduction: [
-    () => <HV.Table cols={['Item','Value']} rows={[['component','app-pod (target ns)'],['config','exact customer values'],['flag','LOG_LEVEL=debug']]} />,
-    () => <HV.Contrast bad='✗  logs appear normally' good='✓  symptom present under customer config' />,
-    () => <HV.Diff lines={[['+','LOG_LEVEL=debug'],['+','"Skipping X: excluded by rule" → confirms H1']]} />,
-    () => <HV.Diff lines={[['+','exclude: ["X"]   ← customer'],['+',' include: ["X"]   ← customer'],['−',' (do not change either)']]} />,
+    () => <HV.Table cols={['Item','Value']} rows={[['component','target service'],['config','exact customer values'],['flag','LOG_LEVEL=debug']]} />,
+    () => <HV.Contrast bad='✗  feature works normally' good='✓  symptom present under exact customer config' />,
+    () => <HV.Diff lines={[['+','LOG_LEVEL=debug'],['+','"Skipping item X: rule B applied" → confirms H1']]} />,
+    () => <HV.Diff lines={[['+',' rule_B: ["X"]  ← from customer'],['+',' rule_A: ["X"]  ← from customer'],['−',' (do not change either value)']]} />,
   ],
   escalation: [
-    () => <HV.Contrast bad='"Logs are not being collected"' good='"exclude_containers wins over include (launcher.go:87)"' />,
-    () => <HV.Table cols={['#','Source','Links']} rows={[['1','agent.log:42','H1 ✓'],['2','launcher.go:87','H1 ✓'],['3','repro','confirmed']]} />,
-    () => <HV.Contrast bad='Unknown' good='Broken: v7.43–7.45 · Fixed: v7.46 (PR #18234)' />,
-    () => <HV.Table cols={['Option','Action']} rows={[['A','Remove X from exclude_containers'],['B','Pin to ≤ v7.42 until fix ships']]} />,
+    () => <HV.Contrast bad='"The feature is broken"' good='"filter.go:87 — rule B overrides rule A, silently dropping item X"' />,
+    () => <HV.Table cols={['#','Source','Links']} rows={[['1','app.log:42','H1 ✓'],['2','filter.go:87','H1 ✓'],['3','repro','confirmed']]} />,
+    () => <HV.Contrast bad='Unknown' good='Broken: v1.2–v1.4 · Fixed: v1.5 (PR #1234)' />,
+    () => <HV.Table cols={['Option','Action']} rows={[['A','Remove X from rule_B config'],['B','Pin to ≤ v1.1 until fix ships']]} />,
   ],
 };
 
@@ -1565,7 +1565,7 @@ function App() {
 
                     {/* Checklist */}
                     {stage.steps && (
-                      <div className="checklist">
+                      <div className="checklist" key={stage.id}>
                         <div className="checklist-label">Checklist</div>
                         {stage.steps.map((step, i) => {
                           const hintFn = STAGE_VISUAL_HINTS[stage.id] && STAGE_VISUAL_HINTS[stage.id][i];
