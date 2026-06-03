@@ -17,7 +17,106 @@
       padding: 32px 24px;
     }
 
-    .app { max-width: 820px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+    .app { max-width: 980px; margin: 0 auto; display: flex; flex-direction: row; align-items: flex-start; }
+
+    /* Sidebar */
+    .sidebar {
+      width: 148px; flex-shrink: 0;
+      display: flex; flex-direction: column; gap: 2px;
+      padding: 0 10px 32px 0;
+      position: sticky; top: 32px;
+    }
+    .sidebar-header {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; color: #94a3b8;
+      padding: 2px 12px 10px 12px;
+    }
+    .sidebar-stage {
+      cursor: pointer; display: flex; align-items: center; gap: 8px;
+      padding: 7px 12px; border: none; background: transparent;
+      border-radius: 6px; text-align: left; width: 100%;
+      transition: background 0.12s; border-left: 3px solid transparent;
+    }
+    .sidebar-stage:hover { background: #f1f5f9; }
+    .sidebar-stage.active { background: #eff6ff; border-left-color: #2563eb; }
+    .sidebar-num {
+      width: 20px; height: 20px; border-radius: 999px;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 700; flex-shrink: 0;
+      background: #e2e8f0; color: #64748b;
+      transition: background 0.12s, color 0.12s;
+    }
+    .sidebar-stage.active .sidebar-num { background: #2563eb; color: #fff; }
+    .sidebar-label {
+      font-size: 12px; font-weight: 500; color: #64748b; line-height: 1.3;
+    }
+    .sidebar-stage.active .sidebar-label { color: #1d4ed8; font-weight: 600; }
+
+    /* Main area */
+    .main {
+      flex: 1; min-width: 0; padding-left: 20px;
+      border-left: 1px solid #e2e8f0;
+      display: flex; flex-direction: column; gap: 16px;
+    }
+
+    /* Stage checklist */
+    .checklist {
+      display: flex; flex-direction: column; gap: 5px;
+      padding: 10px 14px;
+      background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;
+    }
+    .checklist-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
+      text-transform: uppercase; color: #94a3b8; margin-bottom: 2px;
+    }
+    .checklist-item {
+      display: flex; align-items: flex-start; gap: 8px;
+      font-size: 12px; color: #475569; line-height: 1.5;
+    }
+    .checklist-dot {
+      width: 5px; height: 5px; border-radius: 999px;
+      background: #cbd5e1; flex-shrink: 0; margin-top: 6px;
+    }
+
+    /* Attachments */
+    .attach-section { display: flex; flex-direction: column; gap: 6px; }
+    .attach-section-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
+      text-transform: uppercase; color: #94a3b8;
+    }
+    .attach-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .attach-item {
+      flex: 1; min-width: 220px;
+      border: 1px solid #d0d7de; border-radius: 8px;
+      background: #fff; overflow: hidden;
+    }
+    .attach-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 6px 10px; background: #f1f5f9;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .attach-filename {
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 11px; font-weight: 600; color: #1f2328;
+    }
+    .attach-tag {
+      font-size: 9px; font-weight: 700; letter-spacing: 0.05em;
+      text-transform: uppercase; padding: 1px 6px; border-radius: 999px;
+    }
+    .attach-tag-helm    { background: #ede9fe; color: #6d28d9; }
+    .attach-tag-runtime { background: #fef9c3; color: #854d0e; }
+    .attach-copy-btn {
+      cursor: pointer; background: #fff;
+      border: 1px solid #d0d7de; border-radius: 4px;
+      padding: 2px 8px; font-size: 10px; font-weight: 600; color: #475569;
+    }
+    .attach-copy-btn:hover { background: #f8fafc; }
+    .attach-body {
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 11px; line-height: 1.6; padding: 10px 12px;
+      color: #1f2328; white-space: pre; overflow-x: auto;
+      max-height: 160px; overflow-y: auto;
+    }
     .row { display: flex; flex-direction: row; align-items: center; }
     .wrap { flex-wrap: wrap; }
     .spacer { flex: 1; }
@@ -289,6 +388,7 @@ const L2_STAGES = [
   {
     id: "triage", label: "Kickoff", alias: ";p_s_1",
     color: "#2563eb", bg: "#eff6ff", border: "#bfdbfe",
+    steps: ["Restate the problem in one sentence", "Classify the issue type", "Assign trust levels to each element", "Identify missing artefacts", "Propose hypotheses with confidence %"],
     canvasVisual: "heatmap — rows=hypotheses, cols=artifacts needed, filled dot=confirmed, empty=needed. All dots start empty.",
     htmlVisual: "heatmap grid table — rows=hypotheses, cols=artifacts. Green cell ●=confirmed, gray cell ○=needed.",
     promptLight: `Restate the customer problem in one sentence.
@@ -329,6 +429,7 @@ OUTPUT FORMAT:
   {
     id: "investigation", label: "Investigation", alias: ";p_s_2",
     color: "#15803d", bg: "#f0fdf4", border: "#bbf7d0",
+    steps: ["Config written vs config loaded", "Check Datadog docs for known settings", "Update trust and confidence per finding", "Search similar past tickets", "Check Jira for known bugs"],
     canvasVisual: "evidence tracker — rows=findings, columns=[Artifact, Quote, Trust before, Trust after, H impact]. rowTone: success=upgraded, danger=refuted, neutral=unchanged.",
     htmlVisual: "evidence table — green row=trust upgraded, red row=refuted, gray=unchanged. Columns: Artifact | Quote | Trust Before | Trust After | H Impact.",
     promptLight: `Review the attached artifacts.
@@ -361,6 +462,7 @@ Updated elements table + evidence table + updated hypothesis confidence % + one 
   {
     id: "artefact", label: "Artefact Correlation", alias: ";p_s_3",
     color: "#6d28d9", bg: "#faf5ff", border: "#ddd6fe",
+    steps: ["Cross-reference findings across logs, config, and code", "Find the component or parameter responsible", "Trace when/where behavior diverges from expectation", "Check release notes or changelogs for the relevant version", "Update hypothesis with direct evidence — source + line required"],
     canvasVisual: "diff view — DiffView of buggy vs fixed lines with file path in CardHeader and DiffStats in trailing slot, one card per file.",
     htmlVisual: "two-column diff — left=buggy config (red highlight on changed lines), right=fixed (green highlight). File path as section header.",
     promptLight: `Search the datadog-agent GitHub repo for the code that implements the relevant behavior.
@@ -391,6 +493,7 @@ Code evidence table + updated hypothesis confidence % (expected 70-95%) + one-li
   {
     id: "reproduction", label: "Reproduction", alias: ";p_s_4",
     color: "#c2410c", bg: "#fff7ed", border: "#fed7aa",
+    steps: ["Clean environment (remove pods, keep secrets)", "Present deployment plan and wait for approval", "Deploy sandbox matching customer environment", "Confirm reproduction and capture supporting evidence", "Document every command and output"],
     canvasVisual: "timeline — one dot per repro step (rowTone success=pass, danger=fail, neutral=skipped), final row=VERDICT in bold.",
     htmlVisual: "numbered step list — ✓ green=pass, ✗ red=fail per step. VERDICT in large bold at bottom inside green or red bordered box.",
     promptLight: `Reproduce this issue in minikube using the customer's exact configuration.
@@ -425,6 +528,7 @@ Deployment plan (presented first, before execution) + step-by-step reproduction 
   {
     id: "escalation", label: "Escalation", alias: ";p_s_5",
     color: "#0f766e", bg: "#f0fdfa", border: "#99f6e4",
+    steps: ["Check for an existing Jira card — bug or feature request", "Identify gaps and unknowns before escalating", "Summarize observed behavior, scope, expected vs actual", "Attach all evidence with source references", "Share detailed reproduction steps — environment, commands, output"],
     canvasVisual: "summary — Root Cause (danger Callout) + Affected versions (Stat cards) + Workaround (success Callout) side by side, evidence table with file:line citations below.",
     htmlVisual: "three side-by-side boxes: Root Cause (red border), Versions (gray border), Workaround (green border). Evidence table with file:line citations below.",
     promptLight: `State the root cause in one sentence.
@@ -598,6 +702,72 @@ function getInitialStage() {
   return null;
 }
 
+/* ── Stage attachments ─────────────────────────────────── */
+const STAGE_ATTACHMENTS = {
+  investigation: [
+    {
+      id: "helm", filename: "repro-values.yaml", tag: "helm", tagClass: "attach-tag-helm",
+      content: `datadog:
+  apiKeyExistingSecret: datadog-secret
+  site: datadoghq.com
+  clusterName: minikube-repro
+
+  containerExclude: "kube_namespace:.*"
+  containerInclude: "kube_namespace:ig1 kube_namespace:ncc-operators"
+  containerExcludeLogs: "name:^istio-proxy$"
+
+  logs:
+    enabled: true
+    containerCollectAll: true
+
+  kubelet:
+    tlsVerify: false
+
+  tags:
+    - "env:repro"
+
+agents:
+  image:
+    tag: "7.71.2"
+  containers:
+    agent:
+      resources:
+        requests:
+          cpu: 200m
+          memory: 256Mi
+        limits:
+          cpu: 500m
+          memory: 512Mi
+
+clusterAgent:
+  enabled: false
+
+clusterChecksRunner:
+  enabled: false`,
+    },
+    {
+      id: "runtime", filename: "runtime_config_dump.yaml", tag: "runtime", tagClass: "attach-tag-runtime",
+      content: `# Container filter settings (runtime_config_dump.yaml excerpt)
+ac_exclude: []
+ac_include: []
+
+container_exclude:
+  - kube_namespace:.*
+container_exclude_logs:
+  - name:^istio-proxy$
+container_exclude_metrics: []
+
+container_include:
+  - kube_namespace:ig1
+  - kube_namespace:ncc-operators
+container_include_logs: []
+
+logs_config:
+  container_collect_all: true`,
+    },
+  ],
+};
+
 /* ── Workshop routing blocks ──────────────────────────── */
 function canvasRoutingBlock(stageNum) {
   return `WORKSHOP MODE — canvas only, no chat output.
@@ -716,192 +886,223 @@ function App() {
 
   const totalTags = Object.values(tags).flat().length;
 
+  const activeStageObj = STAGES.find(s => s.id === activeStage) ?? null;
+
   return (
     <div className="app">
 
-      {/* ── Header ── */}
-      <div className="row" style={{ gap: 10 }}>
-        <span className="mode-label">L2 — Technical Ticket Annotation</span>
+      {/* ── Left sidebar ── */}
+      <div className="sidebar">
+        <div className="sidebar-header">L2</div>
+        {STAGES.map((stage, i) => (
+          <button
+            key={stage.id}
+            className={`sidebar-stage${activeStage === stage.id ? " active" : ""}`}
+            onClick={() => toggleStage(stage.id)}
+          >
+            <span className="sidebar-num">{i + 1}</span>
+            <span className="sidebar-label">{stage.label}</span>
+          </button>
+        ))}
       </div>
 
-      {/* ── Editing panel ── */}
-      {editing ? (
-        <>
-          <textarea
-            className="paste-area"
-            value={raw}
-            onChange={e => setRaw(e.target.value)}
-            placeholder="Paste the customer message here…"
-          />
-          <div className="row" style={{ gap: 8 }}>
-            <button className="btn btn-primary" onClick={loadMessage}>Load message</button>
-            <button className="btn btn-ghost" onClick={() => setEditing(false)}>Cancel</button>
+      {/* ── Main area ── */}
+      <div className="main">
+
+        {/* Tool toggle */}
+        <div className="row" style={{ gap: 10 }}>
+          <div className="tool-bar">
+            <button className={`tool-btn${tool === "cursor" ? " active" : ""}`} onClick={() => setTool("cursor")}>⬡ Cursor Canvas</button>
+            <button className={`tool-btn${tool === "claude" ? " active" : ""}`} onClick={() => setTool("claude")}>◈ Claude HTML</button>
           </div>
-        </>
-      ) : (
-        <>
-          {/* Palette */}
-          <div className="row wrap" style={{ gap: 8 }}>
-            {paletteOpen && ELEMENTS.map(el => (
-              <div
-                key={el.id}
-                className={`pill-drag${dragging === el.id ? " dragging" : ""}`}
-                draggable
-                onDragStart={() => setDragging(el.id)}
-                onDragEnd={() => { setDragging(null); setOver(null); }}
-              >
-                <span className={`pill pill-${el.tone}`}>{el.label}</span>
-              </div>
-            ))}
-            <div className="spacer" />
-            {totalTags > 0 && (
-              <span className="count-badge">{totalTags} label{totalTags !== 1 ? "s" : ""}</span>
-            )}
-            <button className="toggle-btn" onClick={() => setPaletteOpen(p => !p)}>
-              {paletteOpen ? "Hide labels" : "Show labels"}
-            </button>
-            <button className="toggle-btn" onClick={() => setEditing(true)}>Change message</button>
-            {totalTags > 0 && (
-              <button className="btn btn-primary" style={{ fontSize: 12, padding: "4px 12px" }} onClick={handleGenerate}>
-                Generate prompt block
-              </button>
-            )}
-          </div>
+          <span className="tool-hint">Complete prompts include {tool === "cursor" ? "Cursor canvas routing" : "Claude HTML routing"}</span>
+        </div>
 
-          <hr className="divider" />
-          <span className="section-label">Customer Message</span>
-
-          {/* Drop zones */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-            {lines.map(line => {
-              const lineTags = tags[line.id] ?? [];
-              const isOver   = over === line.id;
-              const topEl    = lineTags[0] ? ELEMENTS.find(e => e.id === lineTags[0].elementId) : null;
-              const toneClass = topEl && !isOver ? `has-${topEl.tone}` : "";
-
-              return (
-                <div
-                  key={line.id}
-                  className={`msg-line${isOver ? " drag-over" : ""}${toneClass ? " " + toneClass : ""}`}
-                  onDragOver={e => { e.preventDefault(); setOver(line.id); }}
-                  onDragLeave={() => setOver(null)}
-                  onDrop={() => onDrop(line.id)}
-                >
-                  {line.type === "text" && (
-                    <p className="text-sm">{renderInline(line.text)}</p>
-                  )}
-                  {line.type === "code" && <ConfigRows rows={line.rows} />}
-                  {line.type === "intro-code" && (
-                    <>
-                      <p className="text-sm" style={{ marginBottom: 4 }}>{renderInline(line.intro)}</p>
-                      <ConfigRows rows={line.rows} />
-                    </>
-                  )}
-                  {lineTags.length > 0 && (
-                    <div className="tags-row">
-                      {lineTags.map(tag => {
-                        const el = ELEMENTS.find(e => e.id === tag.elementId);
-                        if (!el) return null;
-                        return (
-                          <span
-                            key={tag.uid}
-                            className={`pill pill-${el.tone} tag-chip`}
-                            title="Click to remove"
-                            onClick={() => removeTag(line.id, tag.uid)}
-                          >
-                            {el.label} ×
-                          </span>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-
-          {/* ── Stage buttons + panels ── */}
-          <hr className="divider" />
-          <div className="row" style={{ gap: 10, marginBottom: 6 }}>
-            <div className="tool-bar">
-              <button className={`tool-btn${tool === "cursor" ? " active" : ""}`} onClick={() => setTool("cursor")}>⬡ Cursor Canvas</button>
-              <button className={`tool-btn${tool === "claude" ? " active" : ""}`} onClick={() => setTool("claude")}>◈ Claude HTML</button>
+        {/* Editing || Content */}
+        {editing ? (
+          <>
+            <textarea
+              className="paste-area"
+              value={raw}
+              onChange={e => setRaw(e.target.value)}
+              placeholder="Paste the customer message here…"
+            />
+            <div className="row" style={{ gap: 8 }}>
+              <button className="btn btn-primary" onClick={loadMessage}>Load message</button>
+              <button className="btn btn-ghost" onClick={() => setEditing(false)}>Cancel</button>
             </div>
-            <span className="tool-hint">Complete prompts include {tool === "cursor" ? "Cursor canvas routing" : "Claude HTML routing"}</span>
-          </div>
-          <div className="stage-bar">
-            {STAGES.map((stage, i) => (
-              <button
-                key={stage.id}
-                className={`stage-btn${activeStage === stage.id ? " active" : ""}`}
-                onClick={() => toggleStage(stage.id)}
-              >
-                <span className="stage-num">{i + 1}</span>
-                {stage.label}
+          </>
+        ) : (
+          <>
+            {/* Palette */}
+            <div className="row wrap" style={{ gap: 8 }}>
+              {paletteOpen && ELEMENTS.map(el => (
+                <div
+                  key={el.id}
+                  className={`pill-drag${dragging === el.id ? " dragging" : ""}`}
+                  draggable
+                  onDragStart={() => setDragging(el.id)}
+                  onDragEnd={() => { setDragging(null); setOver(null); }}
+                >
+                  <span className={`pill pill-${el.tone}`}>{el.label}</span>
+                </div>
+              ))}
+              <div className="spacer" />
+              {totalTags > 0 && (
+                <span className="count-badge">{totalTags} label{totalTags !== 1 ? "s" : ""}</span>
+              )}
+              <button className="toggle-btn" onClick={() => setPaletteOpen(p => !p)}>
+                {paletteOpen ? "Hide labels" : "Show labels"}
               </button>
-            ))}
-          </div>
+              <button className="toggle-btn" onClick={() => setEditing(true)}>Change message</button>
+              {totalTags > 0 && (
+                <button className="btn btn-primary" style={{ fontSize: 12, padding: "4px 12px" }} onClick={handleGenerate}>
+                  Generate prompt block
+                </button>
+              )}
+            </div>
 
-          {STAGES.map(stage => (
-              <div key={stage.id} className={`stage-panel${activeStage === stage.id ? " open" : ""}`}>
-                <div className="stage-panel-inner">
-                  <div className="stage-title">
-                    Stage {STAGES.indexOf(stage) + 1} — {stage.label}
-                  </div>
-                  {stage.promptLight && (
-                    <details className="light-details">
-                      <summary className="light-summary">Light version <span className="light-hint">(expand)</span></summary>
-                      <div className="stage-prompt-wrap" style={{ marginTop: 8 }}>
-                        <pre className="stage-prompt">{stage.promptLight}</pre>
-                        <button
-                          className="stage-copy-btn"
-                          onClick={() => { navigator.clipboard.writeText(stage.promptLight); setCopiedStage(stage.id + "_light"); setTimeout(() => setCopiedStage(null), 2000); }}
-                        >
-                          {copiedStage === stage.id + "_light" ? "Copied!" : "Copy"}
-                        </button>
-                      </div>
-                    </details>
-                  )}
-                  {stage.promptLight && (
-                    <div className="prompt-version-label">
-                      Complete version — {tool === "cursor" ? "Cursor Canvas" : "Claude HTML"}
-                    </div>
-                  )}
-                  <div className="stage-prompt-wrap">
-                    <pre className="stage-prompt">{renderPrompt(stage.prompt)}</pre>
-                    <button className="stage-copy-btn" onClick={() => copyPrompt(stage)}>
-                      {copiedStage === stage.id ? "Copied!" : "Copy"}
-                    </button>
-                  </div>
-                </div>
-              </div>
-          ))}
+            <hr className="divider" />
+            <span className="section-label">Customer Message</span>
 
-          {/* Prompt block output */}
-          {promptBlock && (
-            <>
-              <hr className="divider" />
-              <div className="prompt-panel">
-                <div className="prompt-panel-header">
-                  <span className="prompt-panel-title">Annotated prompt block</span>
-                  <div className="spacer" />
-                  <button
-                    className="btn btn-ghost"
-                    style={{ fontSize: 12, padding: "4px 12px", marginLeft: 8 }}
-                    onClick={() => handleCopyPrompt(promptBlock)}
+            {/* Drop zones */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+              {lines.map(line => {
+                const lineTags = tags[line.id] ?? [];
+                const isOver   = over === line.id;
+                const topEl    = lineTags[0] ? ELEMENTS.find(e => e.id === lineTags[0].elementId) : null;
+                const toneClass = topEl && !isOver ? `has-${topEl.tone}` : "";
+                return (
+                  <div
+                    key={line.id}
+                    className={`msg-line${isOver ? " drag-over" : ""}${toneClass ? " " + toneClass : ""}`}
+                    onDragOver={e => { e.preventDefault(); setOver(line.id); }}
+                    onDragLeave={() => setOver(null)}
+                    onDrop={() => onDrop(line.id)}
                   >
-                    {copied ? "Copied!" : "Copy"}
-                  </button>
-                  <button className="toggle-btn" style={{ marginLeft: 4 }} onClick={() => setPromptBlock(null)}>
-                    ✕
-                  </button>
+                    {line.type === "text" && <p className="text-sm">{renderInline(line.text)}</p>}
+                    {line.type === "code" && <ConfigRows rows={line.rows} />}
+                    {line.type === "intro-code" && (
+                      <>
+                        <p className="text-sm" style={{ marginBottom: 4 }}>{renderInline(line.intro)}</p>
+                        <ConfigRows rows={line.rows} />
+                      </>
+                    )}
+                    {lineTags.length > 0 && (
+                      <div className="tags-row">
+                        {lineTags.map(tag => {
+                          const el = ELEMENTS.find(e => e.id === tag.elementId);
+                          if (!el) return null;
+                          return (
+                            <span key={tag.uid} className={`pill pill-${el.tone} tag-chip`} title="Click to remove" onClick={() => removeTag(line.id, tag.uid)}>
+                              {el.label} ×
+                            </span>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* ── Active stage content ── */}
+            {activeStageObj && (() => {
+              const stage = activeStageObj;
+              const stageIndex = STAGES.indexOf(stage);
+              const atts = STAGE_ATTACHMENTS[stage.id];
+              return (
+                <>
+                  <hr className="divider" />
+                  <div className="stage-panel-inner">
+                    <div className="stage-title">
+                      Stage {stageIndex + 1} — {stage.label}
+                    </div>
+
+                    {/* Checklist */}
+                    {stage.steps && (
+                      <div className="checklist">
+                        <div className="checklist-label">Checklist</div>
+                        {stage.steps.map((step, i) => (
+                          <div key={i} className="checklist-item">
+                            <span className="checklist-dot" />
+                            <span>{step}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Attachments */}
+                    {atts && (
+                      <div className="attach-section">
+                        <div className="attach-section-label">Attachments</div>
+                        <div className="attach-row">
+                          {atts.map(att => (
+                            <div key={att.id} className="attach-item">
+                              <div className="attach-header">
+                                <span className="attach-filename">{att.filename}</span>
+                                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                                  <span className={`attach-tag ${att.tagClass}`}>{att.tag}</span>
+                                  <button className="attach-copy-btn" onClick={() => { navigator.clipboard.writeText(att.content); setCopiedStage("att_" + att.id); setTimeout(() => setCopiedStage(null), 2000); }}>
+                                    {copiedStage === "att_" + att.id ? "Copied!" : "Copy"}
+                                  </button>
+                                </div>
+                              </div>
+                              <pre className="attach-body">{att.content}</pre>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Prompts */}
+                    {stage.promptLight && (
+                      <details className="light-details">
+                        <summary className="light-summary">Light version <span className="light-hint">(expand)</span></summary>
+                        <div className="stage-prompt-wrap" style={{ marginTop: 8 }}>
+                          <pre className="stage-prompt">{stage.promptLight}</pre>
+                          <button className="stage-copy-btn" onClick={() => { navigator.clipboard.writeText(stage.promptLight); setCopiedStage(stage.id + "_light"); setTimeout(() => setCopiedStage(null), 2000); }}>
+                            {copiedStage === stage.id + "_light" ? "Copied!" : "Copy"}
+                          </button>
+                        </div>
+                      </details>
+                    )}
+                    {stage.promptLight && (
+                      <div className="prompt-version-label">
+                        Complete version — {tool === "cursor" ? "Cursor Canvas" : "Claude HTML"}
+                      </div>
+                    )}
+                    <div className="stage-prompt-wrap">
+                      <pre className="stage-prompt">{renderPrompt(stage.prompt)}</pre>
+                      <button className="stage-copy-btn" onClick={() => copyPrompt(stage)}>
+                        {copiedStage === stage.id ? "Copied!" : "Copy"}
+                      </button>
+                    </div>
+                  </div>
+                </>
+              );
+            })()}
+
+            {/* Prompt block output */}
+            {promptBlock && (
+              <>
+                <hr className="divider" />
+                <div className="prompt-panel">
+                  <div className="prompt-panel-header">
+                    <span className="prompt-panel-title">Annotated prompt block</span>
+                    <div className="spacer" />
+                    <button className="btn btn-ghost" style={{ fontSize: 12, padding: "4px 12px", marginLeft: 8 }} onClick={() => handleCopyPrompt(promptBlock)}>
+                      {copied ? "Copied!" : "Copy"}
+                    </button>
+                    <button className="toggle-btn" style={{ marginLeft: 4 }} onClick={() => setPromptBlock(null)}>✕</button>
+                  </div>
+                  <pre className="prompt-output">{promptBlock}</pre>
                 </div>
-                <pre className="prompt-output">{promptBlock}</pre>
-              </div>
-            </>
-          )}
-        </>
-      )}
+              </>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 }
