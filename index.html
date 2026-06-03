@@ -1001,16 +1001,16 @@ Environment plan (presented first, before execution) + step-by-step reproduction
     promptLight: `INSTRUCTIONS:
 Stage 5 — prepare the escalation package:
 1. State the root cause in one technical sentence
-2. List all evidence with artifact references (file + line, flare file, or screenshot)
+2. List all evidence with artifact references (file + line, diagnostic artifact, or screenshot)
 3. State affected versions — confirmed broken and confirmed fixed
 4. Propose a workaround the customer can apply today
-5. Draft the Jira escalation — summary, reproduction steps, expected vs actual, evidence, versions, workaround
+5. Draft the escalation ticket — summary, reproduction steps, expected vs actual, evidence, versions, workaround
 
 REASONING:
 Every claim must cite a specific artifact. No claim without direct evidence.
 
 OUTPUT FORMAT:
-Root cause / evidence table / affected versions / workaround / Jira draft
+Root cause / evidence table / affected versions / workaround / escalation draft
 
 [CUSTOMER ISSUE — paste original customer message]
 [INVESTIGATION — paste Stage 1–4 findings]`,
@@ -1020,10 +1020,10 @@ Stage 5 — Escalation. Reproduction confirmed the bug. Prepare the escalation p
 INSTRUCTIONS:
 Complete in order:
 1. State the root cause in one technical sentence
-2. List all evidence with artifact references (file + line, flare file, or screenshot)
+2. List all evidence with artifact references (file + line, diagnostic artifact, or screenshot)
 3. State affected versions (confirmed broken + confirmed fixed)
 4. Propose a workaround the customer can apply today
-5. Draft a Jira escalation with: summary, reproduction steps, expected vs actual behavior, evidence references, affected versions, workaround
+5. Draft an escalation ticket with: summary, reproduction steps, expected vs actual behavior, evidence references, affected versions, workaround
 
 REASONING:
 For each claim in the escalation, cite a specific artifact. No claim without direct evidence.
@@ -1035,7 +1035,7 @@ EXAMPLES:
 - Workaround: [actionable step the customer can take today]
 
 OUTPUT FORMAT:
-Root cause / evidence table / affected versions / workaround / Jira draft.
+Root cause / evidence table / affected versions / workaround / escalation draft.
 
 [CUSTOMER ISSUE DESCRIPTION — paste original customer message]
 [CONCERN / ISSUE — paste Stage 1 elements table and hypotheses]
