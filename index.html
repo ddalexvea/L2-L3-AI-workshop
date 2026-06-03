@@ -147,19 +147,19 @@
       font-size: 9px; font-weight: 700; letter-spacing: 0.05em;
       text-transform: uppercase; padding: 1px 6px; border-radius: 999px;
     }
-    .attach-tag-helm    { background: #ede9fe; color: #6d28d9; }
-    .attach-tag-runtime { background: #fef9c3; color: #854d0e; }
-    .attach-copy-btn {
-      cursor: pointer; background: #fff;
-      border: 1px solid #d0d7de; border-radius: 4px;
-      padding: 2px 8px; font-size: 10px; font-weight: 600; color: #475569;
+    .attach-tag-helm  { background: #ede9fe; color: #6d28d9; }
+    .attach-tag-flare { background: #dbeafe; color: #1d4ed8; }
+    .attach-dl-btn {
+      cursor: pointer; background: #1f2328; color: #fff;
+      border: none; border-radius: 4px;
+      padding: 3px 10px; font-size: 10px; font-weight: 700;
+      text-decoration: none; display: inline-flex; align-items: center; gap: 4px;
+      transition: background 0.12s;
     }
-    .attach-copy-btn:hover { background: #f8fafc; }
-    .attach-body {
-      font-family: "SFMono-Regular", Consolas, monospace;
-      font-size: 11px; line-height: 1.6; padding: 10px 12px;
-      color: #1f2328; white-space: pre; overflow-x: auto;
-      max-height: 160px; overflow-y: auto;
+    .attach-dl-btn:hover { background: #32383f; }
+    .attach-desc {
+      font-size: 11px; color: #64748b; padding: 8px 10px;
+      line-height: 1.4;
     }
     .row { display: flex; flex-direction: row; align-items: center; }
     .wrap { flex-wrap: wrap; }
@@ -751,63 +751,11 @@ const STAGE_ATTACHMENTS = {
   investigation: [
     {
       id: "helm", filename: "repro-values.yaml", tag: "helm", tagClass: "attach-tag-helm",
-      content: `datadog:
-  apiKeyExistingSecret: datadog-secret
-  site: datadoghq.com
-  clusterName: minikube-repro
-
-  containerExclude: "kube_namespace:.*"
-  containerInclude: "kube_namespace:ig1 kube_namespace:ncc-operators"
-  containerExcludeLogs: "name:^istio-proxy$"
-
-  logs:
-    enabled: true
-    containerCollectAll: true
-
-  kubelet:
-    tlsVerify: false
-
-  tags:
-    - "env:repro"
-
-agents:
-  image:
-    tag: "7.71.2"
-  containers:
-    agent:
-      resources:
-        requests:
-          cpu: 200m
-          memory: 256Mi
-        limits:
-          cpu: 500m
-          memory: 512Mi
-
-clusterAgent:
-  enabled: false
-
-clusterChecksRunner:
-  enabled: false`,
+      href: "repro-values.yaml", desc: "Helm values used to deploy the Agent in the reproduction environment",
     },
     {
-      id: "runtime", filename: "runtime_config_dump.yaml", tag: "runtime", tagClass: "attach-tag-runtime",
-      content: `# Container filter settings (runtime_config_dump.yaml excerpt)
-ac_exclude: []
-ac_include: []
-
-container_exclude:
-  - kube_namespace:.*
-container_exclude_logs:
-  - name:^istio-proxy$
-container_exclude_metrics: []
-
-container_include:
-  - kube_namespace:ig1
-  - kube_namespace:ncc-operators
-container_include_logs: []
-
-logs_config:
-  container_collect_all: true`,
+      id: "flare", filename: "agent-flare.zip", tag: "flare", tagClass: "attach-tag-flare",
+      href: "agent-flare.zip", desc: "Datadog Agent flare from the customer's minikube cluster",
     },
   ],
 };
@@ -1176,12 +1124,12 @@ function App() {
                                 <span className="attach-filename">{att.filename}</span>
                                 <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                                   <span className={`attach-tag ${att.tagClass}`}>{att.tag}</span>
-                                  <button className="attach-copy-btn" onClick={() => { navigator.clipboard.writeText(att.content); setCopiedStage("att_" + att.id); setTimeout(() => setCopiedStage(null), 2000); }}>
-                                    {copiedStage === "att_" + att.id ? "Copied!" : "Copy"}
-                                  </button>
+                                  <a className="attach-dl-btn" href={att.href} download={att.filename}>
+                                    ↓ Download
+                                  </a>
                                 </div>
                               </div>
-                              <pre className="attach-body">{att.content}</pre>
+                              <div className="attach-desc">{att.desc}</div>
                             </div>
                           ))}
                         </div>

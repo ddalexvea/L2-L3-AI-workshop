@@ -1,0 +1,37 @@
+datadog:
+  apiKeyExistingSecret: datadog-secret
+  site: datadoghq.com
+  clusterName: minikube-repro
+
+  containerExclude: "kube_namespace:.*"
+  containerInclude: "kube_namespace:ig1 kube_namespace:ncc-operators"
+  containerExcludeLogs: "name:^istio-proxy$"
+
+  logs:
+    enabled: true
+    containerCollectAll: true
+
+  kubelet:
+    tlsVerify: false
+
+  tags:
+    - "env:repro"
+
+agents:
+  image:
+    tag: "7.71.2"
+  containers:
+    agent:
+      resources:
+        requests:
+          cpu: 200m
+          memory: 256Mi
+        limits:
+          cpu: 500m
+          memory: 512Mi
+
+clusterAgent:
+  enabled: false
+
+clusterChecksRunner:
+  enabled: false
