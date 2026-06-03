@@ -820,7 +820,7 @@ Problem restatement + elements table + artifact decision table
 
 [PASTE CUSTOMER MESSAGE HERE]`,
     prompt: `CONTEXT:
-I'm a Datadog TSE2 starting a ticket investigation leveraging AI. I'm working in 5 stages: Kickoff, Investigation, Log/Configuration Codebase Correlation, Reproduction, and Escalation.
+Stage 1 — Kickoff. Starting a ticket investigation. Working in 5 stages: Kickoff, Investigation, Artefact Correlation, Reproduction, and Escalation.
 
 INSTRUCTIONS:
 Using the customer message below, complete in order:
@@ -854,15 +854,15 @@ OUTPUT FORMAT:
   {
     id: "investigation", label: "Investigation", alias: ";p_s_2",
     color: "#15803d", bg: "#f0fdf4", border: "#bbf7d0",
-    steps: ["Is what the customer configured actually what the Agent loaded at runtime?", "Where could a gap exist between config written and config running?", "Does the official documentation say anything about how these settings interact?", "Can I raise my confidence — and if so, what exact line justifies it?"],
+    steps: ["Is what the customer configured actually what the product loaded at runtime?", "Where could a gap exist between config written and config running?", "Does the official documentation say anything about how these settings interact?", "Can I raise my confidence — and if so, what exact line justifies it?"],
     canvasVisual: "evidence tracker — rows=findings, columns=[Artifact, Quote, Trust before, Trust after, H impact]. rowTone: success=upgraded, danger=refuted, neutral=unchanged.",
     htmlVisual: "evidence table — green row=trust upgraded, red row=refuted, gray=unchanged. Columns: Artifact | Quote | Trust Before | Trust After | H Impact.",
     promptLight: `INSTRUCTIONS:
 Stage 2 — artifacts are now available. Using the Stage 1 findings:
 1. Confirm the customer's claimed settings are present in the config artifact
-2. Confirm the Agent loaded those settings at runtime
+2. Confirm the product loaded those settings at runtime
 3. Note any gap between config written and config loaded
-4. Check official documentation for the interaction between the relevant settings
+4. Check the official documentation for explicit mention of the interaction between the relevant settings
 5. Update trust levels and confidence % — direct artifact quote required for every change
 
 REASONING:
@@ -871,16 +871,16 @@ No trust change without a direct quote from the artifact.
 OUTPUT FORMAT:
 Updated elements table + evidence table + updated confidence % + one key finding sentence
 
-[ATTACH HELM VALUES AND AGENT FLARE]`,
+[ATTACH CONFIGURATION AND RUNTIME ARTIFACTS]`,
     prompt: `CONTEXT:
 Stage 2 — Investigation. Stage 1 identified initial hypotheses. Artifacts are now available.
 
 INSTRUCTIONS:
 Using the artifacts identified in Stage 1, complete in order:
 1. Examine the configuration artifact: confirm the customer's claimed settings are present
-2. Examine the runtime artifact: confirm the Agent loaded those settings at runtime
+2. Examine the runtime artifact: confirm the product loaded those settings at runtime
 3. Note any gap between claimed config and actual loaded config
-4. Check official Datadog documentation for explicit mention of the interaction between the relevant settings
+4. Check the official documentation for explicit mention of the interaction between the relevant settings
 5. Update each element's trust level based on direct artifact evidence
 6. Update hypothesis confidence %
 
@@ -895,7 +895,7 @@ EXAMPLES:
 OUTPUT FORMAT:
 Updated elements table + evidence table + updated hypothesis confidence % + one key finding sentence.
 
-[ATTACH HELM VALUES AND AGENT FLARE]`,
+[ATTACH CONFIGURATION AND RUNTIME ARTIFACTS]`,
   },
   {
     id: "artefact", label: "Artefact Correlation", alias: ";p_s_3",
