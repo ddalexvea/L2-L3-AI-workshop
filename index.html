@@ -1668,9 +1668,11 @@ function App() {
       {/* ── Main area ── */}
       <div className="main">
 
-        {/* Preparation panel */}
-        {activeStage === "prep" && (
-          <>
+        {/* Preparation + Game panels — both always in DOM when either is active, to prevent height jump */}
+        {(activeStage === "prep" || activeStage === "game") && (
+          <div style={{position:'relative'}}>
+            {/* Workshop Preparation — normal flow, always sets container height */}
+            <div style={{opacity: activeStage === "prep" ? 1 : 0, pointerEvents: activeStage === "prep" ? 'auto' : 'none', transition:'opacity 0.15s'}}>
             <div className="prep-panel">
               <div className="prep-panel-title">Workshop Preparation</div>
               <p className="prep-hint">Paste this prompt <strong>once</strong> at the start of your Cursor or Claude session. The AI will remember the routing rules for all 5 stages.</p>
@@ -1705,12 +1707,10 @@ function App() {
               </div>
             </div>
             <hr className="divider" />
-          </>
-        )}
+            </div>
 
-        {/* Abstraction Game panel */}
-        {activeStage === "game" && (
-          <>
+            {/* Abstraction Game — absolutely overlaid, same container height as Workshop */}
+            <div style={{position:'absolute', top:0, left:0, right:0, opacity: activeStage === "game" ? 1 : 0, pointerEvents: activeStage === "game" ? 'auto' : 'none', transition:'opacity 0.15s'}}>
             <div className="prep-panel" style={{ borderColor: "#16a34a", background: "#f0fdf4" }}>
               <div className="prep-panel-title" style={{ color: "#15803d", display:'flex', alignItems:'center', gap:6 }}><Ic n="Gamepad2" size={15} color="#15803d"/> Abstraction Game</div>
               <p className="prep-hint" style={{ color: "#15803d" }}>
@@ -1755,7 +1755,8 @@ function App() {
               </div>
             </div>
             <hr className="divider" />
-          </>
+            </div>
+          </div>
         )}
 
         {/* Editing || Content — hidden on Preparation and Game steps */}
