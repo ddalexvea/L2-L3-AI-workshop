@@ -1031,19 +1031,14 @@ function App() {
                 </div>
               </div>
 
-              {/* Preparation visual — what the prompts build */}
-              <div style={{ fontSize: 12, color: '#6d28d9', fontWeight: 600, marginTop: 12, marginBottom: 2 }}>What the prompts make the AI build</div>
+              {/* Preparation visual — what workshop mode does */}
+              <div style={{ fontSize: 12, color: '#6d28d9', fontWeight: 600, marginTop: 12, marginBottom: 2 }}>What workshop mode does</div>
               <MermaidChart id="prep" chart={`flowchart LR
-  subgraph Board["Investigation Board (every stage)"]
-    direction TB
-    ST["Statement\\n[trust: HIGH]"]
-    EV["Evidence\\n[trust: MED]"]
-    HY["Hypothesis\\n[trust: LOW]"]
-  end
-  Board --> C["Confidence %\\nstarts ≤ 30%"]
-  C -->|Stage 2 artifacts| UP["Trust levels ↑\\nConfidence ↑"]
-  UP -->|Stage 3 code| CONF["Hypothesis\\nCONFIRMED"]
-  CONF -->|Stage 4 repro| DONE["Root cause\\nevidenced"]`} />
+  SP["Stage Prompt"] --> WM{{"Workshop Mode\\n(routing block)"}}
+  WM -->|Cursor Canvas| C["stage-N.canvas.tsx\\nReact visual\\nsaved to Desktop"]
+  WM -->|Claude HTML| H["stage-N.html\\nStyled page\\nopens in Chrome"]
+  C --> OUT["No markdown in chat\\nVisual output only\\nfits one screen"]
+  H --> Out["No markdown in chat\\nVisual output only\\nfits one screen"]`} />
 
               <div className="prep-block">
                 <div className="prep-block-label">{tool === "cursor" ? "Cursor Canvas — session routing" : "Claude Code — session routing"}</div>
