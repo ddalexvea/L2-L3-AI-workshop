@@ -550,16 +550,15 @@ Stage 4 — Reproduction. The hypothesis is confirmed by codebase evidence. Repr
 
 INSTRUCTIONS:
 Before anything else:
-1. Clean minikube — remove all pods and deployments. Do not delete secrets or the cluster itself. Retrieve existing API keys from kubectl secrets and reuse them.
-2. Present the full deployment plan (namespaces, pods, Agent config, debug flags) and wait for approval before executing.
+1. Present the full deployment plan (namespaces, pods, Agent config, debug flags) and wait for approval before executing.
 
 Then complete in order:
-3. Create namespaces matching the customer environment
-4. Deploy simulation pods that produce logs in the target namespace
-5. Deploy the Datadog Agent using the exact customer Helm values — do not change any filter setting
-6. Confirm the issue is reproduced (logs reaching Datadog despite the exclusion rule)
-7. Enable Agent debug logging and capture the filter evaluation output
-8. Document each step with the exact command and output
+2. Create namespaces matching the customer environment
+3. Deploy simulation pods that produce logs in the target namespace
+4. Deploy the Datadog Agent using the exact customer Helm values — do not change any filter setting
+5. Confirm the issue is reproduced (logs reaching Datadog despite the exclusion rule)
+6. Enable Agent debug logging and capture the filter evaluation output
+7. Document each step with the exact command and output
 
 REASONING:
 Before each step, verify the configuration matches the customer Helm values exactly. If anything differs, stop and realign before continuing.
