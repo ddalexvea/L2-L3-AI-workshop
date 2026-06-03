@@ -459,47 +459,58 @@ function WorkshopModeVisual() {
 
 function AbstractionGameVisual({ metaphor }) {
   const m = (metaphor||'').trim() || 'lighthouse';
-  const terms = [['Datadog Agent','Lighthouse'],['Log pipeline','Signal beam'],['Container','Ship'],['Integration','Radio receiver']];
-  const board = [
-    {label:'Statement',trust:'HIGH',bg:'#22c55e',text:`"The ${m} ignores ship signals"`},
-    {label:'Evidence',  trust:'MED', bg:'#f59e0b',text:'"From log: ship X blacklisted"'},
-    {label:'Hypothesis',trust:'LOW', bg:'#ef4444',text:'"Blacklist rule misconfigured"'},
+  const mCap = m.charAt(0).toUpperCase() + m.slice(1);
+
+  const InvestigationCard = ({ title, icon, color, bg, border, rows, conf }) => (
+    <div style={{flex:1,minWidth:145,background:bg,border:`2px solid ${border}`,borderRadius:10,padding:'12px 13px',display:'flex',flexDirection:'column',gap:7}}>
+      <div style={{fontSize:11,fontWeight:700,color,display:'flex',alignItems:'center',gap:5,marginBottom:2}}>
+        {icon} {title}
+      </div>
+      {rows.map((row,i) => (
+        <div key={i} style={{background:'rgba(255,255,255,0.7)',borderRadius:6,padding:'6px 8px'}}>
+          <div style={{display:'flex',alignItems:'center',gap:5,marginBottom:3}}>
+            <span style={{fontSize:8,fontWeight:700,background:row.tc,color:'#fff',padding:'1px 5px',borderRadius:3,letterSpacing:'0.05em'}}>{row.trust}</span>
+            <span style={{fontSize:10,fontWeight:600,color:'#374151'}}>{row.label}</span>
+          </div>
+          <div style={{fontSize:10,color:'#4b5563',fontStyle:'italic',lineHeight:1.4}}>{row.text}</div>
+        </div>
+      ))}
+      <div style={{marginTop:2,borderTop:`1px solid ${border}`,paddingTop:7}}>
+        <div style={{display:'flex',alignItems:'center',gap:6}}>
+          <div style={{flex:1,background:'rgba(0,0,0,0.08)',borderRadius:4,height:9,overflow:'hidden'}}>
+            <div style={{width:conf+'%',background:color,height:'100%',borderRadius:4}}/>
+          </div>
+          <span style={{fontSize:11,fontWeight:700,color,minWidth:28,textAlign:'right'}}>{conf}%</span>
+        </div>
+        <div style={{fontSize:9,color:'#94a3b8',marginTop:2}}>confidence — no artifacts yet</div>
+      </div>
+    </div>
+  );
+
+  const ddRows = [
+    {trust:'HIGH',tc:'#22c55e',label:'Statement',   text:'"Agent excludes container logs despite include rule"'},
+    {trust:'MED', tc:'#f59e0b',label:'Evidence',    text:'"Ticket: logs missing since config change"'},
+    {trust:'LOW', tc:'#ef4444',label:'Hypothesis',  text:'"exclude_containers overrides include_containers"'},
   ];
-  const conf = [{label:'Stage 1',pct:15},{label:'Stage 2',pct:55},{label:'Stage 3',pct:85}];
+  const gmRows = [
+    {trust:'HIGH',tc:'#22c55e',label:'Statement',   text:`"${mCap} blocks unit signals despite entry rule"`},
+    {trust:'MED', tc:'#f59e0b',label:'Evidence',    text:'"Report: signals lost since rule change"'},
+    {trust:'LOW', tc:'#ef4444',label:'Hypothesis',  text:'"Block rule overrides the entry permission"'},
+  ];
+
   return (
-    <div style={{display:'flex',flexDirection:'column',gap:14,margin:'14px 0'}}>
-      <div>
-        <div style={{fontSize:10,fontWeight:700,color:'#15803d',marginBottom:6,letterSpacing:'0.06em'}}>TERM SUBSTITUTION</div>
-        {terms.map(([dd,mt],i) => (
-          <div key={i} style={{display:'flex',alignItems:'center',gap:8,fontSize:11,marginBottom:4}}>
-            <span style={{color:'#6b7280',width:115,flexShrink:0}}>{dd}</span>
-            <span style={{color:'#16a34a',fontWeight:700}}>→</span>
-            <span style={{color:'#166534',fontWeight:600}}>{mt}</span>
-          </div>
-        ))}
+    <div style={{margin:'14px 0'}}>
+      <div style={{display:'flex',gap:8,alignItems:'stretch'}}>
+        <InvestigationCard title="Datadog world" icon="🔧" color="#2563eb" bg="#eff6ff" border="#bfdbfe" rows={ddRows} conf={15}/>
+        <div style={{display:'flex',flexDirection:'column',justifyContent:'center',alignItems:'center',gap:3,flexShrink:0,padding:'0 2px'}}>
+          <div style={{fontSize:20,color:'#7c3aed',lineHeight:1}}>→</div>
+          <div style={{fontSize:8,color:'#a78bfa',fontWeight:600,letterSpacing:'0.04em'}}>TRANSLATE</div>
+        </div>
+        <InvestigationCard title={`${mCap} world`} icon="🎮" color="#15803d" bg="#f0fdf4" border="#86efac" rows={gmRows} conf={15}/>
       </div>
-      <div>
-        <div style={{fontSize:10,fontWeight:700,color:'#15803d',marginBottom:6,letterSpacing:'0.06em'}}>INVESTIGATION BOARD (in metaphor world)</div>
-        {board.map((item,i) => (
-          <div key={i} style={{display:'flex',alignItems:'center',gap:8,marginBottom:5,fontSize:11}}>
-            <span style={{width:72,color:'#374151',flexShrink:0}}>{item.label}</span>
-            <span style={{background:item.bg,color:'#fff',fontSize:9,fontWeight:700,padding:'1px 5px',borderRadius:3,flexShrink:0}}>{item.trust}</span>
-            <span style={{color:'#6b7280',fontStyle:'italic'}}>{item.text}</span>
-          </div>
-        ))}
-      </div>
-      <div>
-        <div style={{fontSize:10,fontWeight:700,color:'#15803d',marginBottom:6,letterSpacing:'0.06em'}}>CONFIDENCE EVOLVES WITH EVIDENCE</div>
-        {conf.map((s,i) => (
-          <div key={i} style={{display:'flex',alignItems:'center',gap:8,marginBottom:5,fontSize:11}}>
-            <span style={{width:48,color:'#374151',flexShrink:0}}>{s.label}</span>
-            <div style={{flex:1,background:'#dcfce7',borderRadius:4,height:10,overflow:'hidden'}}>
-              <div style={{width:s.pct+'%',background:'#16a34a',height:'100%',borderRadius:4}}/>
-            </div>
-            <span style={{width:32,color:'#15803d',fontWeight:700,fontSize:10,textAlign:'right'}}>{s.pct}%</span>
-          </div>
-        ))}
-        <div style={{fontSize:10,color:'#6b7280',fontStyle:'italic',marginTop:2}}>only moves when an artifact backs it up</div>
+      <div style={{marginTop:10,padding:'7px 12px',background:'#faf5ff',border:'1px solid #ddd6fe',borderRadius:7,textAlign:'center'}}>
+        <div style={{fontSize:11,color:'#6d28d9',fontWeight:700}}>Same trust levels · Same confidence % · Same evidence rules</div>
+        <div style={{fontSize:10,color:'#7c3aed',marginTop:2}}>The reasoning is the skill — vocabulary is just the surface</div>
       </div>
     </div>
   );
