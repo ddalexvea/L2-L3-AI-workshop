@@ -438,10 +438,7 @@ const L2_STAGES = [
     steps: ["Restate the problem in one sentence", "List elements — Statement, Evidence, Hypothesis — with a trust level for each", "Propose 1–3 hypotheses with confidence % (max 30%)", "For each element and hypothesis — what artifact would confirm or refute it?"],
     canvasVisual: "heatmap — rows=hypotheses, cols=artifacts needed, filled dot=confirmed, empty=needed. All dots start empty.",
     htmlVisual: "heatmap grid table — rows=hypotheses, cols=artifacts. Green cell ●=confirmed, gray cell ○=needed.",
-    promptLight: `Restate the customer problem in one sentence.
-List 3 hypotheses with a confidence % (max 30% each at this stage).
-What artifacts or information do I still need to verify each one?`,
-    prompt: `INSTRUCTIONS:
+    promptLight: `INSTRUCTIONS:
 Apply the investigation framework to the customer message below:
 1. Restate the problem in one sentence
 2. Build the Investigation Board — Statement, Evidence, Hypothesis — with trust level for each
@@ -456,6 +453,37 @@ OUTPUT FORMAT:
 Problem restatement + elements table + artifact decision table
 
 [PASTE CUSTOMER MESSAGE HERE]`,
+    prompt: `CONTEXT:
+I'm a Datadog TSE2 starting a ticket investigation leveraging AI. I'm working in 5 stages: Kickoff, Investigation, Log/Configuration Codebase Correlation, Reproduction, and Escalation.
+
+INSTRUCTIONS:
+Using the customer message below, complete in order:
+1. Restate the problem in one sentence
+2. List all investigation elements: Statement, Evidence, Hypothesis
+3. Assign a trust level to each: Customer Claim / Unverified / Speculative / Low / Medium / High
+4. Propose 1-3 initial hypotheses with confidence % (max 30% at this stage). Never modify an existing hypothesis — only add new ones, always at a lower confidence than the current highest.
+5. List every artifact or piece of information still needed to verify each element, and for each one state why it is required
+
+REASONING:
+For each trust level, quote the exact customer wording that justified it, or write "no evidence yet".
+Do not include Root Cause or Workaround rows — those are determined in later stages.
+Minimum artifact rule: infer artifact candidates from the product area, environment, and symptoms — do not use a fixed list. For each candidate, decide needed or not needed and justify why in one sentence.
+
+EXAMPLES:
+| Element | Content | Trust | Justification |
+|---------|---------|-------|---------------|
+| Statement | [restate the symptom] | Customer Claim | "[exact customer quote]" |
+| H1 | [possible cause] | Speculative | no artifact evidence yet |
+
+Artifact decision table:
+| Artifact | Needed | Why |
+|----------|--------|-----|
+| [artifact type] | YES/NO | [one sentence reason] |
+
+OUTPUT FORMAT:
+1-sentence problem restatement + elements table + hypotheses with confidence % + artifact decision table.
+
+[PASTE CUSTOMER MESSAGE HERE]`,
   },
   {
     id: "investigation", label: "Investigation", alias: ";p_s_2",
@@ -463,9 +491,7 @@ Problem restatement + elements table + artifact decision table
     steps: ["Confirm settings are present in the config artifact", "Confirm the Agent loaded those settings at runtime", "Note any gap between config written and config loaded", "Check official docs for the interaction between the relevant settings", "Update trust levels and hypothesis confidence % with direct quotes"],
     canvasVisual: "evidence tracker — rows=findings, columns=[Artifact, Quote, Trust before, Trust after, H impact]. rowTone: success=upgraded, danger=refuted, neutral=unchanged.",
     htmlVisual: "evidence table — green row=trust upgraded, red row=refuted, gray=unchanged. Columns: Artifact | Quote | Trust Before | Trust After | H Impact.",
-    promptLight: `Review the attached artifacts.
-What confirms or refutes each hypothesis from Stage 1? Update confidence %.`,
-    prompt: `INSTRUCTIONS:
+    promptLight: `INSTRUCTIONS:
 Stage 2 — artifacts are now available. Using the Stage 1 findings:
 1. Confirm the customer's claimed settings are present in the config artifact
 2. Confirm the Agent loaded those settings at runtime
@@ -480,6 +506,30 @@ OUTPUT FORMAT:
 Updated elements table + evidence table + updated confidence % + one key finding sentence
 
 [ATTACH HELM VALUES AND AGENT FLARE]`,
+    prompt: `CONTEXT:
+Stage 2 — Investigation. Stage 1 identified initial hypotheses. Artifacts are now available.
+
+INSTRUCTIONS:
+Using the artifacts identified in Stage 1, complete in order:
+1. Examine the configuration artifact: confirm the customer's claimed settings are present
+2. Examine the runtime artifact: confirm the Agent loaded those settings at runtime
+3. Note any gap between claimed config and actual loaded config
+4. Check official Datadog documentation for explicit mention of the interaction between the relevant settings
+5. Update each element's trust level based on direct artifact evidence
+6. Update hypothesis confidence %
+
+REASONING:
+For each trust level change, quote the exact line from the artifact. Do not change trust without a direct quote.
+
+EXAMPLES:
+| Finding | Artifact | Quote | Impact on H1 |
+|---------|----------|-------|-------------|
+| [what was found] | [artifact name] | "[exact line]" | Supports/Refutes H1 |
+
+OUTPUT FORMAT:
+Updated elements table + evidence table + updated hypothesis confidence % + one key finding sentence.
+
+[ATTACH HELM VALUES AND AGENT FLARE]`,
   },
   {
     id: "artefact", label: "Artefact Correlation", alias: ";p_s_3",
@@ -487,9 +537,7 @@ Updated elements table + evidence table + updated confidence % + one key finding
     steps: ["Cross-reference findings across logs, config, and code", "Find the component or parameter responsible", "Trace when/where behavior diverges from expectation", "Check release notes or changelogs for the relevant version", "Update hypothesis with direct evidence — source + line required"],
     canvasVisual: "diff view — DiffView of buggy vs fixed lines with file path in CardHeader and DiffStats in trailing slot, one card per file.",
     htmlVisual: "two-column diff — left=buggy config (red highlight on changed lines), right=fixed (green highlight). File path as section header.",
-    promptLight: `Search the datadog-agent GitHub repo for the code that implements the relevant behavior.
-What does it tell us? Quote the exact file path, line number, and code.`,
-    prompt: `INSTRUCTIONS:
+    promptLight: `INSTRUCTIONS:
 Stage 3 — correlate Stage 2 findings with the Datadog Agent codebase:
 1. Search the datadog-agent GitHub repository for the relevant filter logic
 2. Find the function or component that defines filter precedence
@@ -503,6 +551,28 @@ OUTPUT FORMAT:
 Code evidence table + updated confidence % (expected 70–95%) + one-line root cause statement
 
 [PASTE STAGE 2 FINDINGS HERE]`,
+    prompt: `CONTEXT:
+Stage 3 — Log/Configuration Codebase Correlation. Stage 2 confirmed the configuration. Now correlate findings with the Datadog Agent codebase.
+
+INSTRUCTIONS:
+Complete in order:
+1. Search the datadog-agent GitHub repository for files that implement the relevant filter logic
+2. Find the function or component that defines filter group precedence
+3. Use git blame to identify when the behavior changed and which commit introduced it
+4. Update hypothesis with code evidence
+
+REASONING:
+For each finding, quote the exact file path + line number + code or comment. Do not paraphrase — direct quote only.
+
+EXAMPLES:
+| File | Line | Quote | Verdict |
+|------|------|-------|---------|
+| [file path] | [line] | "[exact code or comment]" | Confirms/Refutes H1 |
+
+OUTPUT FORMAT:
+Code evidence table + updated hypothesis confidence % (expected 70-95%) + one-line root cause statement.
+
+[PASTE STAGE 2 FINDINGS HERE]`,
   },
   {
     id: "reproduction", label: "Reproduction", alias: ";p_s_4",
@@ -510,9 +580,7 @@ Code evidence table + updated confidence % (expected 70–95%) + one-line root c
     steps: ["Clean environment (remove pods, keep secrets)", "Present deployment plan and wait for approval", "Deploy sandbox matching customer environment", "Confirm reproduction and capture supporting evidence", "Document every command and output"],
     canvasVisual: "timeline — one dot per repro step (rowTone success=pass, danger=fail, neutral=skipped), final row=VERDICT in bold.",
     htmlVisual: "numbered step list — ✓ green=pass, ✗ red=fail per step. VERDICT in large bold at bottom inside green or red bordered box.",
-    promptLight: `Reproduce this issue in minikube using the customer's exact configuration.
-Show the commands and their output. Confirm pass or fail.`,
-    prompt: `INSTRUCTIONS:
+    promptLight: `INSTRUCTIONS:
 Stage 4 — reproduce the issue in minikube:
 1. Present the full deployment plan (namespaces, pods, Agent config, debug flags) and wait for approval
 2. Create namespaces and deploy simulation pods
@@ -528,6 +596,31 @@ OUTPUT FORMAT:
 Deployment plan + step-by-step reproduction log + debug snippet + pass/fail verdict
 
 [PASTE CUSTOMER HELM VALUES HERE]`,
+    prompt: `CONTEXT:
+Stage 4 — Reproduction. The hypothesis is confirmed by codebase evidence. Reproduce the issue in minikube.
+
+INSTRUCTIONS:
+Before anything else:
+1. Present the full deployment plan (namespaces, pods, Agent config, debug flags) and wait for approval before executing.
+
+Then complete in order:
+2. Create namespaces matching the customer environment
+3. Deploy simulation pods that produce logs in the target namespace
+4. Deploy the Datadog Agent using the exact customer Helm values — do not change any filter setting
+5. Confirm the issue is reproduced (logs reaching Datadog despite the exclusion rule)
+6. Enable Agent debug logging and capture the filter evaluation output
+7. Document each step with the exact command and output
+
+REASONING:
+Before each step, verify the configuration matches the customer Helm values exactly. If anything differs, stop and realign before continuing.
+
+EXAMPLES:
+"[relevant log line]" → [what it confirms about the hypothesis]
+
+OUTPUT FORMAT:
+Deployment plan (presented first, before execution) + step-by-step reproduction log + debug log snippet confirming the behavior + pass/fail verdict.
+
+[PASTE CUSTOMER HELM VALUES HERE]`,
   },
   {
     id: "escalation", label: "Escalation", alias: ";p_s_5",
@@ -535,9 +628,7 @@ Deployment plan + step-by-step reproduction log + debug snippet + pass/fail verd
     steps: ["Check for an existing Jira card — bug or feature request", "Identify gaps and unknowns before escalating", "Summarize observed behavior, scope, expected vs actual", "Attach all evidence with source references", "Share detailed reproduction steps — environment, commands, output"],
     canvasVisual: "summary — Root Cause (danger Callout) + Affected versions (Stat cards) + Workaround (success Callout) side by side, evidence table with file:line citations below.",
     htmlVisual: "three side-by-side boxes: Root Cause (red border), Versions (gray border), Workaround (green border). Evidence table with file:line citations below.",
-    promptLight: `State the root cause in one sentence.
-List the evidence. Draft a Jira escalation ticket with reproduction steps and a workaround.`,
-    prompt: `INSTRUCTIONS:
+    promptLight: `INSTRUCTIONS:
 Stage 5 — prepare the escalation package:
 1. State the root cause in one technical sentence
 2. List all evidence with artifact references (file + line, flare file, or screenshot)
@@ -553,6 +644,34 @@ Root cause / evidence table / affected versions / workaround / Jira draft
 
 [CUSTOMER ISSUE — paste original customer message]
 [INVESTIGATION — paste Stage 1–4 findings]`,
+    prompt: `CONTEXT:
+Stage 5 — Escalation. Reproduction confirmed the bug. Prepare the escalation package.
+
+INSTRUCTIONS:
+Complete in order:
+1. State the root cause in one technical sentence
+2. List all evidence with artifact references (file + line, flare file, or screenshot)
+3. State affected versions (confirmed broken + confirmed fixed)
+4. Propose a workaround the customer can apply today
+5. Draft a Jira escalation with: summary, reproduction steps, expected vs actual behavior, evidence references, affected versions, workaround
+
+REASONING:
+For each claim in the escalation, cite a specific artifact. No claim without direct evidence.
+
+EXAMPLES:
+- Root cause: [technical one-sentence description]
+- Evidence: [file:line or artifact reference]
+- Affected: [version X confirmed broken · version Y confirmed fixed]
+- Workaround: [actionable step the customer can take today]
+
+OUTPUT FORMAT:
+Root cause / evidence table / affected versions / workaround / Jira draft.
+
+[CUSTOMER ISSUE DESCRIPTION — paste original customer message]
+[CONCERN / ISSUE — paste Stage 1 elements table and hypotheses]
+[INVESTIGATION — paste Stage 2 artifact findings and trust level updates]
+[CODEBASE CORRELATION — paste Stage 3 code evidence and root cause statement]
+[REPRODUCTION — paste Stage 4 reproduction log and debug output]`,
   },
 ];
 
