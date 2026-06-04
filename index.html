@@ -1158,6 +1158,7 @@ const L2_STAGES = [
   {
     id: "triage", label: "Kickoff", alias: ";p_s_1",
     color: "#2563eb", bg: "#eff6ff", border: "#bfdbfe",
+    goal: "Label every part of the customer message as Statement, Evidence, Hypothesis, or Missing Info — before opening a single artifact. Build the investigation board and cap confidence at ~20%.",
     steps: ["What is the customer actually reporting vs. what could be their assumption?", "How confident should I be right now — with zero artifacts in hand?", "What would I need to see to believe or disprove each hypothesis?", "Can I restate the whole problem in one sentence the customer would agree with?"],
     canvasVisual: "heatmap — rows=hypotheses, cols=artifacts needed, filled dot=confirmed, empty=needed. All dots start empty.",
     htmlVisual: "heatmap grid table — rows=hypotheses, cols=artifacts. Green cell ●=confirmed, gray cell ○=needed.",
@@ -1211,6 +1212,7 @@ OUTPUT FORMAT:
   {
     id: "investigation", label: "Investigation", alias: ";p_s_2",
     color: "#15803d", bg: "#f0fdf4", border: "#bbf7d0",
+    goal: "Cross-reference artifacts against each hypothesis. For each artifact, determine whether it confirms, refutes, or is inconclusive. Find the gap between config written and config loaded at runtime, and update confidence with direct artifact quotes.",
     steps: ["Is what the customer configured actually what the product loaded at runtime?", "Where could a gap exist between config written and config running?", "Does the official documentation say anything about how these settings interact?", "Can I raise my confidence — and if so, what exact line justifies it?"],
     canvasVisual: "evidence tracker — rows=findings, columns=[Artifact, Quote, Trust before, Trust after, H impact]. rowTone: success=upgraded, danger=refuted, neutral=unchanged.",
     htmlVisual: "evidence table — green row=trust upgraded, red row=refuted, gray=unchanged. Columns: Artifact | Quote | Trust Before | Trust After | H Impact.",
@@ -1257,6 +1259,7 @@ Updated elements table + evidence table + updated hypothesis confidence % + one 
   {
     id: "artefact", label: "Artefact Correlation", alias: ";p_s_3",
     color: "#6d28d9", bg: "#faf5ff", border: "#ddd6fe",
+    goal: "Correlate timestamps across log sources, locate the exact file and function responsible, and identify when the behavior changed. The output is a precise code or log reference — not a theory.",
     steps: ["How do timestamps and error patterns line up across all available log sources?", "Where in the product codebase is the component responsible for this behavior?", "Which rule or function wins when two settings conflict — and when did that change?", "Can I describe the observed behavior precisely, with a log line or code reference to back it up?"],
     canvasVisual: "diff view — DiffView of buggy vs fixed lines with file path in CardHeader and DiffStats in trailing slot, one card per file.",
     htmlVisual: "two-column diff — left=buggy config (red highlight on changed lines), right=fixed (green highlight). File path as section header.",
@@ -1309,6 +1312,7 @@ Log correlation timeline + code evidence table + updated hypothesis confidence %
   {
     id: "reproduction", label: "Reproduction", alias: ";p_s_4",
     color: "#c2410c", bg: "#fff7ed", border: "#fed7aa",
+    goal: "Reproduce the symptom in a sandbox using the customer's exact config. Enable debug logging and confirm the symptom appears in the log output. The verdict must be backed by a specific debug log line — not just 'it failed'.",
     steps: ["What exact environment do I need to reproduce this — components, config, runtime?", "What would a successful reproduction look like vs. a failed one?", "What debug flag or log line would confirm the issue is happening inside the product?", "Am I using the customer's exact config — or have I changed anything?"],
     canvasVisual: "timeline — one dot per repro step (rowTone success=pass, danger=fail, neutral=skipped), final row=VERDICT in bold.",
     htmlVisual: "numbered step list — ✓ green=pass, ✗ red=fail per step. VERDICT in large bold at bottom inside green or red bordered box.",
@@ -1357,6 +1361,7 @@ Environment plan (presented first, before execution) + step-by-step reproduction
   {
     id: "escalation", label: "Escalation", alias: ";p_s_5", bonus: false,
     color: "#0f766e", bg: "#f0fdfa", border: "#99f6e4",
+    goal: "Package all findings for the engineering team: unexpected behavior (not root cause), evidence with artifact citations, affected versions, workaround, investigation scope, business impact, and a specific engineering ask. Every claim must have a source.",
     steps: ["Can I describe the unexpected behavior precisely — expected vs. actual, with evidence?", "Is every claim backed by a specific artifact reference — no unsupported assertions?", "What versions are confirmed affected, and is there a known fixed version or workaround?", "Have I summarized what was investigated and ruled out, so the engineering team doesn't duplicate work?", "What is the customer impact and urgency — production-blocking, data risk, or degraded experience?", "What specific action am I requesting from engineering — bug confirmation, fix prioritization, or workaround guidance?"],
     canvasVisual: "summary — Unexpected Behavior (danger Callout) + Affected versions (Stat cards) + Workaround (success Callout) side by side, evidence table with artifact citations below.",
     htmlVisual: "three side-by-side boxes: Unexpected Behavior (red border), Versions (gray border), Workaround (green border). Evidence table with artifact citations below.",
@@ -1420,6 +1425,7 @@ Unexpected behavior / evidence table / affected versions / workaround / investig
   {
     id: "retrospective", label: "Retro", alias: ";p_s_r", bonus: true,
     color: "#d97706", bg: "#fffbeb", border: "#fde68a",
+    goal: "Replay the investigation as a confidence timeline. Assign confidence % to each hypothesis at each stage, identify the turning-point artifact, flag any hypothesis ruled out late, and extract one concrete lesson for the next investigation.",
     steps: [
       "For each hypothesis: at which stage did confidence change most — and what artifact caused it?",
       "Which single piece of evidence was the turning point of the investigation?",
@@ -1712,6 +1718,8 @@ function App() {
   const [tool, setTool]                   = useState("cursor"); // "cursor" | "claude" | "game"
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const [metaphor, setMetaphor]               = useState("");
+  const [promptTab, setPromptTab]             = useState("goal");
+  useEffect(() => { setPromptTab("goal"); }, [activeStage]);
 
   function toggleStage(id) {
     setActiveStage(prev => prev === id ? null : id);
@@ -2089,30 +2097,54 @@ function App() {
                       </div>
                     )}
 
-                    {/* Prompts — hidden by default (reveal after participants attempt) */}
-                    <details className="light-details">
-                      <summary className="light-summary">Show prompts <span className="light-hint">(reveal after attempt)</span></summary>
-                      <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 10 }}>
-                        {stage.promptLight && (
-                          <>
-                            <div className="prompt-version-label">Light version</div>
-                            <div className="stage-prompt-wrap">
-                              <pre className="stage-prompt">{stage.promptLight}</pre>
-                              <button className="stage-copy-btn" onClick={() => { navigator.clipboard.writeText(stage.promptLight); setCopiedStage(stage.id + "_light"); setTimeout(() => setCopiedStage(null), 2000); }}>
-                                {copiedStage === stage.id + "_light" ? <><Ic n="Check" size={11}/> Copied!</> : <><Ic n="Copy" size={11}/> Copy</>}
-                              </button>
-                            </div>
-                          </>
-                        )}
-                        <div className="prompt-version-label">Complete version</div>
+                    {/* Prompts — Goal / Light / Complete tab selector */}
+                    <div style={{marginTop:6}}>
+                      <div className="checklist-label" style={{marginBottom:6}}>Prompt</div>
+                      <div style={{display:'flex',background:'#f1f5f9',borderRadius:8,padding:3,marginBottom:10,gap:2}}>
+                        {[
+                          {id:'goal',     label:'Goal',     icon:'Target'},
+                          {id:'light',    label:'Light',    icon:'Zap'},
+                          {id:'complete', label:'Complete', icon:'BookOpen'},
+                        ].map(tab => {
+                          const active = promptTab === tab.id;
+                          return (
+                            <button key={tab.id} onClick={() => setPromptTab(tab.id)} style={{
+                              flex:1, border:'none', borderRadius:6, padding:'5px 4px',
+                              fontSize:11, fontWeight:600, cursor:'pointer',
+                              background: active ? '#fff' : 'transparent',
+                              color: active ? stage.color : '#94a3b8',
+                              boxShadow: active ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+                              transition:'all 0.15s',
+                              display:'flex', alignItems:'center', justifyContent:'center', gap:4,
+                            }}>
+                              <Ic n={tab.icon} size={10}/>
+                              {tab.label}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      {promptTab === 'goal' && (
+                        <div style={{fontSize:13,color:'#475569',lineHeight:1.65,padding:'10px 14px',background:'#f8fafc',borderRadius:8,border:'1px solid #e2e8f0',borderLeft:`3px solid ${stage.color}`}}>
+                          {stage.goal || 'No goal defined for this stage.'}
+                        </div>
+                      )}
+                      {promptTab === 'light' && stage.promptLight && (
+                        <div className="stage-prompt-wrap">
+                          <pre className="stage-prompt">{stage.promptLight}</pre>
+                          <button className="stage-copy-btn" onClick={() => { navigator.clipboard.writeText(stage.promptLight); setCopiedStage(stage.id + "_light"); setTimeout(() => setCopiedStage(null), 2000); }}>
+                            {copiedStage === stage.id + "_light" ? <><Ic n="Check" size={11}/> Copied!</> : <><Ic n="Copy" size={11}/> Copy</>}
+                          </button>
+                        </div>
+                      )}
+                      {promptTab === 'complete' && (
                         <div className="stage-prompt-wrap">
                           <pre className="stage-prompt">{renderPrompt(stage.prompt)}</pre>
                           <button className="stage-copy-btn" onClick={() => copyPrompt(stage)}>
                             {copiedStage === stage.id ? <><Ic n="Check" size={11}/> Copied!</> : <><Ic n="Copy" size={11}/> Copy</>}
                           </button>
                         </div>
-                      </div>
-                    </details>
+                      )}
+                    </div>
                   </div>
                 </>
               );
