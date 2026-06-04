@@ -1850,19 +1850,15 @@ function App() {
 
               <div className="prep-block">
                 <div className="prep-block-label">{tool === "cursor" ? "Cursor Canvas — session routing" : "Claude Code — session routing"}</div>
-                <div className="prep-routing"><PillarPrompt text={tool === "cursor" ? CANVAS_SESSION_ROUTING : HTML_SESSION_ROUTING}/></div>
-                <button
-                  className="prep-copy-btn"
-                  onClick={() => {
+                <div className="stage-prompt-wrap">
+                  <div className="prep-routing"><PillarPrompt text={tool === "cursor" ? CANVAS_SESSION_ROUTING : HTML_SESSION_ROUTING}/></div>
+                  <button className="stage-copy-btn" onClick={() => {
                     const text = tool === "cursor" ? CANVAS_SESSION_ROUTING : HTML_SESSION_ROUTING;
-                    navigator.clipboard.writeText(text).then(() => {
-                      setCopiedStage("prep");
-                      setTimeout(() => setCopiedStage(null), 2000);
-                    });
-                  }}
-                >
-                  {copiedStage === "prep" ? <><Ic n="Check" size={11}/> Copied!</> : <><Ic n="Copy" size={11}/> {tool === "cursor" ? "Copy for Cursor" : "Copy for Claude"}</>}
-                </button>
+                    navigator.clipboard.writeText(text).then(() => { setCopiedStage("prep"); setTimeout(() => setCopiedStage(null), 2000); });
+                  }}>
+                    {copiedStage === "prep" ? <><Ic n="Check" size={11}/> Copied!</> : <><Ic n="Copy" size={11}/> Copy</>}
+                  </button>
+                </div>
               </div>
             </div>
             <hr className="divider" />
@@ -1898,19 +1894,14 @@ function App() {
               </div>
               <div className="prep-block">
                 <div className="prep-block-label" style={{ color: "#15803d" }}>Prompt preview</div>
-                <div className="prep-routing" style={{ borderColor: "#bbf7d0" }}><PillarPrompt text={buildGamePrompt(metaphor)}/></div>
-                <button
-                  className="prep-copy-btn"
-                  style={{ background: "#16a34a" }}
-                  onClick={() => {
-                    navigator.clipboard.writeText(buildGamePrompt(metaphor)).then(() => {
-                      setCopiedStage("game");
-                      setTimeout(() => setCopiedStage(null), 2000);
-                    });
-                  }}
-                >
-                  {copiedStage === "game" ? <><Ic n="Check" size={11}/> Copied!</> : <><Ic n="Copy" size={11}/> Copy game prompt</>}
-                </button>
+                <div className="stage-prompt-wrap">
+                  <div className="prep-routing" style={{ borderColor: "#bbf7d0" }}><PillarPrompt text={buildGamePrompt(metaphor)}/></div>
+                  <button className="stage-copy-btn" onClick={() => {
+                    navigator.clipboard.writeText(buildGamePrompt(metaphor)).then(() => { setCopiedStage("game"); setTimeout(() => setCopiedStage(null), 2000); });
+                  }}>
+                    {copiedStage === "game" ? <><Ic n="Check" size={11}/> Copied!</> : <><Ic n="Copy" size={11}/> Copy</>}
+                  </button>
+                </div>
               </div>
             </div>
             <hr className="divider" />
