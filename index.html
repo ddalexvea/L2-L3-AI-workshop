@@ -1077,7 +1077,7 @@ const STAGE_VISUALS = {
           {/* Zone 3 — confidence timeline SVG */}
           <div style={{flex:1.4,display:'flex',flexDirection:'column',paddingTop:6,paddingBottom:2,gap:2}}>
             <span style={{fontSize:7,color:C,fontWeight:700,letterSpacing:'0.04em',flexShrink:0}}>CONFIDENCE TIMELINE</span>
-            <svg width="100%" viewBox="0 0 176 100">
+            <svg width="100%" style={{maxHeight:80}} viewBox="0 0 176 100">
               {/* Y-axis labels */}
               {[0,50,100].map(v=>(
                 <React.Fragment key={v}>
