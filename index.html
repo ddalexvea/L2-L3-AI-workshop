@@ -1423,20 +1423,15 @@ Unexpected behavior / evidence table / affected versions / workaround / investig
       "What would you do differently in the next investigation — triage framing, artifact request, or escalation?",
     ],
     promptLight: `INSTRUCTIONS:
-Bonus — Retrospective. Visualize the full investigation as a confidence timeline.
+Bonus — Retrospective. Replay the investigation as a confidence timeline.
 1. List every hypothesis from Stage 1
 2. For each hypothesis, assign a confidence % at the end of each stage (1–5): 0 = ruled out, 100 = confirmed
 3. Identify the artifact or finding that caused the biggest single confidence shift
-4. Generate a confidence timeline visualization — one colored line per hypothesis, X = stages 1–5, Y = confidence %
-5. Write a 2-sentence reflection: what was the turning point, and what would you do differently?
-
-OUTPUT FORMAT:
-[Cursor Canvas] React component — SVG/canvas line chart + evidence markers + 2-sentence reflection below
-[Claude HTML] Self-contained HTML file — JS chart with the same structure
+4. Write a 2-sentence reflection: what was the turning point, and what would you do differently?
 
 [PASTE STAGE 1–5 FINDINGS]`,
     prompt: `CONTEXT:
-Bonus — Retrospective. The full 5-stage investigation is complete. Replay it as a confidence graph.
+Bonus — Retrospective. The full 5-stage investigation is complete. Replay it as a confidence timeline.
 
 INSTRUCTIONS:
 Complete in order:
@@ -1445,22 +1440,12 @@ Complete in order:
    - 0% = definitively ruled out · 100% = confirmed · intermediate = partial evidence
 3. Identify the key turning-point artifact: the single finding that caused the largest confidence jump for the winning hypothesis
 4. Identify any hypothesis ruled out late — what earlier evidence could have closed it sooner?
-5. Generate a confidence timeline visualization:
-   - One colored line per hypothesis
-   - X-axis: stages S1 → S5
-   - Y-axis: confidence 0–100%
-   - Mark dots on each stage data point
-   - Annotate the turning-point artifact with a callout
-6. Write a 2-sentence investigation reflection: what shifted the outcome, and what you would do faster next time
+5. Write a 2-sentence investigation reflection: what shifted the outcome, and what you would do faster next time
 
 EXAMPLES:
 - Confidence table: H1: [12, 45, 72, 90, 90] · H2: [18, 25, 10, 4, 0]
 - Turning point: "artifact.log:42 at Stage 2 — H1 jumped from 12% to 45%"
 - Ruled out late: "H2 could have been closed at Stage 1 if debug flag had been requested earlier"
-
-OUTPUT FORMAT:
-[Cursor Canvas] React component with SVG line chart, dot markers, turning-point callout, and reflection block
-[Claude HTML] Self-contained HTML/JS with identical structure
 
 [CUSTOMER ISSUE DESCRIPTION — paste original customer message]
 [CONCERN / ISSUE — paste Stage 1 elements table and hypotheses]
