@@ -2017,7 +2017,7 @@ function App() {
                   <hr className="divider" />
                   <div className="stage-panel-inner">
                     <div className="stage-title">
-                      Stage {stageIndex + 1} — {stage.label}
+                      {stage.bonus ? "Bonus Stage" : `Stage ${stageIndex + 1}`} — {stage.label}
                     </div>
 
                     {/* Stage visual */}
