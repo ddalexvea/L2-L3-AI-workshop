@@ -1160,8 +1160,6 @@ const L2_STAGES = [
     color: "#2563eb", bg: "#eff6ff", border: "#bfdbfe",
     goal: "Label every part of the customer message as Statement, Evidence, Hypothesis, or Missing Info — before opening a single artifact. Build the investigation board and cap confidence at ~20%.",
     steps: ["What is the customer actually reporting vs. what could be their assumption?", "How confident should I be right now — with zero artifacts in hand?", "What would I need to see to believe or disprove each hypothesis?", "Can I restate the whole problem in one sentence the customer would agree with?"],
-    canvasVisual: "heatmap — rows=hypotheses, cols=artifacts needed, filled dot=confirmed, empty=needed. All dots start empty.",
-    htmlVisual: "heatmap grid table — rows=hypotheses, cols=artifacts. Green cell ●=confirmed, gray cell ○=needed.",
     promptLight: `INSTRUCTIONS:
 Apply the investigation framework to the customer message below:
 1. Restate the problem in one sentence
@@ -1214,8 +1212,6 @@ OUTPUT FORMAT:
     color: "#15803d", bg: "#f0fdf4", border: "#bbf7d0",
     goal: "Cross-reference artifacts against each hypothesis. For each artifact, determine whether it confirms, refutes, or is inconclusive. Find the gap between config written and config loaded at runtime, and update confidence with direct artifact quotes.",
     steps: ["Is what the customer configured actually what the product loaded at runtime?", "Where could a gap exist between config written and config running?", "Does the official documentation say anything about how these settings interact?", "Can I raise my confidence — and if so, what exact line justifies it?"],
-    canvasVisual: "evidence tracker — rows=findings, columns=[Artifact, Quote, Trust before, Trust after, H impact]. rowTone: success=upgraded, danger=refuted, neutral=unchanged.",
-    htmlVisual: "evidence table — green row=trust upgraded, red row=refuted, gray=unchanged. Columns: Artifact | Quote | Trust Before | Trust After | H Impact.",
     promptLight: `INSTRUCTIONS:
 Stage 2 — artifacts are now available. Using the Stage 1 findings:
 1. Confirm the customer's claimed settings are present in the config artifact
@@ -1261,8 +1257,6 @@ Updated elements table + evidence table + updated hypothesis confidence % + one 
     color: "#6d28d9", bg: "#faf5ff", border: "#ddd6fe",
     goal: "Correlate timestamps across log sources, locate the exact file and function responsible, and identify when the behavior changed. The output is a precise code or log reference — not a theory.",
     steps: ["How do timestamps and error patterns line up across all available log sources?", "Where in the product codebase is the component responsible for this behavior?", "Which rule or function wins when two settings conflict — and when did that change?", "Can I describe the observed behavior precisely, with a log line or code reference to back it up?"],
-    canvasVisual: "diff view — DiffView of buggy vs fixed lines with file path in CardHeader and DiffStats in trailing slot, one card per file.",
-    htmlVisual: "two-column diff — left=buggy config (red highlight on changed lines), right=fixed (green highlight). File path as section header.",
     promptLight: `INSTRUCTIONS:
 Stage 3 — correlate Stage 2 findings across logs and the product codebase:
 1. Cross-reference timestamps and error patterns across all available log sources to trace the event sequence
@@ -1314,8 +1308,6 @@ Log correlation timeline + code evidence table + updated hypothesis confidence %
     color: "#c2410c", bg: "#fff7ed", border: "#fed7aa",
     goal: "Reproduce the symptom in a sandbox using the customer's exact config. Enable debug logging and confirm the symptom appears in the log output. The verdict must be backed by a specific debug log line — not just 'it failed'.",
     steps: ["What exact environment do I need to reproduce this — components, config, runtime?", "What would a successful reproduction look like vs. a failed one?", "What debug flag or log line would confirm the issue is happening inside the product?", "Am I using the customer's exact config — or have I changed anything?"],
-    canvasVisual: "timeline — one dot per repro step (rowTone success=pass, danger=fail, neutral=skipped), final row=VERDICT in bold.",
-    htmlVisual: "numbered step list — ✓ green=pass, ✗ red=fail per step. VERDICT in large bold at bottom inside green or red bordered box.",
     promptLight: `INSTRUCTIONS:
 Stage 4 — reproduce the issue in a sandbox environment:
 1. Present the full environment plan (components, config, debug flags) and wait for approval
@@ -1363,8 +1355,6 @@ Environment plan (presented first, before execution) + step-by-step reproduction
     color: "#0f766e", bg: "#f0fdfa", border: "#99f6e4",
     goal: "Package all findings for the engineering team: unexpected behavior (not root cause), evidence with artifact citations, affected versions, workaround, investigation scope, business impact, and a specific engineering ask. Every claim must have a source.",
     steps: ["Can I describe the unexpected behavior precisely — expected vs. actual, with evidence?", "Is every claim backed by a specific artifact reference — no unsupported assertions?", "What versions are confirmed affected, and is there a known fixed version or workaround?", "Have I summarized what was investigated and ruled out, so the engineering team doesn't duplicate work?", "What is the customer impact and urgency — production-blocking, data risk, or degraded experience?", "What specific action am I requesting from engineering — bug confirmation, fix prioritization, or workaround guidance?"],
-    canvasVisual: "summary — Unexpected Behavior (danger Callout) + Affected versions (Stat cards) + Workaround (success Callout) side by side, evidence table with artifact citations below.",
-    htmlVisual: "three side-by-side boxes: Unexpected Behavior (red border), Versions (gray border), Workaround (green border). Evidence table with artifact citations below.",
     promptLight: `INSTRUCTIONS:
 Stage 5 — prepare the escalation package:
 1. Describe the unexpected behavior in one sentence: what was expected vs. what actually happens
@@ -1644,11 +1634,12 @@ Rules for this session:
 Canvas: for each prompt I send, create a Cursor canvas at
 ~/Desktop/workshop/stage-N.canvas.tsx
 (replace N with the stage number) using this visual per stage:
-- Stage 1: heatmap — rows=hypotheses, cols=artifacts needed, filled dot=confirmed, empty=needed. All dots start empty.
-- Stage 2: evidence tracker — rows=findings, columns=[Artifact, Quote, Trust before, Trust after, H impact], rowTone: success=upgraded, danger=refuted, neutral=unchanged
-- Stage 3: diff view — DiffView of buggy vs fixed lines with file path in CardHeader and DiffStats in trailing slot, one card per file
-- Stage 4: timeline — one dot per repro step (rowTone success=pass, danger=fail, neutral=skipped), final row=VERDICT in bold
-- Stage 5: summary — Root Cause (danger Callout) + Affected versions (Stat cards) + Workaround (success Callout) side by side, evidence table with file:line citations below
+- Stage 1: investigation board — rows=hypotheses, cols=[label, confidence %, artifact needed]. All confidence cells start empty.
+- Stage 2: evidence tracker — rows=findings, columns=[Artifact, Quote, Trust before, Trust after, H impact]. rowTone: success=upgraded, danger=refuted, neutral=unchanged.
+- Stage 3: findings panel — log correlation table (Timestamp | Source | Event) + code location card (file path, function, line) + diff strip (old vs new behavior).
+- Stage 4: reproduction log — numbered step list with pass/fail per step, debug log snippet row, VERDICT callout at bottom (success=reproduced, danger=not reproduced).
+- Stage 5: escalation package — Unexpected Behavior (danger Callout) + Affected Versions (stat cards) + Workaround (success Callout) side by side, evidence table with artifact citations, Impact & Engineering Ask below.
+- Stage 6 (Bonus): confidence timeline — SVG line chart, one colored line per hypothesis, X=stages 1–5, Y=confidence 0–100%, evidence dot markers + turning-point callout, reflection block below.
 
 Canvas hard rules — must follow exactly:
 - No hardcoded hex colors. Only useHostTheme() tokens (call it inside every component that needs it).
@@ -1689,11 +1680,12 @@ Rules for this session:
 - Single screen layout, max 3 bullets per section, max 4 table rows, one bold takeaway at bottom
 
 Visual per stage:
-- Stage 1: heatmap grid table — rows=hypotheses, cols=artifacts. Green cell ●=confirmed, gray cell ○=needed.
+- Stage 1: investigation board table — rows=hypotheses, cols=[Label, Confidence %, Artifact needed]. Empty cells until artifacts arrive.
 - Stage 2: evidence table — green row=trust upgraded, red row=refuted, gray=unchanged. Columns: Artifact | Quote | Trust Before | Trust After | H Impact.
-- Stage 3: two-column diff — left=buggy config (red highlight on changed lines), right=fixed (green highlight). File path as section header.
-- Stage 4: numbered step list — ✓ green=pass, ✗ red=fail per step. VERDICT in large bold at bottom inside green or red bordered box.
-- Stage 5: three side-by-side boxes: Root Cause (red border), Versions (gray border), Workaround (green border). Evidence table with file:line citations below.
+- Stage 3: findings panel — log correlation table (Timestamp | Source | Event) + code location block (file path, function, line) + two-column diff (left=old behavior red, right=new behavior green).
+- Stage 4: numbered step list — ✓ green=pass, ✗ red=fail per step. Debug log snippet row. VERDICT in large bold at bottom inside green or red bordered box.
+- Stage 5: three side-by-side boxes: Unexpected Behavior (red border), Versions (gray border), Workaround (green border). Evidence table + Impact & Engineering Ask below.
+- Stage 6 (Bonus): confidence timeline — line chart, one colored line per hypothesis, X=stages 1–5, Y=confidence 0–100%. Evidence dot markers, turning-point annotation, reflection paragraph below.
 
 HTML hard rules:
 - Self-contained: inline CSS only, no external dependencies
