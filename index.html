@@ -2017,6 +2017,8 @@ function App() {
                     {STAGE_VISUALS[stage.id] && (() => {
                       const sv = STAGE_VISUALS[stage.id];
                       return (
+                        <>
+                        <div className="checklist-label" style={{marginBottom:6}}>Stage Visual</div>
                         <details open style={{marginBottom:14,border:`1px solid ${sv.color}28`,borderRadius:10,overflow:'hidden'}}>
                           <summary style={{listStyle:'none',cursor:'pointer',background:`${sv.color}10`,borderBottom:`1px solid ${sv.color}28`,padding:'8px 12px',display:'flex',alignItems:'center',gap:8}} className="visual-summary">
                             <div style={{width:26,height:26,borderRadius:6,background:sv.color,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
@@ -2031,6 +2033,7 @@ function App() {
                             {sv.graphic && sv.graphic()}
                           </div>
                         </details>
+                        </>
                       );
                     })()}
 
