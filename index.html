@@ -1052,7 +1052,7 @@ const STAGE_VISUALS = {
         {label:'H2', color:'#dc2626', pts:[18,25,10,4,0]},
       ];
       return (
-        <div style={{display:'flex',alignItems:'stretch',gap:0,height:148}}>
+        <div style={{display:'flex',alignItems:'stretch',gap:0}}>
           {/* Zone 1 — all 5 stages as inputs */}
           <div style={{flex:1,display:'flex',flexDirection:'column',justifyContent:'space-between',paddingTop:6,paddingBottom:4}}>
             <span style={{fontSize:7,color:'#94a3b8',fontWeight:600,letterSpacing:'0.03em',marginBottom:2}}>STAGES</span>
@@ -1065,9 +1065,9 @@ const STAGE_VISUALS = {
           </div>
           {/* Zone 2 — brain with 5 lines */}
           <div style={{width:48,position:'relative',display:'flex',alignItems:'center',justifyContent:'center'}}>
-            <svg width="48" height="148" viewBox="0 0 48 148" style={{position:'absolute',inset:0}}>
-              {[22,46,74,102,126].map((y,i)=>(
-                <line key={i} x1="0" y1={y} x2="48" y2="74" stroke={C} strokeWidth="1" strokeOpacity="0.3"/>
+            <svg width="48" height="100%" viewBox="0 0 48 130" style={{position:'absolute',inset:0}}>
+              {[18,36,55,74,92].map((y,i)=>(
+                <line key={i} x1="0" y1={y} x2="48" y2="55" stroke={C} strokeWidth="1" strokeOpacity="0.3"/>
               ))}
             </svg>
             <div style={{position:'relative',zIndex:1,background:'#fffbeb',border:`2px solid ${C}60`,borderRadius:'50%',width:30,height:30,display:'flex',alignItems:'center',justifyContent:'center'}}>
@@ -1075,10 +1075,9 @@ const STAGE_VISUALS = {
             </div>
           </div>
           {/* Zone 3 — confidence timeline SVG */}
-          <div style={{flex:1.4,display:'flex',flexDirection:'column',paddingTop:6,paddingBottom:4,gap:4}}>
+          <div style={{flex:1.4,display:'flex',flexDirection:'column',paddingTop:6,paddingBottom:2,gap:2}}>
             <span style={{fontSize:7,color:C,fontWeight:700,letterSpacing:'0.04em',flexShrink:0}}>CONFIDENCE TIMELINE</span>
-            <div style={{flex:1,position:'relative'}}>
-            <svg style={{position:'absolute',inset:0,width:'100%',height:'100%'}} viewBox="0 0 176 100" preserveAspectRatio="none">
+            <svg width="100%" viewBox="0 0 176 100">
               {/* Y-axis labels */}
               {[0,50,100].map(v=>(
                 <React.Fragment key={v}>
@@ -1107,7 +1106,6 @@ const STAGE_VISUALS = {
                 </React.Fragment>
               ))}
             </svg>
-            </div>
           </div>
         </div>
       );
@@ -1403,7 +1401,8 @@ Bonus — Retrospective. Replay the investigation as a confidence timeline.
 1. List every hypothesis from Stage 1
 2. For each hypothesis, assign a confidence % at the end of each stage (1–5): 0 = ruled out, 100 = confirmed
 3. Identify the artifact or finding that caused the biggest single confidence shift
-4. Write a 2-sentence reflection: what was the turning point, and what would you do differently?`,
+4. Write a 2-sentence reflection: what was the turning point, and what would you do differently?
+5. For each stage prompt used, rate its output: was it directly usable, or did it require significant manual correction? Flag any stage where the prompt produced output that needed too much adjustment to be reusable.`,
     prompt: `CONTEXT:
 Bonus — Retrospective. The full 5-stage investigation is complete. Replay it as a confidence timeline.
 
@@ -1415,11 +1414,16 @@ Complete in order:
 3. Identify the key turning-point artifact: the single finding that caused the largest confidence jump for the winning hypothesis
 4. Identify any hypothesis ruled out late — what earlier evidence could have closed it sooner?
 5. Write a 2-sentence investigation reflection: what shifted the outcome, and what you would do faster next time
+6. Prompt quality audit — for each of the 5 stage prompts used (Goal / Light / Complete), evaluate:
+   - Was the output directly usable as-is, or did it require significant manual correction?
+   - Which stage produced the least reusable output — and what would make that prompt more autonomous?
+   - Which prompt could realistically be turned into a reusable skill (minimal human intervention needed)?
 
 EXAMPLES:
 - Confidence table: H1: [12, 45, 72, 90, 90] · H2: [18, 25, 10, 4, 0]
 - Turning point: "artifact.log:42 at Stage 2 — H1 jumped from 12% to 45%"
-- Ruled out late: "H2 could have been closed at Stage 1 if debug flag had been requested earlier"`,
+- Ruled out late: "H2 could have been closed at Stage 1 if debug flag had been requested earlier"
+- Prompt audit: "Stage 3 Complete prompt required manual correction — code path was too generic. Stage 1 Light prompt output was directly reusable."`,
   },
 ];
 
