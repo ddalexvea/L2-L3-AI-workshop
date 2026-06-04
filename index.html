@@ -1045,67 +1045,42 @@ const STAGE_VISUALS = {
     concept: 'Reflect on how confidence evolved across every stage.',
     graphic: () => {
       const C = '#d97706';
-      const xs = [18,52,86,120,154];
-      const yOf = v => 6 + (1 - v/100) * 72;
+      const stages = ['S1','S2','S3','S4','S5'];
       const hyps = [
         {label:'H1', color:'#2563eb', pts:[12,45,72,90,90]},
         {label:'H2', color:'#dc2626', pts:[18,25,10,4,0]},
       ];
       return (
-        <div style={{display:'flex',alignItems:'stretch',gap:0,height:120}}>
-          {/* Zone 1 — all 5 stages as inputs */}
-          <div style={{flex:1,display:'flex',flexDirection:'column',justifyContent:'space-between',paddingTop:6,paddingBottom:4}}>
-            <span style={{fontSize:7,color:'#94a3b8',fontWeight:600,letterSpacing:'0.03em',marginBottom:2}}>STAGES</span>
+        <div style={{display:'flex',gap:10,alignItems:'flex-start'}}>
+          {/* Zone 1 — stage pills */}
+          <div style={{width:76,flexShrink:0,display:'flex',flexDirection:'column',gap:2,paddingTop:14}}>
             {[['#2563eb','Kickoff'],['#15803d','Investig.'],['#6d28d9','Artefact'],['#c2410c','Repro'],['#0f766e','Escalation']].map(([c,lbl],i)=>(
-              <div key={i} style={{flex:1,display:'flex',alignItems:'center',gap:5,borderRadius:5,padding:'0 7px',margin:'1px 0',background:`${c}10`,border:`1px solid ${c}40`}}>
-                <div style={{width:6,height:6,borderRadius:'50%',background:c,flexShrink:0}}/>
+              <div key={i} style={{display:'flex',alignItems:'center',gap:4,borderRadius:4,padding:'2px 6px',background:`${c}10`,border:`1px solid ${c}30`}}>
+                <div style={{width:5,height:5,borderRadius:'50%',background:c,flexShrink:0}}/>
                 <span style={{fontSize:8,color:c,fontWeight:600}}>{lbl}</span>
               </div>
             ))}
           </div>
-          {/* Zone 2 — brain with 5 connector lines */}
-          <div style={{width:48,position:'relative',display:'flex',alignItems:'center',justifyContent:'center'}}>
-            <svg width="48" height="120" viewBox="0 0 48 120" style={{position:'absolute',inset:0}}>
-              {[14,32,50,68,86].map((y,i)=>(
-                <line key={i} x1="0" y1={y} x2="48" y2="60" stroke={C} strokeWidth="1" strokeOpacity="0.3"/>
-              ))}
-            </svg>
-            <div style={{position:'relative',zIndex:1,background:'#fffbeb',border:`2px solid ${C}60`,borderRadius:'50%',width:30,height:30,display:'flex',alignItems:'center',justifyContent:'center'}}>
-              <Ic n="BrainCircuit" size={14} color={C}/>
+          {/* Zone 2 — confidence bar table */}
+          <div style={{flex:1,display:'flex',flexDirection:'column',gap:4}}>
+            <span style={{fontSize:7,color:C,fontWeight:700,letterSpacing:'0.05em'}}>CONFIDENCE TIMELINE</span>
+            {/* Stage header */}
+            <div style={{display:'grid',gridTemplateColumns:'22px repeat(5,1fr)',gap:2,marginBottom:2}}>
+              <span/>
+              {stages.map(s=><span key={s} style={{fontSize:7,color:'#94a3b8',fontWeight:600,textAlign:'center'}}>{s}</span>)}
             </div>
-          </div>
-          {/* Zone 3 — confidence timeline */}
-          <div style={{flex:1.4,display:'flex',flexDirection:'column',paddingTop:6,paddingBottom:4,gap:2,overflow:'hidden'}}>
-            <span style={{fontSize:7,color:C,fontWeight:700,letterSpacing:'0.04em',flexShrink:0}}>CONFIDENCE TIMELINE</span>
-            <svg width="100%" viewBox="0 0 176 100">
-              {/* Y-axis labels */}
-              {[0,50,100].map(v=>(
-                <React.Fragment key={v}>
-                  <line x1="18" y1={yOf(v)} x2="172" y2={yOf(v)} stroke="#e2e8f0" strokeWidth="0.7"/>
-                  <text x="14" y={yOf(v)+2} fontSize="6" fill="#cbd5e1" textAnchor="end">{v}</text>
-                </React.Fragment>
-              ))}
-              {/* Stage tick labels */}
-              {xs.map((x,i)=>(
-                <text key={i} x={x} y="89" fontSize="7" fill="#94a3b8" textAnchor="middle">S{i+1}</text>
-              ))}
-              {/* Hypothesis lines + dots */}
-              {hyps.map(h=>(
-                <React.Fragment key={h.label}>
-                  <polyline points={h.pts.map((v,i)=>`${xs[i]},${yOf(v)}`).join(' ')} fill="none" stroke={h.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  {h.pts.map((v,i)=>(
-                    <circle key={i} cx={xs[i]} cy={yOf(v)} r="3" fill={h.color}/>
-                  ))}
-                </React.Fragment>
-              ))}
-              {/* Legend */}
-              {hyps.map((h,i)=>(
-                <React.Fragment key={h.label}>
-                  <line x1={18+i*36} y1="95" x2={30+i*36} y2="95" stroke={h.color} strokeWidth="2"/>
-                  <text x={33+i*36} y="98" fontSize="7" fill={h.color} fontWeight="700">{h.label}</text>
-                </React.Fragment>
-              ))}
-            </svg>
+            {/* Hypothesis rows */}
+            {hyps.map(h=>(
+              <div key={h.label} style={{display:'grid',gridTemplateColumns:'22px repeat(5,1fr)',gap:2,alignItems:'center'}}>
+                <span style={{fontSize:8,fontWeight:700,color:h.color}}>{h.label}</span>
+                {h.pts.map((v,i)=>(
+                  <div key={i} style={{background:'#f1f5f9',borderRadius:3,height:14,overflow:'hidden',position:'relative'}}>
+                    <div style={{position:'absolute',inset:0,right:`${100-v}%`,background:h.color,opacity:0.85,borderRadius:3}}/>
+                    <span style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',fontSize:7,fontWeight:600,color: v>40?'#fff':h.color}}>{v}%</span>
+                  </div>
+                ))}
+              </div>
+            ))}
           </div>
         </div>
       );
@@ -1149,8 +1124,6 @@ const STAGE_VISUAL_HINTS = {
   retrospective: [
     () => <HV.ConfBars bars={[['H1 — S1',12,'speculation'],['H1 — S2',45,'first artifact'],['H1 — S4',90,'reproduced']]} />,
     () => <HV.Contrast bad='"I would do the same next time"' good='"Ask for debug logs at Stage 1 — would have skipped Stage 3 entirely"' />,
-    () => <HV.Table cols={['Prompt','Used?','Would have helped at']} rows={[['UI link for behavior','✓ S1','—'],['Sandbox commands','✗','S4 Repro'],['Mermaid diagram','✗','S3 Artefact'],['Prerequisite concepts','✗','S1 Kickoff']]} />,
-    () => <HV.Table cols={['Prompt','Used?','Would have helped at']} rows={[['Evidence table','✓ S2','—'],['Hypothesis rank','✗','S2–S3'],['Escalation trigger','✗','S5'],['Confidence delta','✗','S3–S4']]} />,
   ],
 };
 
@@ -1395,9 +1368,23 @@ Unexpected behavior / evidence table / affected versions / workaround / investig
     steps: [
       "Which single artifact caused the biggest confidence shift — and at which stage?",
       "What would you do differently next time to reach that turning point faster?",
-      "From the Technical Insights prompts below, which ones did you actually use — and at which stage would the others have helped?\n\n• What Datadog UI link would best show the reported behavior?\n• What commands would let me verify this evidence in the sandbox or customer env?\n• List all evidence requiring a source outside Datadog docs/KB — with a mini technical description for each.\n• Share a Mermaid diagram presenting the current topic technically.\n• What prerequisite concepts do I need to understand before diagnosing this?",
-      "From the Investigation Insights prompts below, which ones did you actually use — and which would have changed your approach?\n\n• What is the minimum information I need to get the most reliable evidence?\n• Build an evidence table: Evidence | Supports H | Contradicts H | Weight.\n• Rank my top 3 hypotheses by current probability. What single piece of evidence would confirm or eliminate each?\n• At what point should I escalate — and what evidence would trigger that?\n• What evidence would increase or decrease confidence in the current leading hypothesis?",
     ],
+    quickPrompts: {
+      technical: [
+        "What would be the best UI link to show the reported behavior directly?",
+        "What commands would let me verify this evidence in the sandbox or customer environment?",
+        "List all evidence requiring a source outside the docs/internal KB — with a mini technical description for each.",
+        "Share a Mermaid diagram presenting the current topic in a technical way.",
+        "What prerequisite concepts do I need to understand before I can diagnose this issue?",
+      ],
+      investigation: [
+        "What is the minimum information I need from this topic to get the most reliable evidence?",
+        "Build an evidence table: Evidence | Supports hypothesis | Contradicts hypothesis | Weight.",
+        "Rank my top 3 hypotheses by current probability. What single piece of evidence would confirm or eliminate each?",
+        "At what point in this investigation should I escalate, and what evidence would trigger that?",
+        "What evidence would increase or decrease confidence in the current leading hypothesis?",
+      ],
+    },
     promptLight: `INSTRUCTIONS:
 Bonus — Retrospective. Replay the investigation as a confidence timeline.
 1. List every hypothesis from Stage 1
@@ -2092,6 +2079,55 @@ function App() {
                         </div>
                       )}
                     </div>
+
+                    {/* Quick Prompts card — retro stage only */}
+                    {stage.quickPrompts && (() => {
+                      const [qTab, setQTab] = React.useState('technical');
+                      const groups = {
+                        technical:    {label:'Technical Insights',    icon:'Wrench',    color:'#2563eb'},
+                        investigation:{label:'Investigation Insights', icon:'Microscope', color:'#6d28d9'},
+                      };
+                      const g = groups[qTab];
+                      return (
+                        <div style={{marginTop:10}}>
+                          <div className="checklist-label" style={{marginBottom:6}}>Quick Prompts</div>
+                          <div style={{border:'1px solid #e2e8f0',borderRadius:10,overflow:'hidden'}}>
+                            {/* Tab bar */}
+                            <div style={{display:'flex',background:'#f8fafc',borderBottom:'1px solid #e2e8f0',padding:3,gap:2}}>
+                              {Object.entries(groups).map(([id,{label,icon,color}])=>{
+                                const active = qTab===id;
+                                return (
+                                  <button key={id} onClick={()=>setQTab(id)} style={{
+                                    flex:1,border:'none',borderRadius:6,padding:'5px 6px',
+                                    fontSize:11,fontWeight:600,cursor:'pointer',
+                                    background:active?'#fff':'transparent',
+                                    color:active?color:'#94a3b8',
+                                    boxShadow:active?'0 1px 3px rgba(0,0,0,0.08)':'none',
+                                    transition:'all 0.15s',display:'flex',alignItems:'center',justifyContent:'center',gap:4,
+                                  }}>
+                                    <Ic n={icon} size={10}/>{label}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                            {/* Prompt list */}
+                            <div style={{padding:'8px 10px',display:'flex',flexDirection:'column',gap:4}}>
+                              {stage.quickPrompts[qTab].map((p,i)=>{
+                                const key=`qp_${qTab}_${i}`;
+                                return (
+                                  <div key={i} style={{display:'flex',alignItems:'flex-start',gap:6,padding:'5px 8px',borderRadius:6,background:`${g.color}07`,border:`1px solid ${g.color}20`}}>
+                                    <span style={{fontSize:12,color:'#475569',lineHeight:1.5,flex:1}}>{p}</span>
+                                    <button onClick={()=>{navigator.clipboard.writeText(p);setCopiedStage(key);setTimeout(()=>setCopiedStage(null),2000);}} style={{flexShrink:0,border:'none',background:'transparent',cursor:'pointer',color:copiedStage===key?g.color:'#94a3b8',padding:'2px 4px',borderRadius:4,fontSize:10,fontWeight:600,display:'flex',alignItems:'center',gap:3}}>
+                                      <Ic n={copiedStage===key?'Check':'Copy'} size={10}/>{copiedStage===key?'Copied':'Copy'}
+                                    </button>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </div>
                 </>
               );
