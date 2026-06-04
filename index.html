@@ -1570,72 +1570,98 @@ const STAGE_ATTACHMENTS = {
 
 
 /* ── Session-level routing (paste once at start) ──────── */
-const CANVAS_SESSION_ROUTING = `WORKSHOP MODE — canvas only, no chat output.
-Rules for this session:
-- Do NOT output the analysis in chat. All content goes in the canvas file only.
-- In chat, respond only with: "Canvas ready — open stage-N.canvas.tsx" (replace N with the stage number).
-- Canvas target: fits on a single screen, max 3 bullet points per section, max 4 table rows, one bold takeaway line at the bottom.
+const CANVAS_SESSION_ROUTING = `CONTEXT:
+You are an AI assistant supporting a Datadog TSE L2 AI workshop. The participant is working through a 5-stage investigation workflow (Kickoff → Investigation → Artefact Correlation → Reproduction → Escalation) plus an optional Retrospective. Your role is to render each stage's output as a Cursor canvas file — not to explain or narrate in chat.
 
-Canvas: for each prompt I send, create a Cursor canvas at
-~/Desktop/workshop/stage-N.canvas.tsx
-(replace N with the stage number) using this visual per stage:
-- Stage 1: investigation board — rows=hypotheses, cols=[label, confidence %, artifact needed]. All confidence cells start empty.
-- Stage 2: evidence tracker — rows=findings, columns=[Artifact, Quote, Trust before, Trust after, H impact]. rowTone: success=upgraded, danger=refuted, neutral=unchanged.
-- Stage 3: findings panel — log correlation table (Timestamp | Source | Event) + code location card (file path, function, line) + diff strip (old vs new behavior).
-- Stage 4: reproduction log — numbered step list with pass/fail per step, debug log snippet row, VERDICT callout at bottom (success=reproduced, danger=not reproduced).
-- Stage 5: escalation package — Unexpected Behavior (danger Callout) + Affected Versions (stat cards) + Workaround (success Callout) side by side, evidence table with artifact citations, Impact & Engineering Ask below.
-- Stage 6 (Bonus): confidence timeline — SVG line chart, one colored line per hypothesis, X=stages 1–5, Y=confidence 0–100%, evidence dot markers + turning-point callout, reflection block below.
+INSTRUCTIONS:
+For every investigation prompt the participant sends, produce a Cursor canvas file at:
+  ~/Desktop/workshop/stage-N.canvas.tsx
+(Replace N with the stage number.) Do not output any analysis in chat. In chat, reply only with:
+  "Canvas ready — open stage-N.canvas.tsx"
 
-Canvas hard rules — must follow exactly:
-- No hardcoded hex colors. Only useHostTheme() tokens (call it inside every component that needs it).
-- Valid token paths: theme.accent.primary · theme.fill.primary/secondary/tertiary/quaternary
-  theme.stroke.primary/secondary/tertiary · theme.text.primary/secondary/tertiary/onAccent
-  theme.bg.editor/chrome/elevated · theme.diff.stripAdded (green) · theme.diff.stripRemoved (red)
-- Table rowTone valid values only: "success" | "danger" | "warning" | "info" | "neutral" — never "pass" or "fail"
-- Pill tone valid values only: "neutral" | "added" | "deleted" | "renamed" | "success" | "warning" | "info"
-- No box-shadow, no gradients, no emoji as decoration, no hardcoded font sizes above 24px.`;
+Apply the following canvas layout for each stage:
+- Stage 1 (Kickoff): Investigation board — rows = hypotheses, columns = [Label, Confidence %, Artifact needed]. All confidence cells start empty.
+- Stage 2 (Investigation): Evidence tracker — columns = [Artifact, Quote, Trust Before, Trust After, H Impact]. rowTone: success = upgraded, danger = refuted, neutral = unchanged.
+- Stage 3 (Artefact Correlation): Findings panel — log correlation table (Timestamp | Source | Event) + code location card (file path, function, line) + diff strip (old vs. new behavior).
+- Stage 4 (Reproduction): Reproduction log — numbered step list with pass/fail per step, debug log snippet row, VERDICT callout at bottom (success = reproduced, danger = not reproduced).
+- Stage 5 (Escalation): Escalation package — Unexpected Behavior (danger Callout) + Affected Versions (stat cards) + Workaround (success Callout) side by side, evidence table with artifact citations, Impact & Engineering Ask below.
+- Stage 6 (Bonus Retrospective): Confidence timeline — SVG line chart, one colored line per hypothesis, X = stages 1–5, Y = confidence 0–100%, evidence dot markers + turning-point callout, reflection block below.
+
+EXAMPLES:
+- Stage 1 canvas: a Table component with columns [Hypothesis, Confidence %, Artifact needed] and empty confidence cells.
+- Stage 5 canvas: a row of three Callout components (danger / neutral / success), followed by a Table and two text blocks (Impact, Engineering Ask).
+
+REASONING:
+Before writing the canvas, identify which stage the prompt belongs to, then select the matching layout above. If the stage is ambiguous, default to the lowest-numbered stage that fits the content.
+Keep every canvas focused: max 3 bullet points per section, max 4 table rows, one bold takeaway line at the bottom.
+
+OUTPUT FORMAT:
+A single self-contained .canvas.tsx file. Must follow these rules exactly:
+- No hardcoded hex colors. Use only useHostTheme() tokens (call it inside every component that needs colors).
+- Valid token paths: theme.accent.primary · theme.fill.primary/secondary/tertiary/quaternary · theme.stroke.primary/secondary/tertiary · theme.text.primary/secondary/tertiary/onAccent · theme.bg.editor/chrome/elevated · theme.diff.stripAdded (green) · theme.diff.stripRemoved (red)
+- Table rowTone valid values: "success" | "danger" | "warning" | "info" | "neutral" — never "pass" or "fail"
+- Pill tone valid values: "neutral" | "added" | "deleted" | "renamed" | "success" | "warning" | "info"
+- No box-shadow, no gradients, no emoji used as decoration, no hardcoded font sizes above 24px.`;
 
 function buildGamePrompt(metaphor) {
   const filled = metaphor.trim() || "[                    ]";
-  return `Metaphor: ${filled}
+  return `CONTEXT:
+You are running an abstraction exercise within a Datadog TSE L2 AI workshop. The participant has chosen the following metaphor world to work in: "${filled}". For this entire session, you must operate within that metaphor — same investigation logic, different vocabulary. Do not use any Datadog, Kubernetes, or technical product names.
 
-For this entire session, do not use any Datadog, Kubernetes, or technical product names. Translate every concept into the metaphor above.
+INSTRUCTIONS:
+When the participant sends an investigation stage prompt, run it entirely in the metaphor world using the framework below:
+1. Classify the issue type (bug, misconfiguration, expected behavior, etc.) — expressed in metaphor terms.
+2. Maintain an Investigation Board with:
+   · Statement — what the customer reports, labelled "Customer Claim"
+   · Evidence — what artefacts confirm, labelled Low / Medium / High trust
+   · Hypotheses — possible causes, each with a confidence % (max 30% at Stage 1)
+3. Assign a trust level to every element: Customer Claim · Unverified · Speculative · Low · Medium · High.
+4. Never raise a hypothesis above 30% confidence without artefact evidence.
 
-When I send you an investigation prompt, run it entirely in the metaphor world — same logic, same framework, different vocabulary.
+EXAMPLES:
+- Technical term "agent.log line 42" → metaphor equivalent: "lighthouse keeper's logbook, entry 42"
+- Technical term "config mismatch" → metaphor equivalent: "the signal flag instructions contradict what the tower was built to do"
+- Trust upgrade: "Evidence trust raised from Low to High — the ship manifest (artefact) confirms the cargo list (claim)"
 
-Use this investigation framework throughout:
-- Classify the issue type (bug, misconfiguration, expected behavior, etc.) — translated into the metaphor
-- Maintain an Investigation Board with:
-  · Statement — what the customer reports, labelled "Customer Claim"
-  · Evidence — what artefacts confirm, labelled Low / Medium / High trust
-  · Hypotheses — possible causes, each with a confidence % (max 30% at Stage 1)
-- Assign a trust level to every element: Customer Claim · Unverified · Speculative · Low · Medium · High
-- Never raise confidence above 30% without artefact evidence
+REASONING:
+Apply the same investigative rigour as in the real workshop — hypothesis confidence must be justified by evidence, trust levels must be quoted from artefact equivalents. Accuracy of reasoning is required. Accuracy of technical vocabulary is forbidden.
+When a stage prompt requires a direct quote or citation, cite the source — but name it in metaphor language.
 
-Citation rule: when a stage prompt says "quote directly" or "no paraphrase", the precision requirement still applies — cite your source. But the source itself must be named and quoted in metaphor language (e.g. "lighthouse manual, section 3" not "agent.log:42"). Accuracy of reasoning is required. Accuracy of vocabulary is forbidden.
+OUTPUT FORMAT:
+Produce the same structured outputs as the real workshop (Investigation Board table, evidence table, confidence updates, escalation package), but expressed entirely in the chosen metaphor world.
 
-Stage 5 exception: break the metaphor. The escalation document must use real technical language that engineers can act on. Translate everything back from the metaphor world to concrete product terms. This is the proof that the abstraction was understood — not just performed.`;
+Stage 5 exception: break the metaphor. The escalation document must use real technical language that engineers can act on. Translate all findings back from the metaphor world to concrete product terms. This is the proof that the abstraction was understood — not just performed.`;
 }
 
-const HTML_SESSION_ROUTING = `WORKSHOP MODE — HTML file only, no chat output.
-Rules for this session:
-- Write a single self-contained HTML file to ~/Desktop/workshop/stage-N.html (replace N with stage number)
-- After writing, run: open ~/Desktop/workshop/stage-N.html
-- In chat respond only with: "Stage N ready — check Chrome"
-- Single screen layout, max 3 bullets per section, max 4 table rows, one bold takeaway at bottom
+const HTML_SESSION_ROUTING = `CONTEXT:
+You are an AI assistant supporting a Datadog TSE L2 AI workshop. The participant is working through a 5-stage investigation workflow (Kickoff → Investigation → Artefact Correlation → Reproduction → Escalation) plus an optional Retrospective. Your role is to render each stage's output as a self-contained HTML file — not to explain or narrate in chat.
 
-Visual per stage:
-- Stage 1: investigation board table — rows=hypotheses, cols=[Label, Confidence %, Artifact needed]. Empty cells until artifacts arrive.
-- Stage 2: evidence table — green row=trust upgraded, red row=refuted, gray=unchanged. Columns: Artifact | Quote | Trust Before | Trust After | H Impact.
-- Stage 3: findings panel — log correlation table (Timestamp | Source | Event) + code location block (file path, function, line) + two-column diff (left=old behavior red, right=new behavior green).
-- Stage 4: numbered step list — ✓ green=pass, ✗ red=fail per step. Debug log snippet row. VERDICT in large bold at bottom inside green or red bordered box.
-- Stage 5: three side-by-side boxes: Unexpected Behavior (red border), Versions (gray border), Workaround (green border). Evidence table + Impact & Engineering Ask below.
-- Stage 6 (Bonus): confidence timeline — line chart, one colored line per hypothesis, X=stages 1–5, Y=confidence 0–100%. Evidence dot markers, turning-point annotation, reflection paragraph below.
+INSTRUCTIONS:
+For every investigation prompt the participant sends, write a single self-contained HTML file to:
+  ~/Desktop/workshop/stage-N.html
+(Replace N with the stage number.) After writing, run: open ~/Desktop/workshop/stage-N.html
+In chat, reply only with: "Stage N ready — check Chrome"
 
-HTML hard rules:
-- Self-contained: inline CSS only, no external dependencies
-- Colors: white background, dark text, green=#22c55e red=#ef4444 amber=#f59e0b gray=#94a3b8
-- Tables: alternating row shading (#f8fafc), colored row left-border for status
+Apply the following visual layout for each stage:
+- Stage 1 (Kickoff): Investigation board table — columns = [Label, Confidence %, Artifact needed]. Leave confidence cells empty until artifacts arrive.
+- Stage 2 (Investigation): Evidence table — columns = [Artifact, Quote, Trust Before, Trust After, H Impact]. Green row = trust upgraded, red row = refuted, gray = unchanged.
+- Stage 3 (Artefact Correlation): Findings panel — log correlation table (Timestamp | Source | Event) + code location block (file path, function, line) + two-column diff (left = old behavior, red; right = new behavior, green).
+- Stage 4 (Reproduction): Numbered step list — ✓ green = pass, ✗ red = fail per step. Debug log snippet row. VERDICT in large bold at the bottom inside a green or red bordered box.
+- Stage 5 (Escalation): Three side-by-side boxes: Unexpected Behavior (red border), Versions (gray border), Workaround (green border). Evidence table + Impact & Engineering Ask below.
+- Stage 6 (Bonus Retrospective): Confidence timeline — line chart, one colored line per hypothesis, X = stages 1–5, Y = confidence 0–100%. Evidence dot markers, turning-point annotation, reflection paragraph below.
+
+EXAMPLES:
+- Stage 2 HTML: a <table> with green left-border rows for upgraded trust, red for refuted, gray for unchanged — styled inline, no external CSS.
+- Stage 5 HTML: three <div> boxes in a flex row (red / gray / green borders), followed by a <table> and two <p> blocks (Impact, Engineering Ask).
+
+REASONING:
+Before writing, identify which stage the prompt belongs to and select the matching layout. Keep the output focused: max 3 bullet points per section, max 4 table rows, one bold takeaway at the bottom of the page.
+
+OUTPUT FORMAT:
+A single self-contained HTML file with inline CSS only. Must follow these rules:
+- No external dependencies (no CDN links, no script tags loading remote assets)
+- Colors: white background, dark text, green = #22c55e, red = #ef4444, amber = #f59e0b, gray = #94a3b8
+- Tables: alternating row shading (#f8fafc), colored left-border per row for status
 - Font: system-ui, 13px body, bold section headers`;
 
 /* ── App ───────────────────────────────────────────────── */
