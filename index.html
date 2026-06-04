@@ -1148,9 +1148,9 @@ const STAGE_VISUAL_HINTS = {
   ],
   retrospective: [
     () => <HV.ConfBars bars={[['H1 — S1',12,'speculation'],['H1 — S2',45,'first artifact'],['H1 — S4',90,'reproduced']]} />,
-    () => <HV.Contrast bad='"Evidence was useful"' good='"artifact.log:42 moved H1 from 12% → 45% at Stage 2 — biggest single jump"' />,
-    () => <HV.Table cols={['Hypothesis','Ruled out at','Evidence']} rows={[['H2','Stage 3','code trace showed unrelated path'],['H3','Stage 2','config mismatch ruled this out']]} />,
     () => <HV.Contrast bad='"I would do the same next time"' good='"Ask for debug logs at Stage 1 — would have skipped Stage 3 entirely"' />,
+    () => <HV.Table cols={['Prompt','Used?','Would have helped at']} rows={[['UI link for behavior','✓ S1','—'],['Sandbox commands','✗','S4 Repro'],['Mermaid diagram','✗','S3 Artefact'],['Prerequisite concepts','✗','S1 Kickoff']]} />,
+    () => <HV.Table cols={['Prompt','Used?','Would have helped at']} rows={[['Evidence table','✓ S2','—'],['Hypothesis rank','✗','S2–S3'],['Escalation trigger','✗','S5'],['Confidence delta','✗','S3–S4']]} />,
   ],
 };
 
@@ -1395,6 +1395,8 @@ Unexpected behavior / evidence table / affected versions / workaround / investig
     steps: [
       "Which single artifact caused the biggest confidence shift — and at which stage?",
       "What would you do differently next time to reach that turning point faster?",
+      "From the Technical Insights prompts below, which ones did you actually use — and at which stage would the others have helped?\n\n• What Datadog UI link would best show the reported behavior?\n• What commands would let me verify this evidence in the sandbox or customer env?\n• List all evidence requiring a source outside Datadog docs/KB — with a mini technical description for each.\n• Share a Mermaid diagram presenting the current topic technically.\n• What prerequisite concepts do I need to understand before diagnosing this?",
+      "From the Investigation Insights prompts below, which ones did you actually use — and which would have changed your approach?\n\n• What is the minimum information I need to get the most reliable evidence?\n• Build an evidence table: Evidence | Supports H | Contradicts H | Weight.\n• Rank my top 3 hypotheses by current probability. What single piece of evidence would confirm or eliminate each?\n• At what point should I escalate — and what evidence would trigger that?\n• What evidence would increase or decrease confidence in the current leading hypothesis?",
     ],
     promptLight: `INSTRUCTIONS:
 Bonus — Retrospective. Replay the investigation as a confidence timeline.
