@@ -1033,41 +1033,47 @@ const STAGE_VISUALS = {
         {label:'H1', color:'#2563eb', pts:[12,45,72,90,90]},
         {label:'H2', color:'#dc2626', pts:[18,25,10,4,0]},
       ];
+      // row heights: header row + one row per hypothesis
+      const rowH = 28;
+      const headerH = 18;
+      const totalH = headerH + hyps.length * rowH + 8;
       return (
-        <div style={{display:'flex',alignItems:'stretch',gap:0,height:120}}>
-          {/* Zone 1 — stage pills */}
-          <div style={{flex:1,display:'flex',flexDirection:'column',justifyContent:'space-between',paddingTop:6,paddingBottom:4}}>
-            <span style={{fontSize:7,color:'#94a3b8',fontWeight:600,letterSpacing:'0.03em',marginBottom:2}}>STAGES</span>
-            {[['#2563eb','Kickoff'],['#15803d','Investig.'],['#6d28d9','Artefact'],['#c2410c','Repro'],['#0f766e','Escalation']].map(([c,lbl],i)=>(
-              <div key={i} style={{flex:1,display:'flex',alignItems:'center',gap:5,borderRadius:5,padding:'0 7px',margin:'1px 0',background:`${c}10`,border:`1px solid ${c}40`}}>
-                <div style={{width:6,height:6,borderRadius:'50%',background:c,flexShrink:0}}/>
-                <span style={{fontSize:8,color:c,fontWeight:600}}>{lbl}</span>
+        <div style={{display:'flex',alignItems:'stretch',gap:0,height:totalH}}>
+          {/* Zone 1 — hypothesis labels (match right-panel rows) */}
+          <div style={{flex:1,display:'flex',flexDirection:'column',gap:2,paddingTop:headerH+4}}>
+            {hyps.map((h,i)=>(
+              <div key={i} style={{height:rowH,display:'flex',alignItems:'center',gap:5,borderRadius:5,padding:'0 7px',background:`${h.color}10`,border:`1px solid ${h.color}40`}}>
+                <div style={{width:6,height:6,borderRadius:'50%',background:h.color,flexShrink:0}}/>
+                <span style={{fontSize:8,color:h.color,fontWeight:700}}>{h.label}</span>
+                <span style={{fontSize:7,color:'#94a3b8',marginLeft:'auto'}}>{h.pts[0]}%→{h.pts[h.pts.length-1]}%</span>
               </div>
             ))}
           </div>
-          {/* Zone 2 — brain connector */}
-          <div style={{width:48,position:'relative',display:'flex',alignItems:'center',justifyContent:'center'}}>
-            <svg width="48" height="120" viewBox="0 0 48 120" style={{position:'absolute',inset:0}}>
-              {[14,32,50,68,86].map((y,i)=>(
-                <line key={i} x1="0" y1={y} x2="48" y2="60" stroke={C} strokeWidth="1" strokeOpacity="0.3"/>
-              ))}
+          {/* Zone 2 — brain connector, lines from each hyp row to center */}
+          <div style={{width:44,position:'relative',display:'flex',alignItems:'center',justifyContent:'center'}}>
+            <svg width="44" height={totalH} viewBox={`0 0 44 ${totalH}`} style={{position:'absolute',inset:0}}>
+              {hyps.map((_,i)=>{
+                const y = headerH + 4 + i * rowH + rowH / 2;
+                return <line key={i} x1="0" y1={y} x2="44" y2={totalH/2} stroke={C} strokeWidth="1" strokeOpacity="0.35"/>;
+              })}
             </svg>
-            <div style={{position:'relative',zIndex:1,background:'#fffbeb',border:`2px solid ${C}60`,borderRadius:'50%',width:30,height:30,display:'flex',alignItems:'center',justifyContent:'center'}}>
-              <Ic n="BrainCircuit" size={14} color={C}/>
+            <div style={{position:'relative',zIndex:1,background:'#fffbeb',border:`2px solid ${C}60`,borderRadius:'50%',width:28,height:28,display:'flex',alignItems:'center',justifyContent:'center'}}>
+              <Ic n="BrainCircuit" size={13} color={C}/>
             </div>
           </div>
-          {/* Zone 3 — confidence bar table */}
-          <div style={{flex:1.3,display:'flex',flexDirection:'column',paddingTop:6,paddingBottom:4,gap:3}}>
-            <span style={{fontSize:7,color:C,fontWeight:700,letterSpacing:'0.04em'}}>CONFIDENCE TIMELINE</span>
-            <div style={{display:'grid',gridTemplateColumns:'20px repeat(5,1fr)',gap:2}}>
-              <span/>
-              {stages.map(s=><span key={s} style={{fontSize:7,color:'#94a3b8',fontWeight:600,textAlign:'center'}}>{s}</span>)}
+          {/* Zone 3 — confidence bar table, rows = hyps, cols = stages */}
+          <div style={{flex:1.4,display:'flex',flexDirection:'column',gap:2}}>
+            <div style={{height:headerH,display:'flex',alignItems:'flex-end',paddingBottom:2}}>
+              <span style={{fontSize:7,color:C,fontWeight:700,letterSpacing:'0.04em',flex:'0 0 18px'}}/>
+              <div style={{flex:1,display:'grid',gridTemplateColumns:`repeat(${stages.length},1fr)`,gap:2}}>
+                {stages.map(s=><span key={s} style={{fontSize:7,color:'#94a3b8',fontWeight:600,textAlign:'center'}}>{s}</span>)}
+              </div>
             </div>
             {hyps.map(h=>(
-              <div key={h.label} style={{display:'grid',gridTemplateColumns:'20px repeat(5,1fr)',gap:2,alignItems:'center',flex:1}}>
+              <div key={h.label} style={{height:rowH,display:'grid',gridTemplateColumns:`18px repeat(${stages.length},1fr)`,gap:2,alignItems:'center'}}>
                 <span style={{fontSize:8,fontWeight:700,color:h.color}}>{h.label}</span>
                 {h.pts.map((v,i)=>(
-                  <div key={i} style={{background:'#f1f5f9',borderRadius:3,height:'100%',minHeight:14,overflow:'hidden',position:'relative'}}>
+                  <div key={i} style={{background:'#f1f5f9',borderRadius:3,height:rowH-6,overflow:'hidden',position:'relative'}}>
                     <div style={{position:'absolute',inset:0,right:`${100-v}%`,background:h.color,opacity:0.8,borderRadius:3}}/>
                     <span style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',fontSize:7,fontWeight:600,color:v>40?'#fff':h.color}}>{v}%</span>
                   </div>
