@@ -1745,7 +1745,7 @@ function App() {
     if (stageIndex === 0) {
       return base + `\n\n---\nCUSTOMER MESSAGE:\n${raw}`;
     }
-    return base + `\n\n---\n[Paste Stage ${stageIndex} output here]`;
+    return base;
   }
 
   function copyPrompt(stage) {
