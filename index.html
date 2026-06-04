@@ -2048,12 +2048,8 @@ function App() {
             ) : (
               /* Stages 2–5: collapsed message pill */
               <div style={{display:'flex',alignItems:'center',gap:8,padding:'6px 10px',background:'#f8fafc',border:'1px solid #e2e8f0',borderRadius:8,marginBottom:4}}>
-                <Ic n="MessageSquare" size={13} color="#94a3b8"/>
-                <span style={{fontSize:11,color:'#94a3b8',flex:1}}>
-                  {lines.length > 0 ? 'Customer message loaded' : 'No message loaded'}
-                </span>
                 {totalTags > 0 && <span className="count-badge" style={{flexShrink:0}}>{totalTags} tag{totalTags!==1?'s':''}</span>}
-                <button className="toggle-btn" style={{flexShrink:0,fontSize:10}} onClick={() => setActiveStage('triage')}>View →</button>
+                <button className="toggle-btn" style={{flexShrink:0,fontSize:10}} onClick={() => setActiveStage('triage')}>View message →</button>
               </div>
             )}
 
