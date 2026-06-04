@@ -20,7 +20,7 @@
       box-sizing: border-box;
     }
 
-    .app { width: 100%; max-width: 1024px; margin: 0 auto; display: flex; flex-direction: row; align-items: flex-start; }
+    .app { width: 100%; max-width: 1024px; margin: 0; display: flex; flex-direction: row; align-items: flex-start; }
 
     /* Sidebar */
     .sidebar {
@@ -1383,6 +1383,13 @@ Unexpected behavior / evidence table / affected versions / workaround / investig
         "At what point in this investigation should I escalate, and what evidence would trigger that decision?",
         "What evidence would increase or decrease confidence in the current leading hypothesis?",
       ],
+      skills: [
+        "Which of the 5 investigation stages felt most natural, and which required the most effort? What does that reveal about a skill gap?",
+        "At which stage did you first form a strong hypothesis? What slowed or accelerated that moment?",
+        "Where did you rely on intuition rather than evidence? Would a more structured approach have helped?",
+        "What is one investigative habit you applied well in this session that you want to reinforce?",
+        "What is one skill you would prioritize improving before your next L2 investigation?",
+      ],
     },
     promptLight: `INSTRUCTIONS:
 Bonus — Retrospective. Replay the investigation as a confidence timeline:
@@ -2144,6 +2151,7 @@ function App() {
                       const groups = {
                         technical:    {label:'Technical Insights',    icon:'Wrench',    color:'#2563eb'},
                         investigation:{label:'Investigation Insights', icon:'Microscope', color:'#6d28d9'},
+                        skills:       {label:'Skills Reflection',      icon:'GraduationCap', color:'#0f766e'},
                       };
                       const g = groups[qTab];
                       return (
