@@ -1861,22 +1861,6 @@ function App() {
                 A 5-stage structured investigation framework — from customer message to escalation package — guided by AI prompts and visual hints.
               </div>
             </div>
-            {/* Stage pills */}
-            <div style={{display:'flex',gap:8,flexWrap:'wrap',justifyContent:'center'}}>
-              {[
-                {n:'1',label:'Kickoff',      color:'#2563eb'},
-                {n:'2',label:'Investigation',color:'#15803d'},
-                {n:'3',label:'Artefact',     color:'#6d28d9'},
-                {n:'4',label:'Reproduction', color:'#c2410c'},
-                {n:'5',label:'Escalation',   color:'#0f766e'},
-                {n:'★',label:'Retrospection',color:'#d97706'},
-              ].map(s=>(
-                <div key={s.n} style={{display:'flex',alignItems:'center',gap:6,background:`${s.color}0f`,border:`1px solid ${s.color}30`,borderRadius:20,padding:'5px 12px'}}>
-                  <span style={{fontSize:10,fontWeight:800,color:s.color}}>{s.n}</span>
-                  <span style={{fontSize:12,fontWeight:500,color:s.color}}>{s.label}</span>
-                </div>
-              ))}
-            </div>
             <button
               onClick={() => setActiveStage("prep")}
               style={{background:'#2563eb',color:'#fff',border:'none',borderRadius:10,padding:'12px 32px',fontSize:14,fontWeight:700,cursor:'pointer',boxShadow:'0 2px 12px #2563eb40',letterSpacing:'0.01em'}}
@@ -1885,7 +1869,6 @@ function App() {
             >
               Start Workshop →
             </button>
-            <div style={{fontSize:11,color:'#94a3b8'}}>Paste a customer message, annotate it, and work through each stage with AI prompts.</div>
           </div>
         )}
 
