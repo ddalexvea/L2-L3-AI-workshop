@@ -1740,8 +1740,16 @@ function App() {
     setActiveStage(prev => prev === id ? null : id);
   }
 
+  function buildPromptWithContext(stage, base) {
+    const stageIndex = STAGES.findIndex(s => s.id === stage.id);
+    if (stageIndex === 0) {
+      return base + `\n\n---\nCUSTOMER MESSAGE:\n${raw}`;
+    }
+    return base + `\n\n---\n[Paste Stage ${stageIndex} output here]`;
+  }
+
   function copyPrompt(stage) {
-    navigator.clipboard.writeText(stage.prompt).then(() => {
+    navigator.clipboard.writeText(buildPromptWithContext(stage, stage.prompt)).then(() => {
       setCopiedStage(stage.id);
       setTimeout(() => setCopiedStage(null), 2000);
     });
@@ -2132,7 +2140,7 @@ function App() {
                           <div className="stage-prompt" style={{padding:0}}>
                             <PillarPrompt text={stage.promptLight}/>
                           </div>
-                          <button className="stage-copy-btn" onClick={() => { navigator.clipboard.writeText(stage.promptLight); setCopiedStage(stage.id + "_light"); setTimeout(() => setCopiedStage(null), 2000); }}>
+                          <button className="stage-copy-btn" onClick={() => { navigator.clipboard.writeText(buildPromptWithContext(stage, stage.promptLight)); setCopiedStage(stage.id + "_light"); setTimeout(() => setCopiedStage(null), 2000); }}>
                             {copiedStage === stage.id + "_light" ? <><Ic n="Check" size={11}/> Copied!</> : <><Ic n="Copy" size={11}/> Copy</>}
                           </button>
                         </div>
