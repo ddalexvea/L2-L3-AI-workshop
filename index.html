@@ -782,6 +782,7 @@ const HV = {
 const STAGE_VISUALS = {
   triage: {
     color:'#2563eb', icon:'SearchCheck',
+    concept: 'Extract structure from noise — before opening a single artifact.',
     graphic: () => {
       const C = '#2563eb';
       return (
@@ -828,6 +829,7 @@ const STAGE_VISUALS = {
   },
   investigation: {
     color:'#15803d', icon:'Microscope',
+    concept: 'Compare what was configured vs. what actually ran — find the gap.',
     graphic: () => {
       const C = '#15803d';
       const rows = [
@@ -880,6 +882,7 @@ const STAGE_VISUALS = {
   },
   artefact: {
     color:'#6d28d9', icon:'GitMerge',
+    concept: 'Pinpoint the exact code location and commit where the behavior lives.',
     graphic: () => {
       const C = '#6d28d9';
       const rightRows = [
@@ -937,6 +940,7 @@ const STAGE_VISUALS = {
   },
   reproduction: {
     color:'#c2410c', icon:'FlaskConical',
+    concept: 'Verify the hypothesis by reproducing the symptom in a controlled sandbox.',
     graphic: () => {
       const C = '#c2410c';
       const leftRows = [
@@ -990,6 +994,7 @@ const STAGE_VISUALS = {
   },
   escalation: {
     color:'#0f766e', icon:'Send',
+    concept: 'Compress 4 stages of investigation into a package an engineer can act on immediately.',
     graphic: () => {
       const C = '#0f766e';
       return (
@@ -1039,16 +1044,17 @@ const STAGE_VISUALS = {
   },
   retrospective: {
     color:'#d97706', icon:'TrendingUp',
+    concept: 'Turn 5 stages of evidence into a hypothesis confidence timeline.',
     graphic: () => {
       const C = '#d97706';
-      const xs = [16,46,76,106,136];
-      const yOf = v => 8 + (1 - v/100) * 60;
+      const xs = [18,52,86,120,154];
+      const yOf = v => 10 + (1 - v/100) * 80;
       const hyps = [
         {label:'H1', color:'#2563eb', pts:[12,45,72,90,90]},
         {label:'H2', color:'#dc2626', pts:[18,25,10,4,0]},
       ];
       return (
-        <div style={{display:'flex',alignItems:'stretch',gap:0,height:120}}>
+        <div style={{display:'flex',alignItems:'stretch',gap:0,height:148}}>
           {/* Zone 1 — all 5 stages as inputs */}
           <div style={{flex:1,display:'flex',flexDirection:'column',justifyContent:'space-between',paddingTop:6,paddingBottom:4}}>
             <span style={{fontSize:7,color:'#94a3b8',fontWeight:600,letterSpacing:'0.03em',marginBottom:2}}>STAGES</span>
@@ -1061,9 +1067,9 @@ const STAGE_VISUALS = {
           </div>
           {/* Zone 2 — brain with 5 lines */}
           <div style={{width:48,position:'relative',display:'flex',alignItems:'center',justifyContent:'center'}}>
-            <svg width="48" height="120" viewBox="0 0 48 120" style={{position:'absolute',inset:0}}>
-              {[20,33,47,60,73,87].map((y,i)=>(
-                <line key={i} x1="0" y1={y} x2="48" y2="60" stroke={C} strokeWidth="1" strokeOpacity="0.3"/>
+            <svg width="48" height="148" viewBox="0 0 48 148" style={{position:'absolute',inset:0}}>
+              {[18,38,58,78,98].map((y,i)=>(
+                <line key={i} x1="0" y1={y} x2="48" y2="74" stroke={C} strokeWidth="1" strokeOpacity="0.3"/>
               ))}
             </svg>
             <div style={{position:'relative',zIndex:1,background:'#fffbeb',border:`2px solid ${C}60`,borderRadius:'50%',width:30,height:30,display:'flex',alignItems:'center',justifyContent:'center'}}>
@@ -1071,31 +1077,34 @@ const STAGE_VISUALS = {
             </div>
           </div>
           {/* Zone 3 — confidence timeline SVG */}
-          <div style={{flex:1.3,display:'flex',flexDirection:'column',justifyContent:'space-between',paddingTop:6,paddingBottom:4}}>
-            <span style={{fontSize:7,color:C,fontWeight:700,letterSpacing:'0.04em',marginBottom:2}}>CONFIDENCE TIMELINE</span>
-            <svg width="100%" height="96" viewBox="0 0 152 86" preserveAspectRatio="none">
-              {/* Grid */}
-              {[0,25,50,75,100].map(v=>(
-                <line key={v} x1="12" y1={yOf(v)} x2="148" y2={yOf(v)} stroke="#e2e8f0" strokeWidth="0.5"/>
+          <div style={{flex:1.4,display:'flex',flexDirection:'column',paddingTop:6,paddingBottom:4,gap:4}}>
+            <span style={{fontSize:7,color:C,fontWeight:700,letterSpacing:'0.04em'}}>CONFIDENCE TIMELINE</span>
+            <svg width="100%" height="120" viewBox="0 0 176 110" preserveAspectRatio="xMidYMid meet">
+              {/* Y-axis labels */}
+              {[0,50,100].map(v=>(
+                <React.Fragment key={v}>
+                  <line x1="18" y1={yOf(v)} x2="172" y2={yOf(v)} stroke="#e2e8f0" strokeWidth="0.7"/>
+                  <text x="14" y={yOf(v)+2} fontSize="6" fill="#cbd5e1" textAnchor="end">{v}</text>
+                </React.Fragment>
               ))}
               {/* Stage tick labels */}
               {xs.map((x,i)=>(
-                <text key={i} x={x} y="76" fontSize="6.5" fill="#94a3b8" textAnchor="middle">S{i+1}</text>
+                <text key={i} x={x} y="100" fontSize="7" fill="#94a3b8" textAnchor="middle">S{i+1}</text>
               ))}
               {/* Hypothesis lines + dots */}
               {hyps.map(h=>(
                 <React.Fragment key={h.label}>
-                  <polyline points={h.pts.map((v,i)=>`${xs[i]},${yOf(v)}`).join(' ')} fill="none" stroke={h.color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <polyline points={h.pts.map((v,i)=>`${xs[i]},${yOf(v)}`).join(' ')} fill="none" stroke={h.color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   {h.pts.map((v,i)=>(
-                    <circle key={i} cx={xs[i]} cy={yOf(v)} r="2.5" fill={h.color}/>
+                    <circle key={i} cx={xs[i]} cy={yOf(v)} r="3" fill={h.color}/>
                   ))}
                 </React.Fragment>
               ))}
               {/* Legend */}
               {hyps.map((h,i)=>(
                 <React.Fragment key={h.label}>
-                  <line x1={12+i*30} y1="82" x2={22+i*30} y2="82" stroke={h.color} strokeWidth="1.5"/>
-                  <text x={24+i*30} y="85" fontSize="6" fill={h.color} fontWeight="600">{h.label}</text>
+                  <line x1={18+i*36} y1="107" x2={30+i*36} y2="107" stroke={h.color} strokeWidth="2"/>
+                  <text x={33+i*36} y="110" fontSize="7" fill={h.color} fontWeight="700">{h.label}</text>
                 </React.Fragment>
               ))}
             </svg>
@@ -2003,12 +2012,7 @@ function App() {
                             <div style={{width:26,height:26,borderRadius:6,background:sv.color,display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
                               <Ic n={sv.icon} size={13} color="#fff"/>
                             </div>
-                            <div style={{flex:1,display:'flex',gap:6}}>
-                              <Ic n="Eye" size={12} color={sv.color}/>
-                              <Ic n="Brain" size={12} color={sv.color}/>
-                              <Ic n="ArrowRight" size={12} color={`${sv.color}80`}/>
-                              <Ic n="FileCheck" size={12} color={sv.color}/>
-                            </div>
+                            <span style={{fontSize:12,fontWeight:600,color:'#1e293b',lineHeight:1.3,flex:1}}>{sv.concept}</span>
                             <Ic n="ChevronDown" size={13} color={sv.color} style={{flexShrink:0,transition:'transform 0.2s'}} className="visual-chevron"/>
                           </summary>
                           {/* Full-width graphic */}
