@@ -603,6 +603,92 @@ function WorkshopModeVisual() {
   );
 }
 
+/* ── Investigation framework visual ────────────────────── */
+function InvestigationFrameworkVisual() {
+  const BoardRow = ({ trust, tc, label, text }) => (
+    <div style={{display:'flex',alignItems:'flex-start',gap:6,marginBottom:6}}>
+      <div style={{flex:1,background:'rgba(255,255,255,0.85)',borderRadius:6,padding:'5px 8px',borderLeft:`3px solid ${tc}`}}>
+        <div style={{display:'flex',alignItems:'center',gap:5,marginBottom:2}}>
+          <span style={{fontSize:8,fontWeight:700,background:tc,color:'#fff',padding:'1px 5px',borderRadius:3,letterSpacing:'0.04em',flexShrink:0}}>{trust}</span>
+          <span style={{fontSize:10,fontWeight:700,color:'#374151'}}>{label}</span>
+        </div>
+        <div style={{fontSize:8,color:'#6b7280',fontStyle:'italic',lineHeight:1.4}}>{text}</div>
+      </div>
+    </div>
+  );
+
+  const TrustStep = ({ label, color, active }) => (
+    <div style={{display:'flex',alignItems:'center',gap:5,marginBottom:4}}>
+      <div style={{width:8,height:8,borderRadius:'50%',background:active?color:'#e2e8f0',flexShrink:0,border:`1.5px solid ${active?color:'#cbd5e1'}`}}/>
+      <span style={{fontSize:8,fontWeight:active?700:400,color:active?color:'#94a3b8'}}>{label}</span>
+    </div>
+  );
+
+  const ConfBar = ({ stage, pct, note }) => (
+    <div style={{display:'flex',alignItems:'center',gap:5,marginBottom:4}}>
+      <span style={{fontSize:8,color:'#374151',width:42,flexShrink:0}}>{stage}</span>
+      <div style={{flex:1,background:'#dcfce7',borderRadius:3,height:7,overflow:'hidden'}}>
+        <div style={{width:pct,background:'#16a34a',height:'100%',borderRadius:3,transition:'width 0.3s'}}/>
+      </div>
+      <span style={{fontSize:8,fontWeight:700,color:'#15803d',width:26,textAlign:'right'}}>{pct}</span>
+    </div>
+  );
+
+  return (
+    <div style={{margin:'14px 0'}}>
+      <div style={{display:'flex',gap:10,alignItems:'stretch'}}>
+
+        {/* Left — element types board */}
+        <div style={{flex:1,minWidth:0,background:'#f8fafc',border:'1.5px solid #e2e8f0',borderRadius:9,padding:'11px 12px'}}>
+          <div style={{fontSize:9,fontWeight:700,color:'#64748b',marginBottom:8,letterSpacing:'0.05em'}}>ELEMENT TYPES</div>
+          <BoardRow trust="STATEMENT" tc="#2563eb" label="Customer claim" text='"Logs missing for my-app since yesterday"' />
+          <BoardRow trust="EVIDENCE"  tc="#f59e0b" label="Artifact-backed fact" text='"agent.log:42 — exclude rule matched name:my-app"' />
+          <BoardRow trust="HYPOTHESIS" tc="#ef4444" label="Proposed cause" text='"exclude takes precedence over include (≤30% S1)"' />
+          <div style={{borderTop:'1px solid #e2e8f0',paddingTop:7,marginTop:2}}>
+            <div style={{fontSize:8,color:'#64748b',fontWeight:700,marginBottom:4,letterSpacing:'0.04em'}}>ARTIFACT NEEDED</div>
+            <div style={{background:'#fff',border:'1px solid #ddd6fe',borderRadius:5,padding:'4px 7px',borderLeft:'3px solid #7c3aed'}}>
+              <div style={{fontSize:8,color:'#6d28d9',fontStyle:'italic'}}>rule evaluation log — confirms or refutes H1</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Arrow */}
+        <div style={{display:'flex',flexDirection:'column',justifyContent:'center',alignItems:'center',gap:2,flexShrink:0,padding:'0 2px'}}>
+          <div style={{width:1,flex:1,background:'#e2e8f0'}}/>
+          <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:2,padding:'6px 0'}}>
+            <div style={{fontSize:16,color:'#15803d'}}>→</div>
+            <div style={{fontSize:7,color:'#16a34a',fontWeight:800,letterSpacing:'0.05em',textAlign:'center',lineHeight:1.4}}>EVIDENCE<br/>DRIVES IT</div>
+          </div>
+          <div style={{width:1,flex:1,background:'#e2e8f0'}}/>
+        </div>
+
+        {/* Right — trust ladder + confidence bars */}
+        <div style={{flex:1,minWidth:0,background:'#f0fdf4',border:'1.5px solid #86efac',borderRadius:9,padding:'11px 12px'}}>
+          <div style={{fontSize:9,fontWeight:700,color:'#15803d',marginBottom:8,letterSpacing:'0.05em'}}>TRUST LADDER</div>
+          <TrustStep label="Customer Claim" color="#94a3b8" active={false}/>
+          <TrustStep label="Unverified"     color="#94a3b8" active={false}/>
+          <TrustStep label="Speculative"    color="#f59e0b" active={true}/>
+          <TrustStep label="Low"            color="#f59e0b" active={true}/>
+          <TrustStep label="Medium"         color="#22c55e" active={true}/>
+          <TrustStep label="High"           color="#16a34a" active={true}/>
+          <div style={{fontSize:7,color:'#86efac',marginBottom:8,fontStyle:'italic',paddingLeft:13}}>upgrade only with a direct artifact quote</div>
+          <div style={{borderTop:'1px solid #bbf7d0',paddingTop:7}}>
+            <div style={{fontSize:8,color:'#15803d',fontWeight:700,marginBottom:4,letterSpacing:'0.04em'}}>CONFIDENCE PER STAGE</div>
+            <ConfBar stage="Stage 1" pct="20%" note="no artifacts yet — capped at 30%"/>
+            <ConfBar stage="Stage 2" pct="60%" note="log quote confirms rule"/>
+            <ConfBar stage="Stage 3" pct="85%" note="code path traced"/>
+            <div style={{fontSize:7,color:'#86efac',marginTop:2,fontStyle:'italic'}}>only moves when evidence is cited</div>
+          </div>
+        </div>
+
+      </div>
+      <div style={{marginTop:9,padding:'7px 14px',background:'#eff6ff',border:'1px solid #bfdbfe',borderRadius:7,textAlign:'center'}}>
+        <span style={{fontSize:10,color:'#1d4ed8',fontWeight:700}}>The domain changes · The methodology never does</span>
+      </div>
+    </div>
+  );
+}
+
 /* ── Visual hint mini-components ───────────────────────── */
 const HV = {
   // ✗ / ✓ contrast
@@ -1780,6 +1866,10 @@ function App() {
               {/* Preparation visual */}
               <div style={{ fontSize: 12, color: '#6d28d9', fontWeight: 600, marginTop: 14, marginBottom: 2 }}>What workshop mode does</div>
               <WorkshopModeVisual />
+
+              {/* Investigation framework visual */}
+              <div style={{ fontSize: 12, color: '#15803d', fontWeight: 600, marginTop: 18, marginBottom: 2 }}>Investigation framework</div>
+              <InvestigationFrameworkVisual />
 
               {/* Tool toggle — after visual */}
               <div className="row" style={{ gap: 10, marginTop: 12 }}>
