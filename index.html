@@ -1946,16 +1946,14 @@ function App() {
                     {paletteOpen ? "Hide labels" : "Show labels"}
                   </button>
                   <button className="toggle-btn" onClick={() => setEditing(true)}>Change message</button>
-                  {totalTags > 0 && (
-                    <button className="btn btn-primary" style={{ fontSize: 12, padding: "4px 12px" }} onClick={() => {
-                      const block = generatePromptBlock(lines, tags, ELEMENTS);
-                      navigator.clipboard.writeText(block);
-                      setCopied(true);
-                      setTimeout(() => setCopied(false), 2000);
-                    }}>
-                      {copied ? <><Ic n="Check" size={11}/> Copied!</> : <><Ic n="Copy" size={11}/> Copy prompt block</>}
-                    </button>
-                  )}
+                  <button className="btn btn-primary" style={{ fontSize: 12, padding: "4px 12px" }} onClick={() => {
+                    const text = totalTags > 0 ? generatePromptBlock(lines, tags, ELEMENTS) : raw;
+                    navigator.clipboard.writeText(text);
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                  }}>
+                    {copied ? <><Ic n="Check" size={11}/> Copied!</> : <><Ic n="Copy" size={11}/> Copy message</>}
+                  </button>
                 </div>
                 <hr className="divider" />
                 <span className="section-label">Customer Message</span>
