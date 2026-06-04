@@ -1988,11 +1988,32 @@ function App() {
                 </div>
               </>
             ) : (
-              /* Stages 2–5: collapsed message pill */
-              <div style={{display:'flex',alignItems:'center',gap:8,padding:'6px 10px',background:'#f8fafc',border:'1px solid #e2e8f0',borderRadius:8,marginBottom:4}}>
-                {totalTags > 0 && <span className="count-badge" style={{flexShrink:0}}>{totalTags} tag{totalTags!==1?'s':''}</span>}
-                <button className="toggle-btn" style={{flexShrink:0,fontSize:10}} onClick={() => setActiveStage('triage')}>View message →</button>
-              </div>
+              /* Stages 2–5: collapsed message pill + stage attachments */
+              <>
+                <div style={{display:'flex',alignItems:'center',gap:8,padding:'6px 10px',background:'#f8fafc',border:'1px solid #e2e8f0',borderRadius:8,marginBottom:4}}>
+                  {totalTags > 0 && <span className="count-badge" style={{flexShrink:0}}>{totalTags} tag{totalTags!==1?'s':''}</span>}
+                  <button className="toggle-btn" style={{flexShrink:0,fontSize:10}} onClick={() => setActiveStage('triage')}>View message →</button>
+                </div>
+                {activeStageObj && STAGE_ATTACHMENTS[activeStageObj.id] && (
+                  <div style={{marginTop:4,marginBottom:4}}>
+                    <div className="attach-section-label" style={{marginBottom:6}}>Attachments</div>
+                    <div className="attach-row">
+                      {STAGE_ATTACHMENTS[activeStageObj.id].map(att => (
+                        <div key={att.id} className="attach-item">
+                          <div className="attach-header">
+                            <span className="attach-filename">{att.filename}</span>
+                            <div style={{display:'flex',alignItems:'center',gap:6}}>
+                              <span className={`attach-tag ${att.tagClass}`}>{att.tag}</span>
+                              <a className="attach-dl-btn" href={att.href} download={att.filename}>↓ Download</a>
+                            </div>
+                          </div>
+                          <div className="attach-desc">{att.desc}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
             )}
 
             {/* ── Active stage content — in Stage 1, only shown when palette is open ── */}
@@ -2058,28 +2079,6 @@ function App() {
                       </div>
                     )}
 
-                    {/* Attachments */}
-                    {atts && (
-                      <div className="attach-section">
-                        <div className="attach-section-label">Attachments</div>
-                        <div className="attach-row">
-                          {atts.map(att => (
-                            <div key={att.id} className="attach-item">
-                              <div className="attach-header">
-                                <span className="attach-filename">{att.filename}</span>
-                                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                                  <span className={`attach-tag ${att.tagClass}`}>{att.tag}</span>
-                                  <a className="attach-dl-btn" href={att.href} download={att.filename}>
-                                    ↓ Download
-                                  </a>
-                                </div>
-                              </div>
-                              <div className="attach-desc">{att.desc}</div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
 
                     {/* Prompts — single 3-tab section */}
                     <div style={{marginTop:6}}>
