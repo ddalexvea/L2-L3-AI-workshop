@@ -1692,7 +1692,6 @@ const PILLAR_META = {
 
 function PillarPrompt({ text }) {
   const HEADERS = Object.keys(PILLAR_META);
-  // Split text at any known pillar header that appears at the start of a line
   const headerRe = new RegExp(`^(${HEADERS.join('|')}):`, 'm');
   const parts = [];
   let remaining = text;
@@ -1708,16 +1707,16 @@ function PillarPrompt({ text }) {
     remaining = next ? afterHeader.slice(next.index) : '';
   }
   if (parts.every(p => !p.header)) {
-    return <pre style={{fontFamily:'"SFMono-Regular",Consolas,monospace',fontSize:11.5,lineHeight:1.7,whiteSpace:'pre-wrap',padding:'12px 14px',margin:0,color:'#1f2328'}}>{text}</pre>;
+    return <pre className="stage-prompt">{text}</pre>;
   }
   return (
-    <pre style={{fontFamily:'"SFMono-Regular",Consolas,monospace',fontSize:11.5,lineHeight:1.7,whiteSpace:'pre-wrap',padding:'12px 14px',margin:0,color:'#1f2328'}}>
+    <pre className="stage-prompt" style={{padding:0,background:'transparent',border:'none'}}>
       {parts.map((p, i) => {
         if (!p.header) return p.body ? <span key={i}>{p.body}</span> : null;
-        const m = PILLAR_META[p.header] || { color:'#64748b' };
+        const m = PILLAR_META[p.header] || { color:'#64748b', bg:'#f8fafc', border:'#e2e8f0' };
         return (
-          <span key={i}>
-            <span style={{fontWeight:700,color:m.color}}>{p.header}:</span>
+          <span key={i} style={{display:'block',borderLeft:`3px solid ${m.border}`,paddingLeft:8,marginBottom:4,background:m.bg,borderRadius:'0 4px 4px 0'}}>
+            <span style={{color:m.color,fontWeight:700}}>{p.header}:</span>
             {p.body ? '\n' + p.body : ''}
             {'\n'}
           </span>
@@ -2140,7 +2139,7 @@ function App() {
                           )}
                           {promptTab === 'complete' && (
                             <div className="stage-prompt-wrap">
-                              <pre className="stage-prompt">{renderPrompt(buildPromptWithContext(stage, stage.prompt))}</pre>
+                              <PillarPrompt text={buildPromptWithContext(stage, stage.prompt)} />
                               <button className="stage-copy-btn" onClick={() => copyPrompt(stage)}>
                                 {copiedStage === stage.id ? <><Ic n="Check" size={11}/> Copied!</> : <><Ic n="Copy" size={11}/> Copy</>}
                               </button>
