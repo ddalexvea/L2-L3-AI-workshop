@@ -1111,9 +1111,10 @@ const STAGE_VISUAL_HINTS = {
     () => <HV.Contrast bad='"Feature X not working"' good='"Rule Y excludes item Z despite include setting"' />,
   ],
   investigation: [
-    () => <HV.Diff lines={[[' ','📄 config:   rule: [A]'],[' ','🖥  runtime:  rule: [A, B?]'],['+',' ↑ gap here?']]} />,
-    () => <HV.Diff lines={[['-','written:  setting: true'],['+','loaded:   setting: false'],['+',' ↑ env override?']]} />,
+    () => <HV.Contrast bad='"The feature is broken"' good='"config line 8: containerExcludeLogs: name:^X$ — verified in flare"' />,
     () => <HV.Table rows={[['official docs','"rule B takes precedence over rule A"']]} cols={['Source','Finding']} />,
+    () => <HV.Diff lines={[[' ','📄 config:   rule: [A]'],[' ','🖥  runtime:  rule: [A, B?]'],['+',' ↑ gap here?']]} />,
+    () => <HV.Diff lines={[['+',' agent.log: "filter skip: name=X matched rule"'],['+',' ↑ confirms H1']]} />,
     () => <HV.Board rows={[['LOW→HIGH','#22c55e','H1','app.log:42: "item excluded by rule" (direct quote)']]} />,
   ],
   artefact: [
