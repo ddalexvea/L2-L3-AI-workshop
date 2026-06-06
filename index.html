@@ -767,7 +767,7 @@ const STAGE_VISUALS = {
     graphic: () => {
       const C = '#2563eb';
       return (
-        <div style={{display:'flex',alignItems:'stretch',gap:0,height:120}}>
+        <div style={{display:'flex',alignItems:'stretch',gap:0,height:140}}>
           {/* Zone 1 — input */}
           <div style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',gap:4,paddingTop:6}}>
             <div style={{flex:1,width:'100%',background:'#f1f5f9',borderRadius:6,border:'1px solid #e2e8f0',position:'relative',overflow:'hidden'}}>
@@ -779,8 +779,8 @@ const STAGE_VISUALS = {
           </div>
           {/* Zone 2 — brain */}
           <div style={{width:48,position:'relative',display:'flex',alignItems:'center',justifyContent:'center'}}>
-            <svg width="48" height="120" viewBox="0 0 48 120" style={{position:'absolute',inset:0}}>
-              <line x1="0" y1="60" x2="48" y2="60" stroke={C} strokeWidth="1.5" strokeOpacity="0.3"/>
+            <svg width="48" height="140" viewBox="0 0 48 140" style={{position:'absolute',inset:0}}>
+              <line x1="0" y1="70" x2="48" y2="70" stroke={C} strokeWidth="1.5" strokeOpacity="0.3"/>
             </svg>
             <div style={{position:'relative',zIndex:1,background:'#eff6ff',border:`2px solid ${C}60`,borderRadius:'50%',width:30,height:30,display:'flex',alignItems:'center',justifyContent:'center'}}>
               <Ic n="BrainCircuit" size={14} color={C}/>
@@ -824,7 +824,7 @@ const STAGE_VISUALS = {
         {ic:'BookOpen', label:'Reference', trust:'HIGH', gap:false, tc:'#22c55e'},
       ];
       return (
-        <div style={{display:'flex',alignItems:'stretch',gap:0,height:120}}>
+        <div style={{display:'flex',alignItems:'stretch',gap:0,height:140}}>
           {/* Zone 1 — inputs */}
           <div style={{flex:1,display:'flex',flexDirection:'column',justifyContent:'space-between',paddingTop:6,paddingBottom:4}}>
             <span style={{fontSize:7,color:'#94a3b8',fontWeight:600,letterSpacing:'0.03em',marginBottom:4}}>ARTIFACTS</span>
@@ -837,10 +837,10 @@ const STAGE_VISUALS = {
           </div>
           {/* Zone 2 — brain */}
           <div style={{width:48,position:'relative',display:'flex',alignItems:'center',justifyContent:'center'}}>
-            <svg width="48" height="120" viewBox="0 0 48 120" style={{position:'absolute',inset:0}}>
-              <line x1="0" y1="34" x2="48" y2="60" stroke={C} strokeWidth="1.5" strokeOpacity="0.4"/>
-              <line x1="0" y1="60" x2="48" y2="60" stroke={C} strokeWidth="1.5" strokeOpacity="0.4"/>
-              <line x1="0" y1="86" x2="48" y2="60" stroke={C} strokeWidth="1.5" strokeOpacity="0.4"/>
+            <svg width="48" height="140" viewBox="0 0 48 140" style={{position:'absolute',inset:0}}>
+              <line x1="0" y1="40" x2="48" y2="70" stroke={C} strokeWidth="1.5" strokeOpacity="0.4"/>
+              <line x1="0" y1="70" x2="48" y2="70" stroke={C} strokeWidth="1.5" strokeOpacity="0.4"/>
+              <line x1="0" y1="100" x2="48" y2="70" stroke={C} strokeWidth="1.5" strokeOpacity="0.4"/>
             </svg>
             <div style={{position:'relative',zIndex:1,background:'#f0fdf4',border:`2px solid ${C}60`,borderRadius:'50%',width:30,height:30,display:'flex',alignItems:'center',justifyContent:'center'}}>
               <Ic n="BrainCircuit" size={14} color={C}/>
