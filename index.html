@@ -1938,7 +1938,7 @@ function App() {
                   <button className="toggle-btn" onClick={() => setPaletteOpen(p => !p)}>
                     {paletteOpen ? "Hide labels" : "Show labels"}
                   </button>
-                  <button className="toggle-btn" onClick={() => setEditing(true)}>Change message</button>
+
                   <button className="btn btn-primary" style={{ fontSize: 12, padding: "4px 12px" }} onClick={() => {
                     const text = totalTags > 0 ? generatePromptBlock(lines, tags, ELEMENTS) : raw;
                     navigator.clipboard.writeText(text);
