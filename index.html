@@ -1583,11 +1583,11 @@ const STAGE_ATTACHMENTS = {
   investigation: [
     {
       id: "helm", filename: "values.yaml", tag: "helm", tagClass: "attach-tag-helm",
-      href: "values.yaml", desc: "Helm values used to deploy the Agent in the reproduction environment",
+      href: "values.yaml", desc: "",
     },
     {
       id: "flare", filename: "agent-flare.zip", tag: "flare", tagClass: "attach-tag-flare",
-      href: "agent-flare.zip", desc: "Datadog Agent flare from the customer's minikube cluster",
+      href: "agent-flare.zip", desc: "",
     },
   ],
 };
@@ -2010,7 +2010,7 @@ function App() {
                               <a className="attach-dl-btn" href={att.href} download={att.filename}>↓ Download</a>
                             </div>
                           </div>
-                          <div className="attach-desc">{att.desc}</div>
+                          {att.desc && <div className="attach-desc">{att.desc}</div>}
                         </div>
                       ))}
                     </div>
