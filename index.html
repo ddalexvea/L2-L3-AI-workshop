@@ -1105,10 +1105,10 @@ const STAGE_VISUALS = {
 
 const STAGE_VISUAL_HINTS = {
   triage: [
+    () => <HV.Contrast bad='"Feature X not working"' good='"Rule Y excludes item Z despite include setting"' />,
     () => <HV.Board rows={[['HIGH','#22c55e','Statement','"Customer reports X is happening"'],['MED','#f59e0b','Evidence','"From ticket: <direct quote>"'],['LOW','#ef4444','Hypothesis','"Could be caused by Y"']]} />,
     () => <HV.ConfBars bars={[['Stage 1',15,'no artifacts yet']]} />,
     () => <HV.ArtMap rows={[['H1→','app.log','confirms/refutes H1'],['H2→','config file','check rule setting']]} />,
-    () => <HV.Contrast bad='"Feature X not working"' good='"Rule Y excludes item Z despite include setting"' />,
   ],
   investigation: [
     () => <HV.Contrast bad='"The feature is broken"' good='"config line 8: containerExcludeLogs: name:^X$ — verified in flare"' />,
@@ -1149,7 +1149,7 @@ const L2_STAGES = [
     id: "triage", label: "Kickoff", alias: ";p_s_1",
     color: "#2563eb", bg: "#eff6ff", border: "#bfdbfe",
     goal: "Label every part of the customer message as Statement, Evidence, Hypothesis, or Missing Info — before opening a single artifact. Build the investigation board and cap confidence at ~20%.",
-    steps: ["What is the customer actually reporting, and what might be their assumption?", "How confident should I be right now — with no artifacts in hand?", "What would I need to see to confirm or disprove each hypothesis?", "Can I restate the entire problem in one sentence the customer would agree with?"],
+    steps: ["What is the customer actually experiencing, in my own words?", "What is the customer reporting — and what is just their assumption?", "What hypotheses can I form, and how confident am I without artifacts?", "What would I need to confirm or disprove each one?"],
     promptLight: `INSTRUCTIONS:
 Apply the investigation framework to the customer message:
 1. Restate the problem in one sentence.
