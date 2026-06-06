@@ -1196,7 +1196,7 @@ One-sentence problem restatement + elements table + hypotheses with confidence %
     id: "investigation", label: "Investigation", alias: ";p_s_2",
     color: "#15803d", bg: "#f0fdf4", border: "#bbf7d0",
     goal: "Cross-reference artifacts against each hypothesis. For each artifact, determine whether it confirms, refutes, or is inconclusive. Find the gap between what was configured and what was loaded at runtime, and update confidence using direct artifact quotes.",
-    steps: ["Is what the customer configured actually what the product loaded at runtime?", "Where could a gap exist between the written config and the running config?", "Does the official documentation describe how these settings interact?", "Can I justify a confidence increase — and if so, which exact artifact line supports it?"],
+    steps: ["Does what the customer described in the message match what's in the config artifact?", "Does the config match what the official documentation says it should do?", "Does the config match what the product actually loaded at runtime — any gap?", "Are there related log lines that confirm or contradict the expected behavior?", "Can I justify a confidence change — and if so, which exact artifact line supports it?"],
     promptLight: `INSTRUCTIONS:
 Stage 2 — Artifacts are now available. Using the Stage 1 findings, complete the following steps:
 1. Confirm that the customer's claimed settings are present in the configuration artifact.
