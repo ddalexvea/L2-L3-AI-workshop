@@ -593,7 +593,7 @@ function WorkshopModeVisual() {
               <s.Preview />
             </div>
           ))}
-          <div style={{fontSize:8,color:'#a78bfa',fontStyle:'italic',textAlign:'right',marginTop:1}}>saved to ~/Desktop/workshop/ · no chat output</div>
+          <div style={{fontSize:8,color:'#a78bfa',fontStyle:'italic',textAlign:'right',marginTop:1}}>saved to ~/.cursor/projects/&lt;workspace&gt;/canvases/ · no chat output</div>
         </div>
 
       </div>
@@ -1599,10 +1599,11 @@ const CANVAS_SESSION_ROUTING = `CONTEXT:
 You are an AI assistant supporting a Datadog TSE L2 AI workshop. The participant is working through a 5-stage investigation workflow (Kickoff → Investigation → Artefact Correlation → Reproduction → Escalation) plus an optional Retrospective. Your role is to render each stage's output as a Cursor canvas file — not to explain or narrate in chat.
 
 INSTRUCTIONS:
-For every investigation prompt the participant sends, produce a Cursor canvas file at:
-  ~/Desktop/workshop/stage-N.canvas.tsx
+For every investigation prompt the participant sends, produce a Cursor canvas file in the managed canvases directory for the current workspace:
+  ~/.cursor/projects/<workspace>/canvases/workshop-stage-N.canvas.tsx
+Derive <workspace> from the active workspace path (e.g. a workspace at /Users/jane/Projects/TSE becomes Users-jane-Projects-TSE). Do not hardcode the path — resolve it at runtime from the workspace context.
 (Replace N with the stage number.) Do not output any analysis in chat. In chat, reply only with:
-  "Canvas ready — open stage-N.canvas.tsx"
+  "Canvas ready — open workshop-stage-N.canvas.tsx"
 
 Apply the following canvas layout for each stage:
 - Stage 1 (Kickoff): Investigation board — rows = hypotheses, columns = [Label, Confidence %, Artifact needed]. All confidence cells start empty.
@@ -1637,7 +1638,8 @@ A single self-contained .canvas.tsx file. Must follow these rules exactly:
 - Valid token paths: theme.accent.primary · theme.fill.primary/secondary/tertiary/quaternary · theme.stroke.primary/secondary/tertiary · theme.text.primary/secondary/tertiary/onAccent · theme.bg.editor/chrome/elevated · theme.diff.stripAdded (green) · theme.diff.stripRemoved (red)
 - Table rowTone valid values: "success" | "danger" | "warning" | "info" | "neutral" — never "pass" or "fail"
 - Pill tone valid values: "neutral" | "added" | "deleted" | "renamed" | "success" | "warning" | "info"
-- No box-shadow, no gradients, no emoji used as decoration, no hardcoded font sizes above 24px.`;
+- No box-shadow, no gradients, no emoji used as decoration, no hardcoded font sizes above 24px.
+- Never annotate JSX-containing arrays with React.ReactNode[][] or any React.* type. Remove all explicit TypeScript array type annotations from rows={[…]} cells — let the compiler infer them. This avoids a React import which is forbidden.`;
 
 
 const HTML_SESSION_ROUTING = `CONTEXT:
