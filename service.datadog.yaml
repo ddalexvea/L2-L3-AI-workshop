@@ -1,0 +1,14 @@
+schema-version: v2.2
+dd-service: l2-ai-workshop-test
+team: tse-sandbox
+contacts:
+  - type: email
+    contact: alexandre.vea@datadoghq.com
+links:
+  - name: Datadog Docs
+    type: doc
+    url: https://docs.datadoghq.com/service_catalog/
+tags:
+  - env:sandbox
+  - repro:zd-2913782
+  - test:default-branch-non-main
