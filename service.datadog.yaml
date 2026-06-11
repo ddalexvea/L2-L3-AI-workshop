@@ -7,5 +7,5 @@ contacts:
 tags:
   - env:sandbox
   - repro:zd-2913782
-  - test:branch-override-repro
-  - triggered: 2026-06-11T072919Z
+  - test:branch-override-fix-verified
+  - triggered: 2026-06-11T075539Z
