@@ -7,5 +7,5 @@ contacts:
 tags:
   - env:sandbox
   - repro:zd-2913782
-  - test:stale-cache-main-while-develop-is-default
-  - triggered: 2026-06-10T205200Z
+  - test:branch-override-repro
+  - triggered: 2026-06-11T072919Z
